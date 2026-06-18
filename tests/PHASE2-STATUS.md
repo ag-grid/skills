@@ -16,7 +16,7 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | skill-already-latest | ✅ | ✅ PASS | detected 35.3.1 == latest, no changes |
 | skill-react-modules | ✅ | ✅ PASS | v31 feature pkgs → v35 modules, incremental, typechecks |
 | skill-vanilla-creategrid | ✅ | ✅ PASS | v30 new Grid → v35 createGrid + module registration added |
-| skill-monorepo-partial | ⏳ | — | |
+| skill-monorepo-partial | ✅ | ✅ PASS | only grid-app upgraded, util untouched (correct scope) |
 | skill-angular-standalone | ⏳ | — | |
 | skill-vue2-to-vue3 | ⏳ | — | |
 | skill-grid-charts-integrated | ⏳ | — | |
