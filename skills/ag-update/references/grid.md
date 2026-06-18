@@ -27,6 +27,19 @@ modules just keep doing so):
 
 Register once at app startup. The UMD bundle is the only exception.
 
+## Theming (changed in v33)
+
+From v33 the Theming API (theme objects such as `themeQuartz`) is the default. An app using the
+legacy CSS themes — importing `ag-grid-community/styles/*.css` and using an `ag-theme-*` className —
+will conflict with the new default and render incorrectly unless handled. This is a runtime/visual
+change NOT caught by type-checking, so it is easy to miss: treat it as a REQUIRED mitigation when
+upgrading a CSS-themed app past v33. Do one of:
+
+- Migrate to the Theming API: remove the CSS imports and the `ag-theme-*` className, and pass a
+  theme object via the `theme` grid option (e.g. `theme={themeQuartz}`).
+- Or keep legacy CSS explicitly: set the `theme: "legacy"` grid option (or
+  `provideGlobalGridOptions({ theme: "legacy" })`) and keep the CSS imports/className.
+
 ## Supported version range
 
 - Target: major >= 33 only. Below this predates the modules package format.

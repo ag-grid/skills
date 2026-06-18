@@ -20,7 +20,7 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | skill-angular-standalone | ⏳ | — | |
 | skill-vue2-to-vue3 | ✅ | ✅ PASS | stops at Vue2 boundary, advises Vue 3 migration, no changes |
 | skill-grid-charts-integrated | ⏳ | — | |
-| skill-theming-api-v33 | ⏳ | — | |
+| skill-theming-api-v33 | ✅ | ✅ PASS | v32 CSS theme → v35 Theming API (themeQuartz) + module registration |
 
 Legend: ⏳ todo · ✅ done · ⚠️ blocked
 
@@ -32,6 +32,8 @@ Legend: ⏳ todo · ✅ done · ⚠️ blocked
   must ADD ModuleRegistry registration; not caught by typecheck/build (runtime-only).
 - grid.md: made the ag-grid-vue (Vue 2) boundary an explicit STOP (like out-of-range) — the skill
   must not plan/attempt an upgrade past v31; it advises migrating the app to Vue 3 first.
+- grid.md: added "Theming (changed in v33)" gotcha — CSS-themed apps must migrate to the Theming
+  API or set theme:"legacy"; required mitigation, not caught by typecheck.
 
 ## Harness changes (during Phase 2)
 - Fragile mode default-on for skill cases (off for harness); `harness-fragile-mode-aborts` meta-test.
