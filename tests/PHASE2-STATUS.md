@@ -12,8 +12,8 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | Case | App built | Skill run | Notes |
 |---|---|---|---|
 | skill-trivial-delta | ✅ | ✅ PASS | 34.0.0→35.3.1, no source changes, plan file cleaned up |
-| skill-out-of-range | ⏳ | — | |
-| skill-already-latest | ⏳ | — | |
+| skill-out-of-range | ✅ | ✅ PASS | refused v23, cited v25 floor, no changes |
+| skill-already-latest | ✅ | ✅ PASS | detected 35.3.1 == latest, no changes |
 | skill-react-modules | ⏳ | — | |
 | skill-vanilla-creategrid | ⏳ | — | |
 | skill-monorepo-partial | ⏳ | — | |
@@ -27,6 +27,7 @@ Legend: ⏳ todo · ✅ done · ⚠️ blocked
 ## Skill changes made
 - SKILL.md step 5: delete the plan file on successful completion (don't leave AG_UPGRADE_PLAN.md
   as clutter in the user's project).
+- grid.md: fixed reversed version-range typo — "Source: major <= 25" → ">= 25".
 
 ## Harness changes (during Phase 2)
 - Fragile mode default-on for skill cases (off for harness); `harness-fragile-mode-aborts` meta-test.

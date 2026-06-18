@@ -18,7 +18,7 @@
 ## Supported version range
 
 - Target: major >= 33 only. Below this predates the modules package format.
-- Source: major <= 25 only. No upgrade docs exist before 25.
+- Source: major >= 25 only. No upgrade docs exist before 25.
 - Outside this range: refuse and explain; do not attempt.
 
 ## Docs: where breaking changes live
