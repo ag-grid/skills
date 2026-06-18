@@ -14,7 +14,7 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | skill-trivial-delta | ✅ | ✅ PASS | 34.0.0→35.3.1, no source changes, plan file cleaned up |
 | skill-out-of-range | ✅ | ✅ PASS | refused v23, cited v25 floor, no changes |
 | skill-already-latest | ✅ | ✅ PASS | detected 35.3.1 == latest, no changes |
-| skill-react-modules | ⏳ | — | |
+| skill-react-modules | ✅ | ✅ PASS | v31 feature pkgs → v35 modules, incremental, typechecks |
 | skill-vanilla-creategrid | ⏳ | — | |
 | skill-monorepo-partial | ⏳ | — | |
 | skill-angular-standalone | ⏳ | — | |
