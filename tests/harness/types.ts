@@ -15,7 +15,9 @@ export type Assertion =
   | { type: "command"; run: string; expectExit?: number; in?: "new" | "root" }
   // LLM diff check: does the diff contain exactly the expected change-set (all of it, nothing
   // material beyond it)? `expected` describes the complete intended set of changes.
-  | { type: "check-diff"; expected: string };
+  | { type: "check-diff"; expected: string }
+  // The agent's user-facing transcript must include this string (e.g. a refusal or status message).
+  | { type: "transcript"; includes: string };
 
 export interface TestDefinition {
   name: string;
@@ -27,6 +29,9 @@ export interface TestDefinition {
   /** The simulator answers questions only from this map. */
   answers: AnswerEntry[];
   assertions?: Assertion[];
+  /** Where the agent runs. "new" (the project under upgrade) for real-skill cases; the skill
+   *  installs into that dir's .claude/skills and reads package.json from it. Default "work". */
+  runIn?: "work" | "new";
   /** Whether the validations are expected to pass or to (correctly) fail. Default "pass". */
   expectOutcome?: "pass" | "fail";
   /** Under-test model. Default "sonnet". */

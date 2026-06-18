@@ -34,6 +34,14 @@ export function runAssertion(
       const v = checkDiff({ expected: a.expected, diff });
       return { assertion: "check-diff", passed: v.pass, detail: v.reason };
     }
+    case "transcript": {
+      const passed = ctx.interaction.transcript.includes(a.includes);
+      return {
+        assertion: `transcript includes "${a.includes}"`,
+        passed,
+        detail: passed ? "found" : "not found in transcript",
+      };
+    }
   }
 }
 

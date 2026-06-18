@@ -2,14 +2,11 @@
 
 ## Current packages
 
-- `ag-grid-community` — community grid
-- `ag-grid-enterprise` — enterprise grid
+- `ag-grid-community`
+- `ag-grid-enterprise`
 - `ag-grid-react`, `ag-grid-angular`, `ag-grid-vue3` — framework wrappers
-
-## Not legacy — do not flag these
-
-- `@ag-grid-community/locale`
-- `@ag-grid-community/styles`
+- `@ag-grid-community/locale` - locales
+- `@ag-grid-community/styles` - legacy themes (still supported)
 
 ## Legacy / removed packages and required migrations
 
@@ -20,8 +17,8 @@
 
 ## Supported version range
 
-- Target: major ≥ 33 only. Below this predates the modules package format.
-- Source: major ≥ 25 only. No upgrade docs exist before 25.
+- Target: major >= 33 only. Below this predates the modules package format.
+- Source: major <= 25 only. No upgrade docs exist before 25.
 - Outside this range: refuse and explain; do not attempt.
 
 ## Docs: where breaking changes live

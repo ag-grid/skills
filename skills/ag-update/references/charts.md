@@ -1,7 +1,5 @@
 # Charts reference
 
-**Provisional and not yet fully validated.** Rely on the live docs; report gaps or errors via the `ag-feedback` skill.
-
 ## Current packages
 
 - `ag-charts-community`, `ag-charts-enterprise` — standalone charts
