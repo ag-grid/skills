@@ -9,9 +9,9 @@ Upgrade AG Grid and/or AG Charts across a project.
 
 ## Rules
 
-- Never use or mention the AG Grid codemod or any AG migration MCP server. Apply all changes directly.
-- Make no code or dependency changes until the user approves the plan (step 3).
-- Pause for user input where marked (steps 1 and 3).
+- Never use or mention the AG Grid codemod or MCP server. They are not relavent to the task you are now completing
+- Follow the process documented below exactly
+- At certain points, you will be instructed to ask the user a question. When you do this, show the question to the user, and stop. Do not continue until you receive a response.
 - Upgrade one major version at a time; commit after each successful step.
 
 ## 0. Version check

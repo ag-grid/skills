@@ -1,0 +1,13 @@
+{
+  "name": "ag-skills-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
