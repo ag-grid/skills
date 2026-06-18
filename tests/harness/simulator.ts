@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import type { AnswerEntry } from "./types.ts";
 
 export type SimAction =
-  | { action: "answer"; reply: string }
+  | { action: "answer"; reply: string; when: string }
   | { action: "wait" }
   | { action: "done" }
   | { action: "no_match" };
@@ -65,7 +65,7 @@ CONVERSATION SO FAR (the agent's user-facing messages, oldest first, newest last
 ${opts.transcript || "(nothing yet)"}
 
 Reply with EXACTLY ONE JSON object and nothing else:
-- {"action":"answer","reply":"<text from the matching map entry>"} - the agent is asking something covered by the map and not already answered.
+- {"action":"answer","reply":"<text from the matching map entry>","when":"<the matched entry's exact \\"when\\" string>"} - the agent is asking something covered by the map and not already answered.
 - {"action":"wait"} - the agent is only showing progress/thinking, or has not asked a new question.
 - {"action":"done"} - the agent has finished its task and is not waiting for any input.
 - {"action":"no_match"} - the agent is asking a question that is NOT covered by the answer map.`;
@@ -83,7 +83,7 @@ function parseAction(text: string): SimAction {
   }
   switch (obj.action) {
     case "answer":
-      return { action: "answer", reply: String(obj.reply ?? "") };
+      return { action: "answer", reply: String(obj.reply ?? ""), when: String(obj.when ?? "") };
     case "done":
       return { action: "done" };
     case "no_match":

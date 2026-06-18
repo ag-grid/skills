@@ -16,7 +16,6 @@ export type Assertion =
   // Cheap interaction guards over the conversation.
   | {
       type: "interaction";
-      maxAnswers?: number;
       mustContain?: string;
       expectNoMatch?: boolean;
     };
@@ -42,6 +41,8 @@ export interface TestDefinition {
 export interface InteractionResult {
   answersSent: number;
   noMatch: boolean;
+  /** `when` descriptions of answer-map entries that were never asked (a failure). */
+  unanswered: string[];
   timedOut: boolean;
   exitCode: number | null;
   finalText: string;

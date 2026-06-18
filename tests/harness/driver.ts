@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { simulateUser, type AnswerLogEntry } from "./simulator.ts";
-import { report } from "./report.ts";
+import type { Reporter } from "./report.ts";
 import type { AnswerEntry, InteractionResult } from "./types.ts";
 import type { JsonlLog } from "./log.ts";
 
@@ -37,7 +37,9 @@ export function runAgentSession(opts: {
   simModel?: string;
   answers: AnswerEntry[];
   log: JsonlLog;
+  reporter: Reporter;
 }): Promise<InteractionResult> {
+  const reporter = opts.reporter;
   return new Promise((resolve) => {
     const debounceMs = DEBOUNCE_MS;
     const timeoutMs = DEFAULT_TIMEOUT_MS;
@@ -61,6 +63,7 @@ export function runAgentSession(opts: {
 
     const userFacing: string[] = [];
     const answerLog: AnswerLogEntry[] = [];
+    const usedAnswers = new Set<string>();
     let answersSent = 0;
     let noMatch = false;
     let timedOut = false;
@@ -76,7 +79,7 @@ export function runAgentSession(opts: {
       };
       child.stdin.write(JSON.stringify(msg) + "\n");
       opts.log.write({ dir: "in", text });
-      report.user(text);
+      reporter.user(text);
     };
 
     const finalize = (reason: string, exitCode: number | null) => {
@@ -97,10 +100,14 @@ export function runAgentSession(opts: {
         noMatch,
         timedOut,
       });
-      report.info(`session ended: ${reason}`);
+      reporter.info(`session ended: ${reason}`);
+      // Every answer the test provided is expected to be asked; any that wasn't is a failure.
+      const unanswered = opts.answers.map((a) => a.when).filter((w) => !usedAnswers.has(w));
+      if (unanswered.length > 0) reporter.sim(`answers never asked: ${unanswered.join("; ")}`, true);
       resolve({
         answersSent,
         noMatch,
+        unanswered,
         timedOut,
         exitCode,
         finalText: userFacing[userFacing.length - 1] ?? "",
@@ -131,11 +138,16 @@ export function runAgentSession(opts: {
           question: userFacing[userFacing.length - 1] ?? "",
           reply: action.reply,
         });
+        // Mark which answer-map entry was used: prefer the reported `when`, else match by reply.
+        const matched =
+          opts.answers.find((a) => a.when === action.when) ??
+          opts.answers.find((a) => a.reply === action.reply);
+        if (matched) usedAnswers.add(matched.when);
         sendUser(action.reply);
       } else if (action.action === "done") {
         finalize("simulator-done", null);
       } else if (action.action === "no_match") {
-        report.sim("NO MATCH — question not covered by the answer map", true);
+        reporter.sim("NO MATCH — question not covered by the answer map", true);
         noMatch = true;
         finalize("no-match", null);
       }
@@ -156,13 +168,13 @@ export function runAgentSession(opts: {
         if (texts.length) {
           const text = texts.join("\n");
           userFacing.push(text);
-          report.agent(text);
+          reporter.agent(text);
           armDebounce();
           armIdle();
         }
         for (const c of evt.message.content) {
           if (c.type === "tool_use") {
-            report.tool(toolSummary(c));
+            reporter.tool(toolSummary(c));
             armIdle();
           }
         }

@@ -1,54 +1,73 @@
 import { styleText } from "node:util";
+import type { RunResult } from "./types.ts";
 
-// Live, colored console output so a human can watch a run and debug in real time.
-// Full structured detail still goes to the JSONL log; this is the human view.
+// Per-run reporter. In "live" mode it writes through immediately (sequential runs);
+// in "buffered" mode it accumulates lines and prints them atomically on flush(), so
+// concurrent parallel runs don't interleave their output.
+export class Reporter {
+  private buf: string[] = [];
+  private live: boolean;
+  constructor(live: boolean) {
+    this.live = live;
+  }
 
-function out(s: string): void {
-  process.stdout.write(s + "\n");
-}
+  private out(s: string): void {
+    if (this.live) process.stdout.write(s + "\n");
+    else this.buf.push(s);
+  }
 
-export const report = {
+  flush(): void {
+    if (!this.live && this.buf.length > 0) {
+      process.stdout.write(this.buf.join("\n") + "\n");
+    }
+    this.buf = [];
+  }
+
   caseStart(name: string, model: string): void {
-    out("\n" + styleText(["bold", "inverse"], ` ${name} `) + styleText("dim", `  model: ${model}`));
-  },
-
-  /** The human kickoff prompt and each simulated user answer. */
+    this.out("\n" + styleText(["bold", "inverse"], ` ${name} `) + styleText("dim", `  model: ${model}`));
+  }
   user(text: string): void {
-    out(styleText(["bold", "green"], "User:") + " " + text);
-  },
-
-  /** An assistant message shown to the user. */
+    this.out(styleText(["bold", "green"], "User:") + " " + text);
+  }
   agent(text: string): void {
-    out(styleText(["bold", "cyan"], "Agent:") + " " + text);
-  },
-
-  /** A tool call the agent made (e.g. running a command, editing a file). */
+    this.out(styleText(["bold", "cyan"], "Agent:") + " " + text);
+  }
   tool(summary: string): void {
-    out(styleText("dim", `  [tool: ${summary}]`));
-  },
-
-  /** A simulator decision (waiting / done / no-match). */
+    this.out(styleText("dim", `  [tool: ${summary}]`));
+  }
   sim(note: string, bad = false): void {
-    out(styleText(bad ? ["bold", "red"] : "dim", `  · ${note}`));
-  },
-
+    this.out(styleText(bad ? ["bold", "red"] : "dim", `  · ${note}`));
+  }
   info(text: string): void {
-    out(styleText("dim", `  ${text}`));
-  },
-
+    this.out(styleText("dim", `  ${text}`));
+  }
   assertion(ok: boolean, label: string, detail: string): void {
     const tag = ok ? styleText("green", "ok ") : styleText(["bold", "red"], "BAD");
-    out(`  ${tag} ${label} ${styleText("dim", `:: ${detail}`)}`);
-  },
-
-  verdict(passed: boolean, expect: string, extra: string): void {
+    this.out(`  ${tag} ${label} ${styleText("dim", `:: ${detail}`)}`);
+  }
+  verdict(name: string, passed: boolean, expect: string, extra: string): void {
     const v = passed
       ? styleText(["bold", "green"], "PASS")
       : styleText(["bold", "red"], "FAIL");
-    out(`${v} ${styleText("dim", `(expect ${expect}; ${extra})`)}`);
-  },
+    this.out(`${v} ${styleText("bold", name)} ${styleText("dim", `(expect ${expect}; ${extra})`)}`);
+  }
+}
 
-  summary(passed: number, total: number): void {
-    out("\n" + styleText(["bold", passed === total ? "green" : "red"], `${passed}/${total} passed`));
-  },
-};
+/** cli-level narration, always printed immediately (even in parallel mode). */
+export function narrate(text: string): void {
+  process.stdout.write(styleText("bold", text) + "\n");
+}
+
+/** End-of-run roster: one line per case (pass/fail), then the total. Always printed. */
+export function summary(results: RunResult[]): void {
+  const sorted = [...results].sort((a, b) => a.name.localeCompare(b.name));
+  process.stdout.write("\n" + styleText(["bold", "inverse"], " summary ") + "\n");
+  for (const r of sorted) {
+    const tag = r.passed ? styleText("green", "PASS") : styleText(["bold", "red"], "FAIL");
+    process.stdout.write(`  ${tag}  ${r.name}\n`);
+  }
+  const passed = results.filter((r) => r.passed).length;
+  process.stdout.write(
+    "\n" + styleText(["bold", passed === results.length ? "green" : "red"], `${passed}/${results.length} passed`) + "\n",
+  );
+}

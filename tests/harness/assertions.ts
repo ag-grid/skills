@@ -34,10 +34,6 @@ export function runAssertion(
         passed = false;
         notes.push(`expected noMatch=${a.expectNoMatch}, got ${ctx.interaction.noMatch}`);
       }
-      if (a.maxAnswers !== undefined && ctx.interaction.answersSent > a.maxAnswers) {
-        passed = false;
-        notes.push(`answersSent ${ctx.interaction.answersSent} > ${a.maxAnswers}`);
-      }
       if (a.mustContain && !ctx.interaction.transcript.includes(a.mustContain)) {
         passed = false;
         notes.push(`transcript missing "${a.mustContain}"`);
