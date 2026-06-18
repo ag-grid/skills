@@ -18,7 +18,7 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | skill-vanilla-creategrid | ✅ | ✅ PASS | v30 new Grid → v35 createGrid + module registration added |
 | skill-monorepo-partial | ✅ | ✅ PASS | only grid-app upgraded, util untouched (correct scope) |
 | skill-angular-standalone | ⏳ | — | |
-| skill-vue2-to-vue3 | ⏳ | — | |
+| skill-vue2-to-vue3 | ✅ | ✅ PASS | stops at Vue2 boundary, advises Vue 3 migration, no changes |
 | skill-grid-charts-integrated | ⏳ | — | |
 | skill-theming-api-v33 | ⏳ | — | |
 
@@ -30,6 +30,8 @@ Legend: ⏳ todo · ✅ done · ⚠️ blocked
 - grid.md: fixed reversed version-range typo — "Source: major <= 25" → ">= 25".
 - grid.md: added "Module registration (required from v33)" gotcha — apps upgrading from before v33
   must ADD ModuleRegistry registration; not caught by typecheck/build (runtime-only).
+- grid.md: made the ag-grid-vue (Vue 2) boundary an explicit STOP (like out-of-range) — the skill
+  must not plan/attempt an upgrade past v31; it advises migrating the app to Vue 3 first.
 
 ## Harness changes (during Phase 2)
 - Fragile mode default-on for skill cases (off for harness); `harness-fragile-mode-aborts` meta-test.

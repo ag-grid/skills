@@ -10,7 +10,7 @@
 
 ## Legacy / removed packages and required migrations
 
-- `ag-grid-vue` (Vue 2 wrapper): no longer updated. To move past its last release, the app must migrate to Vue 3 and switch to `ag-grid-vue3`. No dedicated breaking-change page exists.
+- `ag-grid-vue` (Vue 2 wrapper): no longer updated; its last release is v31. Moving past v31 requires migrating the host application from Vue 2 to Vue 3 (and switching to `ag-grid-vue3`) — a Vue framework migration that is OUTSIDE this skill's scope. If the project depends on `ag-grid-vue` and the target is v32 or later, **STOP** (like an out-of-range version): do not build a plan, do not change anything. Tell the user they must first migrate their application to Vue 3 and switch to `ag-grid-vue3`, then re-run this skill. No dedicated breaking-change page exists.
 - `@ag-grid-community/*` and `@ag-grid-enterprise/*` (feature packages): replaced by the single tree-shakable `ag-grid-community` / `ag-grid-enterprise` using modules. Required to reach v33. See `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/`.
 - `@ag-grid-community/react`, `/angular`, `/vue3` (scoped wrappers): replaced by `ag-grid-react` / `ag-grid-angular` / `ag-grid-vue3` in v33. Same page as above.
 - `ag-grid-charts-enterprise`: removed in v33. No replacement package — use `ag-grid-enterprise` and `ag-charts-enterprise` together. See `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/#integrated-charts--sparklines` (verify the anchor against the live page).

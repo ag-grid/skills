@@ -1,0 +1,14 @@
+{
+  "name": "vue2-grid-app",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "ag-grid-community": "31.3.4",
+    "ag-grid-vue": "31.3.4",
+    "vue": "2.7.16"
+  },
+  "devDependencies": {
+    "typescript": "5.5.4",
+    "vite": "5.4.2"
+  }
+}
