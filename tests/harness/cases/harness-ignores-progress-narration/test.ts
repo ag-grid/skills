@@ -6,7 +6,6 @@ const def: TestDefinition = {
   name: "harness-ignores-progress-narration",
   prompt: "Run the narrate-then-ask skill.",
   answers: [{ when: "asked for the user's name", reply: "Ada Lovelace" }],
-  assertions: [{ type: "interaction", expectNoMatch: false, mustContain: "Ada Lovelace" }],
   expectOutcome: "pass",
 };
 

@@ -8,7 +8,6 @@ const def: TestDefinition = {
     { when: "asked for the user's favourite colour", reply: "blue" },
     { when: "asked which city the user lives in", reply: "London" },
   ],
-  assertions: [{ type: "interaction", expectNoMatch: false, mustContain: "Done" }],
   expectOutcome: "pass",
 };
 

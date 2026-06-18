@@ -1,24 +1,22 @@
 import { execFileSync } from "node:child_process";
 
-/** LLM diff verifier: did the change make all expected edits and nothing unexpected? */
-export function runVerifier(opts: {
+/** LLM diff check: did the change make all expected edits and nothing unexpected? */
+export function checkDiff(opts: {
   expected: string;
-  mustNotChange?: string;
   diff: string;
   model?: string;
 }): { pass: boolean; reason: string } {
   const prompt = `You are verifying the result of an automated code change in a test.
 
-EXPECTED CHANGES (what the change SHOULD have done):
+EXPECTED CHANGES — the COMPLETE set of changes the diff should contain. Anything else is unexpected:
 ${opts.expected}
-${opts.mustNotChange ? `\nMUST NOT CHANGE:\n${opts.mustNotChange}` : ""}
 
 DIFF (old -> new):
 ${opts.diff || "(no differences)"}
 
 Decide:
 1) Were ALL the expected changes made?
-2) Were any UNEXPECTED changes made (changes not implied by the expected list)?
+2) Were any UNEXPECTED changes made (anything in the diff not covered by the expected set)? Ignore trivial incidental churn such as lockfiles or pure formatting.
 
 Reply with EXACTLY ONE JSON object and nothing else:
 {"allExpectedMade": true|false, "unexpectedChanges": true|false, "reason": "<one short sentence>"}`;

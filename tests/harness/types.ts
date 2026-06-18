@@ -8,17 +8,14 @@ export interface AnswerEntry {
   reply: string;
 }
 
+// Interaction mechanics (questions asked/answered, no_match, timeout) are checked intrinsically
+// by the runner, so assertions only cover post-run outcomes: a command exit code or a diff verdict.
 export type Assertion =
   // Run a shell command in work/<case>/new (or root); pass on the expected exit code.
   | { type: "command"; run: string; expectExit?: number; in?: "new" | "root" }
-  // LLM diff verifier: were all expected changes made, and nothing unexpected?
-  | { type: "verifier"; expected: string; mustNotChange?: string }
-  // Cheap interaction guards over the conversation.
-  | {
-      type: "interaction";
-      mustContain?: string;
-      expectNoMatch?: boolean;
-    };
+  // LLM diff check: does the diff contain exactly the expected change-set (all of it, nothing
+  // material beyond it)? `expected` describes the complete intended set of changes.
+  | { type: "check-diff"; expected: string };
 
 export interface TestDefinition {
   name: string;
@@ -29,8 +26,6 @@ export interface TestDefinition {
   prompt: string;
   /** The simulator answers questions only from this map. */
   answers: AnswerEntry[];
-  /** Optional workspace seeding (e.g. lay down old/ + new/ for diff checks). */
-  setup?: (workDir: string) => void | Promise<void>;
   assertions?: Assertion[];
   /** Whether the validations are expected to pass or to (correctly) fail. Default "pass". */
   expectOutcome?: "pass" | "fail";

@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { join } from "node:path";
 import type { Assertion, AssertionResult, InteractionResult } from "./types.ts";
-import { runVerifier } from "./verifier.ts";
+import { checkDiff } from "./check-diff.ts";
 
 export function runAssertion(
   a: Assertion,
@@ -27,25 +27,12 @@ export function runAssertion(
         };
       }
     }
-    case "interaction": {
-      const notes: string[] = [];
-      let passed = true;
-      if (a.expectNoMatch !== undefined && a.expectNoMatch !== ctx.interaction.noMatch) {
-        passed = false;
-        notes.push(`expected noMatch=${a.expectNoMatch}, got ${ctx.interaction.noMatch}`);
-      }
-      if (a.mustContain && !ctx.interaction.transcript.includes(a.mustContain)) {
-        passed = false;
-        notes.push(`transcript missing "${a.mustContain}"`);
-      }
-      return { assertion: "interaction", passed, detail: notes.join("; ") || "ok" };
-    }
-    case "verifier": {
+    case "check-diff": {
       const oldDir = join(ctx.workDir, "old");
       const newDir = join(ctx.workDir, "new");
       const diff = dirDiff(oldDir, newDir);
-      const v = runVerifier({ expected: a.expected, mustNotChange: a.mustNotChange, diff });
-      return { assertion: "verifier", passed: v.pass, detail: v.reason };
+      const v = checkDiff({ expected: a.expected, diff });
+      return { assertion: "check-diff", passed: v.pass, detail: v.reason };
     }
   }
 }

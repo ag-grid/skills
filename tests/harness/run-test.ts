@@ -1,4 +1,4 @@
-import { cpSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 import { runAgentSession } from "./driver.ts";
 import { runAssertion } from "./assertions.ts";
@@ -18,16 +18,25 @@ export async function runTest(
   rmSync(workDir, { recursive: true, force: true });
   mkdirSync(workDir, { recursive: true });
 
-  // Install the skill into project-scoped .claude/skills so Claude Code discovers it.
-  // Embedded skills live in the case folder alongside test.ts (which we must not copy).
-  // Install under the skill's own frontmatter name, not the (harness-prefixed) folder name.
-  const skillSrc = def.skill ? join(REPO, def.skill) : caseDir;
-  cpSync(skillSrc, join(workDir, ".claude/skills", skillFolderName(skillSrc)), {
-    recursive: true,
-    filter: (src) => basename(src) !== "test.ts",
-  });
+  // If the case ships a fixture/ folder (a sample workspace), copy it to old/ and new/.
+  // Omit it for cases that don't exercise a diff (e.g. pure interaction tests).
+  const fixtureDir = join(caseDir, "fixture");
+  if (existsSync(fixtureDir)) {
+    for (const sub of ["old", "new"]) {
+      cpSync(fixtureDir, join(workDir, sub), { recursive: true });
+    }
+  }
 
-  if (def.setup) await def.setup(workDir);
+  // Install skills into project-scoped .claude/skills so Claude Code discovers them.
+  // The skill name is the directory name (no parsing): a referenced skill installs as
+  // .claude/skills/<basename>; an embedded case mirrors .claude/skills in its own skills/ folder,
+  // whose contents (skills/<name>/SKILL.md) are copied in directly.
+  const skillsDest = join(workDir, ".claude/skills");
+  if (def.skill) {
+    cpSync(join(REPO, def.skill), join(skillsDest, basename(def.skill)), { recursive: true });
+  } else {
+    cpSync(join(caseDir, "skills"), skillsDest, { recursive: true });
+  }
 
   const logPath = join(REPO, "tests/results", `${def.name}.jsonl`);
   const log = new JsonlLog(logPath);
@@ -61,7 +70,14 @@ export async function runTest(
     interaction.unanswered.length === 0 &&
     assertionResults.every((r) => r.passed);
   const expectOutcome = def.expectOutcome ?? "pass";
-  const passed = expectOutcome === "pass" ? actualPass : !actualPass;
+  // A timeout is never a legitimate outcome (even for expect-fail tests): it always fails, so a
+  // hang can't masquerade as the failure an expect-fail test was looking for. Otherwise the run
+  // passes when its actual outcome matches what the test expects.
+  const passed = interaction.timedOut
+    ? false
+    : expectOutcome === "pass"
+      ? actualPass
+      : !actualPass;
 
   const result: RunResult = {
     name: def.name,
@@ -80,13 +96,4 @@ export async function runTest(
   };
   log.write({ event: "result", passed, expectOutcome });
   return result;
-}
-
-/** A skill installs under its SKILL.md frontmatter `name`, not its (possibly prefixed) folder. */
-function skillFolderName(dir: string): string {
-  try {
-    const m = readFileSync(join(dir, "SKILL.md"), "utf8").match(/^name:\s*(.+)$/m);
-    if (m) return m[1].trim();
-  } catch {}
-  return basename(dir);
 }
