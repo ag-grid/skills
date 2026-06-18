@@ -15,7 +15,7 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | skill-out-of-range | ✅ | ✅ PASS | refused v23, cited v25 floor, no changes |
 | skill-already-latest | ✅ | ✅ PASS | detected 35.3.1 == latest, no changes |
 | skill-react-modules | ✅ | ✅ PASS | v31 feature pkgs → v35 modules, incremental, typechecks |
-| skill-vanilla-creategrid | ⏳ | — | |
+| skill-vanilla-creategrid | ✅ | ✅ PASS | v30 new Grid → v35 createGrid + module registration added |
 | skill-monorepo-partial | ⏳ | — | |
 | skill-angular-standalone | ⏳ | — | |
 | skill-vue2-to-vue3 | ⏳ | — | |
@@ -28,6 +28,8 @@ Legend: ⏳ todo · ✅ done · ⚠️ blocked
 - SKILL.md step 5: delete the plan file on successful completion (don't leave AG_UPGRADE_PLAN.md
   as clutter in the user's project).
 - grid.md: fixed reversed version-range typo — "Source: major <= 25" → ">= 25".
+- grid.md: added "Module registration (required from v33)" gotcha — apps upgrading from before v33
+  must ADD ModuleRegistry registration; not caught by typecheck/build (runtime-only).
 
 ## Harness changes (during Phase 2)
 - Fragile mode default-on for skill cases (off for harness); `harness-fragile-mode-aborts` meta-test.
