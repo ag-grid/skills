@@ -6,6 +6,9 @@ export interface AnswerEntry {
   when: string;
   /** The reply to give when that question is asked. */
   reply: string;
+  /** If true, the run does NOT fail when this question is never asked (the skill may legitimately
+   *  skip it, e.g. scope confirmation for a single-package app). Required answers must be asked. */
+  optional?: boolean;
 }
 
 // Interaction mechanics (questions asked/answered, no_match, timeout) are checked intrinsically
@@ -29,11 +32,13 @@ export interface TestDefinition {
   /** The simulator answers questions only from this map. */
   answers: AnswerEntry[];
   assertions?: Assertion[];
-  /** Where the agent runs. "new" (the project under upgrade) for real-skill cases; the skill
-   *  installs into that dir's .claude/skills and reads package.json from it. Default "work". */
-  runIn?: "work" | "new";
   /** Whether the validations are expected to pass or to (correctly) fail. Default "pass". */
   expectOutcome?: "pass" | "fail";
+  /** Fragile mode (real-skill cases): inject the fail-fast-on-confusion preamble. Default on for
+   *  cases with a `skill`. Set false for a normal-mode fidelity run, true to opt a harness case in. */
+  fragile?: boolean;
+  /** Meta-test of fragile mode: the run passes iff the agent produced a FRAGILE-ABORT. */
+  expectFragileAbort?: boolean;
   /** Under-test model. Default "sonnet". */
   model?: string;
 }

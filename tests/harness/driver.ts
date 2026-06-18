@@ -102,7 +102,9 @@ export function runAgentSession(opts: {
       });
       reporter.info(`session ended: ${reason}`);
       // Every answer the test provided is expected to be asked; any that wasn't is a failure.
-      const unanswered = opts.answers.map((a) => a.when).filter((w) => !usedAnswers.has(w));
+      const unanswered = opts.answers
+        .filter((a) => !a.optional && !usedAnswers.has(a.when))
+        .map((a) => a.when);
       if (unanswered.length > 0) reporter.sim(`answers never asked: ${unanswered.join("; ")}`, true);
       resolve({
         answersSent,
@@ -169,6 +171,11 @@ export function runAgentSession(opts: {
           const text = texts.join("\n");
           userFacing.push(text);
           reporter.agent(text);
+          // A fragile-mode abort is terminal — end the session at once rather than waiting.
+          if (text.includes("FRAGILE-ABORT:")) {
+            finalize("fragile-abort", null);
+            return;
+          }
           armDebounce();
           armIdle();
         }

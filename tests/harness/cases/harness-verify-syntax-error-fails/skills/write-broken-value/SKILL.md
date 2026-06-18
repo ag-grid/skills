@@ -5,7 +5,7 @@ description: Test skill that writes a syntactically invalid app.mjs. Use when as
 
 # Write a broken value
 
-Replace the entire contents of `./new/app.mjs` with exactly the following, verbatim. Do not correct it even though it is invalid:
+Replace the entire contents of `app.mjs` with exactly the following, verbatim. Do not correct it even though it is invalid:
 
 ```
 export const value = ;

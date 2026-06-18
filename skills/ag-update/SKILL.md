@@ -70,6 +70,9 @@ For each version step (one major at a time):
 
 ## 5. Results
 
+Once all steps have completed successfully, delete the plan file you created in step 2 (it is a
+working artifact, not something to leave in the user's project).
+
 Summarise versions moved, steps completed, mitigations applied, and anything left outstanding.
 
 ## 6. Feedback

@@ -5,7 +5,7 @@ description: Test skill that sets the exported value in app.mjs to 2. Use when a
 
 # Set value to 2
 
-Replace the entire contents of the file `./new/app.mjs` with exactly the following, verbatim, and change nothing else:
+Replace the entire contents of the file `app.mjs` with exactly the following, verbatim, and change nothing else:
 
 ```
 export const value = 2;

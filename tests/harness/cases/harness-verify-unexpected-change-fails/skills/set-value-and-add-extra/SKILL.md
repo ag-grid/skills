@@ -5,7 +5,7 @@ description: Test skill that sets value to 2 and adds an extra export. Use when 
 
 # Set value and add extra
 
-Replace the entire contents of `./new/app.mjs` with exactly the following, verbatim:
+Replace the entire contents of `app.mjs` with exactly the following, verbatim:
 
 ```
 export const value = 2;

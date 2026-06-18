@@ -10,6 +10,12 @@ import type { RunResult, TestDefinition } from "./types.ts";
 // This file is tests/harness/; repo root is two levels up. work/results/fixtures live under tests/.
 const REPO = resolve(import.meta.dirname, "../..");
 
+// Fragile mode: a test-only prompt prefix (not part of the shipped skill) that makes the agent
+// fail fast and loud on skill-level confusion, so wording gaps surface instead of being guessed
+// past. Detected via the FRAGILE-ABORT sentinel, which forces a fail.
+const FRAGILE_PREAMBLE = `FRAGILE MODE (automated test). Follow the skill's instructions exactly. If at any point it is not exactly clear what to do - for example an instruction is ambiguous, or you are given contradictory information or a reference to something that does not exist, or you would otherwise have to GUESS or improvise to continue — do not guess and do not work around it. Stop immediately, output one line "FRAGILE-ABORT: <one sentence on exactly what confused or blocked you, quoting the skill instruction>", and end your turn.
+This does NOT apply to: (a) asking the user the questions the skill tells you to ask — do those normally; (b) handling breaking changes/migrations the skill is designed for — that is expected work; (c) a documented decision to refuse or stop (e.g. an unsupported version range) — that is a correct outcome, report it normally, not as a FRAGILE-ABORT.`;
+
 export async function runTest(
   def: TestDefinition,
   caseDir: string,
@@ -22,14 +28,15 @@ export async function runTest(
   // If the case ships a fixture/ folder (a sample workspace), copy it to old/ and new/.
   // Omit it for cases that don't exercise a diff (e.g. pure interaction tests).
   const fixtureDir = join(caseDir, "fixture");
-  if (existsSync(fixtureDir)) {
+  const hasFixture = existsSync(fixtureDir);
+  if (hasFixture) {
     for (const sub of ["old", "new"]) {
       cpSync(fixtureDir, join(workDir, sub), { recursive: true });
     }
   }
 
-  // Where the agent runs: the project dir (new/) for real-skill cases, else the work dir.
-  const cwd = def.runIn === "new" ? join(workDir, "new") : workDir;
+  // Run in the project dir (new/) whenever the case ships a fixture; otherwise the work dir.
+  const cwd = hasFixture ? join(workDir, "new") : workDir;
   mkdirSync(cwd, { recursive: true });
 
   // Install skills into project-scoped .claude/skills (under cwd) so Claude Code discovers them.
@@ -38,31 +45,43 @@ export async function runTest(
   // whose contents (skills/<name>/SKILL.md) are copied in directly.
   const skillsDest = join(cwd, ".claude/skills");
   if (def.skill) {
-    cpSync(join(REPO, def.skill), join(skillsDest, basename(def.skill)), { recursive: true });
+    cpSync(join(REPO, def.skill), join(skillsDest, basename(def.skill)), {
+      recursive: true,
+    });
   } else {
     cpSync(join(caseDir, "skills"), skillsDest, { recursive: true });
   }
 
   // Real-skill cases run in a git repo so the skill's per-step commits work. Ignore .claude and
   // node_modules so they pollute neither the skill's commits nor the old/new diff.
-  if (def.runIn === "new") {
+  if (hasFixture) {
     // Write the same .gitignore into old/ and new/ so it is diff-neutral; git only inits new/.
     const gitignore = "node_modules\n.claude/\n";
     writeFileSync(join(workDir, "old", ".gitignore"), gitignore);
     writeFileSync(join(cwd, ".gitignore"), gitignore);
     execSync(
       "git init -q && git add -A && " +
-        'git -c user.email=harness@test -c user.name=harness commit -q -m baseline',
+        "git -c user.email=harness@test -c user.name=harness commit -q -m baseline",
       { cwd, stdio: "pipe" },
     );
   }
 
   const logPath = join(REPO, "tests/results", `${def.name}.jsonl`);
   const log = new JsonlLog(logPath);
-  log.write({ event: "start", name: def.name, skill: def.skill, prompt: def.prompt });
+  log.write({
+    event: "start",
+    name: def.name,
+    skill: def.skill,
+    prompt: def.prompt,
+  });
+
+  // Fragile mode (prompt-injected; not part of the shipped skill). Default on for real-skill
+  // cases (those with a `skill`), off for harness cases — override per-test with `fragile`.
+  const fragile = def.fragile ?? Boolean(def.skill);
+  const prompt = fragile ? `${FRAGILE_PREAMBLE}\n\n${def.prompt}` : def.prompt;
 
   const interaction = await runAgentSession({
-    prompt: def.prompt,
+    prompt,
     cwd,
     model: def.model,
     answers: def.answers,
@@ -83,20 +102,25 @@ export async function runTest(
     return r;
   });
 
-  const actualPass =
-    !interaction.noMatch &&
-    !interaction.timedOut &&
-    interaction.unanswered.length === 0 &&
-    assertionResults.every((r) => r.passed);
+  // A FRAGILE-ABORT means the agent hit skill-level confusion; surface the reason.
+  const fragileAbort = interaction.transcript.match(/FRAGILE-ABORT:[^\n]*/)?.[0] ?? null;
+  if (fragileAbort) reporter.sim(fragileAbort, true);
+
   const expectOutcome = def.expectOutcome ?? "pass";
-  // A timeout is never a legitimate outcome (even for expect-fail tests): it always fails, so a
-  // hang can't masquerade as the failure an expect-fail test was looking for. Otherwise the run
-  // passes when its actual outcome matches what the test expects.
-  const passed = interaction.timedOut
-    ? false
-    : expectOutcome === "pass"
-      ? actualPass
-      : !actualPass;
+  let passed: boolean;
+  if (def.expectFragileAbort) {
+    // Meta-test of fragile mode itself: success == the agent produced a FRAGILE-ABORT.
+    passed = Boolean(fragileAbort) && !interaction.timedOut;
+  } else {
+    const actualPass =
+      !interaction.noMatch &&
+      !interaction.timedOut &&
+      !fragileAbort &&
+      interaction.unanswered.length === 0 &&
+      assertionResults.every((r) => r.passed);
+    // A timeout never counts as the expected outcome (even for expect-fail), so it always fails.
+    passed = interaction.timedOut ? false : expectOutcome === "pass" ? actualPass : !actualPass;
+  }
 
   const result: RunResult = {
     name: def.name,
@@ -113,6 +137,6 @@ export async function runTest(
     },
     logPath,
   };
-  log.write({ event: "result", passed, expectOutcome });
+  log.write({ event: "result", passed, expectOutcome, fragileAbort });
   return result;
 }
