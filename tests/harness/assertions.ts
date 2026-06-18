@@ -48,7 +48,7 @@ export function runAssertion(
 function dirDiff(oldDir: string, newDir: string): string {
   try {
     return execSync(
-      `diff -ru --exclude=node_modules --exclude=.git --exclude=.claude "${oldDir}" "${newDir}"`,
+      `diff -ru --exclude=node_modules --exclude=.git --exclude=.claude --exclude=dist --exclude=build "${oldDir}" "${newDir}"`,
       { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 }
     );
   } catch (e: any) {
