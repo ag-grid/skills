@@ -2,7 +2,7 @@ Follow these steps to determine the full set of projects, products and AG depend
 
 ## Output
 
-The goal of this process is to produce a 2-level markdown list of projects, and under each project a list of dependencies in use.
+The goal of this process is to produce a 2-level markdown list of projects, and under each project a list of package.json ag dependencies in use.
 
 Example of expected output format:
 
@@ -11,6 +11,8 @@ Example of expected output format:
   - ag-dependency-name@current-version
 - path/to/project/b
   - ag-dependency-name@current-version
+
+Do not include any other information in the output
 
 ## Steps
 
