@@ -10,9 +10,10 @@ import type { RunResult, TestDefinition } from "./types.ts";
 // This file is tests/harness/; repo root is two levels up. work/results/fixtures live under tests/.
 const REPO = resolve(import.meta.dirname, "../..");
 
-// Fragile mode: a test-only prompt prefix (not part of the shipped skill) that makes the agent
-// fail fast and loud on skill-level confusion, so wording gaps surface instead of being guessed
-// past. Detected via the FRAGILE-ABORT sentinel, which forces a fail.
+// Fragile mode: a test-only prompt prefix (not part of the shipped skill) that
+// makes the agent fail fast and loud on skill-level confusion, so wording gaps
+// surface instead of being guessed past. Detected via the FRAGILE-ABORT
+// sentinel, which forces a fail.
 const FRAGILE_PREAMBLE = `FRAGILE MODE (automated test). Follow the skill's instructions exactly. If at any point it is not exactly clear what to do - for example an instruction is ambiguous, or you are given contradictory information or a reference to something that does not exist, or you would otherwise have to GUESS or improvise to continue — do not guess and do not work around it. Stop immediately, output one line "FRAGILE-ABORT: <one sentence on exactly what confused or blocked you, quoting the skill instruction>", and end your turn.
 This does NOT apply to: (a) asking the user the questions the skill tells you to ask — do those normally; (b) handling breaking changes/migrations the skill is designed for — that is expected work; (c) a documented decision to refuse or stop (e.g. an unsupported version range) — that is a correct outcome, report it normally, not as a FRAGILE-ABORT.`;
 
@@ -103,7 +104,8 @@ export async function runTest(
   });
 
   // A FRAGILE-ABORT means the agent hit skill-level confusion; surface the reason.
-  const fragileAbort = interaction.transcript.match(/FRAGILE-ABORT:[^\n]*/)?.[0] ?? null;
+  const fragileAbort =
+    interaction.transcript.match(/FRAGILE-ABORT:[^\n]*/)?.[0] ?? null;
   if (fragileAbort) reporter.sim(fragileAbort, true);
 
   const expectOutcome = def.expectOutcome ?? "pass";
@@ -119,7 +121,11 @@ export async function runTest(
       interaction.unanswered.length === 0 &&
       assertionResults.every((r) => r.passed);
     // A timeout never counts as the expected outcome (even for expect-fail), so it always fails.
-    passed = interaction.timedOut ? false : expectOutcome === "pass" ? actualPass : !actualPass;
+    passed = interaction.timedOut
+      ? false
+      : expectOutcome === "pass"
+        ? actualPass
+        : !actualPass;
   }
 
   const result: RunResult = {
