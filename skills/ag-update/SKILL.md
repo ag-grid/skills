@@ -3,41 +3,62 @@ name: ag-update
 description: Update AG Grid and/or AG Charts to a newer version
 ---
 
-# AG Grid / AG Charts upgrade
-
-Upgrade AG Grid and/or AG Charts across a project.
-
 ## Rules
 
 - Never use or mention the AG Grid codemod or MCP server. They are not relavent to the task you are now completing
 - Follow the process documented below exactly
-- At certain points, you will be instructed to ask the user a question. When you do this, show the question to the user, and stop. Do not continue until you receive a response.
-- If a step tells you to execute the "roadblock process" that means briefly describe the issue to the user, then ask whether they would like to continue anyway or stop.
-- If you hit a significant issue while trying to follow this process, for example: a file that the process asks you to read is not available, or the process is clearly making an assumption that is not met by your current codebase; then execute the roadblock process even if the current step does not explicitly tell you to.
+- If you are instructed "Tell the user X" then show the message to the user and **continue**.
+- If you are instructed "Ask the user X" then show the question to the user and **stop**. Do not continue until you receive a response. If you have a tool available designed to ask the user a question you may use it.
 
-## Roadblock process
+## Explain process to user
 
-If asked to execute the roadblock process
+Tell the user "Welcome to the AG Update skill. Let's start by gathering some context on your application"
 
-## 0. Version check
+## Version check
 
 - Read `VERSION.md` in this skill folder. Fetch the latest: `https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md`.
 - Compare as semver:
-  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting claude and running `npx skills update ag-grid/skills` before resuming or typing "continue" to ignore and continue with the current version. Stop and wait for user response.
+  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting claude and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they they type "continue" to do so.
   - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit claude and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
+
+## Check for clear plan
+
+- Look for AG_UPGRADE_INFO.md or AG_UPGRADE_PLAN.md in the current directory
+- If either exist then ask the user whether to proceed, making clear that proceeding will result in these files being rewritten
+  - If the user opts to proceed with these files in place, truncate them (replace with emptry text content)
+
+## Validate scope of change
+
+- Determine the projects to operate on. A "project" is a folder containing a package.json.
+  - If this skill was invoked with instructions to upgrade specific projects, use them
+  - Otherwise, recursively find all projects in the current directory that contain dependencies starting "ag-grid-" or "ag-charts-". Ignore projects that are not part of the software in this folder, e.g. inside node_modules and build artefacts. Show these projects to the user and ask them which they want to update.
+- Determine the products, frameworks and library versions in use for each project
+  - The product is "grid" or "charts" as indicated by the dependencies, and it is valid for a project to have both grid and charts products.
+  - The version is determined by the library version in package.json
+- If more than one framework or more than one version of the same ag dependency is in use across the projects, they can not be updated together. Tell this to the user, suggest that they run the skill on a smaller set of projects, and stop. The skill invocation is now finished. Do not follow any of the other instructions in this file.
 
 ## 1. Determine context
 
-- Determine the projects to operate on
-  - If you were invoked with instructions to upgrade specific projects, use them
-  - Otherwise, recursively find all package.json files in the current directory that contain the strings "ag-grid-" or "ag-charts-". Show these to the user and ask them which they want to update.
-- Determine the framework and library version in use for each project
-  - The framework is "react", "vue", "angular" or "javascript" depending on the kind of application in the project
-  - The version is determined by the library version in package.json
-- If any projects use different frameworks, or have different versions of the same ag package, they can not be updated together. Explain this to the user, suggest that they run the skill on a smaller set of projects, and stop.
-- Load references/grid.md if there are grid packages, and follow the rules within.
-- Load references/charts.md if there are charts packages, and follow the rules within.
-- Determine the latest available version with `npm view <package> version`. Propose a target to the user.
+Draft process:
+
+Context: keep log
+
+1. If `AG_UPGRADE_PLAN.md` exists prompt to delete it
+2. Determine projects
+3. Determine products and versions
+4. Bail if not a simple process
+5. Propose version(s) to user and ask for confirmation
+6. Extract full set of breaking changes and behaviour changes TODO split out into reference file
+   - Launch one sub-agent each for for grid and charts as appropriate
+   - Load grid.md or charts.md as appropriate
+   - Establish full set of documentation URLs
+   - TODO support multiple products
+   - Pass full documena
+   - Find them in the docs pages
+   - Establish search term to work out if we're affected
+   - Add 3 headings to the document, `## Applicable breaking changes`, `## Ignored breaking changes`, `## Behaviour changes` and `## Optional changes`
+
+- Determine the latest available version with `npm view <package> version` for the `ag-grid-community` and `ag-charts-community` packages. Propose a target to the user.
 - Identify any legacy/removed packages in use and the migrations they force (see the product reference files).
 - Gather changes: for each version step and each in-scope framework, load the correct upgrade page (URL patterns in the product reference files) and extract the relevant change categories. Charts pages classify changes as must-fix, sign-off, and advisory — see `references/charts.md`.
 

@@ -29,6 +29,8 @@ Register once at app startup. The UMD bundle is the only exception.
 
 ## Theming (changed in v33)
 
+TODO add this to optional changes.
+
 From v33 the Theming API (theme objects such as `themeQuartz`) is the default. An app using the
 legacy CSS themes — importing `ag-grid-community/styles/*.css` and using an `ag-theme-*` className —
 will conflict with the new default and render incorrectly unless handled. This is a runtime/visual
