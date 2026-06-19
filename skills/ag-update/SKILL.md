@@ -12,7 +12,7 @@ Upgrade AG Grid and/or AG Charts across a project.
 - Never use or mention the AG Grid codemod or MCP server. They are not relavent to the task you are now completing
 - Follow the process documented below exactly
 - At certain points, you will be instructed to ask the user a question. When you do this, show the question to the user, and stop. Do not continue until you receive a response.
-- If a step tells you to execute the "roadblock process" that means briefly describe the issue to the user then ask the user if they would like to continue anyway or give feedback. If they choose feedback, skip to the "Feedback" section below.
+- If a step tells you to execute the "roadblock process" that means briefly describe the issue to the user, then ask whether they would like to continue anyway or stop.
 - If you hit a significant issue while trying to follow this process, for example: a file that the process asks you to read is not available, or the process is clearly making an assumption that is not met by your current codebase; then execute the roadblock process even if the current step does not explicitly tell you to.
 
 ## Roadblock process
@@ -74,7 +74,3 @@ Once all steps have completed successfully, delete the plan file you created in 
 working artifact, not something to leave in the user's project).
 
 Summarise versions moved, steps completed, mitigations applied, and anything left outstanding.
-
-## 6. Feedback
-
-Offer to send feedback on this upgrade to the AG team. If the user accepts, follow `references/feedback.md`.
