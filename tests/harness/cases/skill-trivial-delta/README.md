@@ -22,7 +22,7 @@ v34 → latest (35.x). Essentially trivial for a basic community app.
 - `check-diff` expected: "`ag-grid-community` and `ag-grid-react` bumped 34 → latest; no source
   changes."
 - interaction: scope; target latest; approve; decline feedback.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Build notes
 Minimal Vite React TS app pinned to v34. This is the first fixture to build (proves the Phase 2

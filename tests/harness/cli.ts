@@ -35,9 +35,10 @@ async function runOne(caseDir: string, reporter: Reporter): Promise<RunResult> {
   reporter.verdict(
     def.name,
     r.passed,
-    r.expectOutcome,
-    `answers=${r.interaction.answersSent}, noMatch=${r.interaction.noMatch}, ` +
-      `unanswered=${r.interaction.unanswered.length}, timedOut=${r.interaction.timedOut}`,
+    r.expectFail ?? "pass",
+    `failures=[${r.failures.join(",")}], answers=${r.interaction.answersSent}, ` +
+      `noMatch=${r.interaction.noMatch}, unanswered=${r.interaction.unanswered.length}, ` +
+      `timedOut=${r.interaction.timedOut}`,
   );
   reporter.info(`log: ${r.logPath}`);
   return r;

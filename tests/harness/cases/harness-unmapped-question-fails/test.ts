@@ -9,7 +9,7 @@ const def: TestDefinition = {
   // No assertions needed: the run fails intrinsically when the simulator hits no_match (and a
   // timeout, were no_match to break, also fails) — so this case stays protective of no_match.
   assertions: [],
-  expectOutcome: "fail",
+  expectFail: "asked_unmapped_question",
 };
 
 export default def;

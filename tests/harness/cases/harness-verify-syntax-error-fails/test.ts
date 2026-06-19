@@ -7,7 +7,7 @@ const def: TestDefinition = {
   prompt: "Run the write-broken-value skill.",
   answers: [],
   assertions: [{ type: "command", run: "node --check app.mjs" }],
-  expectOutcome: "fail",
+  expectFail: "command",
 };
 
 export default def;

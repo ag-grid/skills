@@ -27,7 +27,7 @@ migrated to Vue 3 first, and **not** upgrade across the boundary. It makes no AG
   **Requires re-adding a transcript-message assertion** — the harness currently has only `command`
   and `check-diff` (see note below).
 - `check-diff`: "no changes" (the skill stops rather than half-migrate).
-- `expectOutcome`: pass (showing the message and stopping is the correct behaviour).
+- `expectFail`: none — showing the message and stopping is the correct behaviour, so a clean pass is required.
 
 > Harness dependency: a message-check assertion (asserting the agent's transcript includes a given
 > string) must be added back before this case — and `skill-out-of-range` / `skill-already-latest` —

@@ -18,7 +18,6 @@ const def: TestDefinition = {
         "Only packages/grid-app is changed: its ag-grid-community and ag-grid-react dependencies bumped from 34 to the latest 35.x (plus the matching package-lock.json change). packages/util is completely unchanged. No unrelated source changes.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

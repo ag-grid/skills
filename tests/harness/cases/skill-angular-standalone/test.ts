@@ -20,7 +20,6 @@ const def: TestDefinition = {
         "ag-grid-angular and ag-grid-community upgraded from 32 to the latest 35.x, with the @angular/* packages bumped to the Angular version AG Grid v33+ requires. Module registration added as required from v33. Theming handled for v33+. Optionally the AgGridModule NgModule import may be modernized to the standalone AgGridAngular component — recommended but NOT required (AgGridModule still works), so its absence is acceptable. No unrelated source changes.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

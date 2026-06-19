@@ -30,7 +30,7 @@ v32 → latest (35). Crosses **v33** (standalone `AgGridAngular`, consolidation,
 - `check-diff` expected: "`AgGridModule` replaced by standalone `AgGridAngular`; `ag-grid-angular`
   and Angular at compatible versions; no unrelated changes."
 - interaction: scope; target latest; approve; decline feedback.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Open items (confirm at build)
 - Exact doc wording + version for `AgGridModule` → standalone `AgGridAngular` (verify on the

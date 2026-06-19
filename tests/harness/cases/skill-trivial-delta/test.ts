@@ -18,7 +18,6 @@ const def: TestDefinition = {
         "ag-grid-community and ag-grid-react upgraded from 34.x to the latest 35.x in package.json (and the matching change in package-lock.json). No application source code changes. .gitignore unchanged.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

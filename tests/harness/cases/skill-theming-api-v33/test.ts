@@ -19,7 +19,6 @@ const def: TestDefinition = {
         "ag-grid-community and ag-grid-react upgraded from 32 to the latest 35.x. The legacy CSS theming (the ag-grid.css / ag-theme-quartz.css imports and the className=\"ag-theme-quartz\" wrapper) is correctly handled for v33+ — EITHER migrated to the Theming API (a theme object such as themeQuartz passed via the grid's theme option, with the CSS imports and className removed) OR explicitly kept as legacy via the theme=\"legacy\" option. Module registration (ModuleRegistry with AllCommunityModule) added as required from v33. No unrelated source changes.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

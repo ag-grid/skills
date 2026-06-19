@@ -22,7 +22,7 @@ Attempt to upgrade to latest. Source major 23 < 25 → out of supported range.
 ## Protective assertions
 - `check-diff` expected: "no changes" (`old` == `new`).
 - interaction: transcript contains a refusal citing the unsupported range / minimum 25.
-- `expectOutcome`: pass (refusing is the correct behaviour).
+- `expectFail`: none — refusing is the correct behaviour, so a clean pass is required.
 
 ## Build notes
 Minimal; no install needed (the skill refuses before upgrading). The `package.json` pinned to v23

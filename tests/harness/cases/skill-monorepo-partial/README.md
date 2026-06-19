@@ -26,7 +26,7 @@ v34 → latest, across the workspace.
 - `check-diff` expected: "only `packages/grid-app` AG deps bumped; `packages/util` unchanged; no
   unrelated changes."
 - interaction: the scope-confirmation step lists only `grid-app`; user confirms.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Build notes
 Keep the workspace minimal (2 packages). Protective for scope: if the skill touches `util` or

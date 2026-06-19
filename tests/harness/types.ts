@@ -22,6 +22,18 @@ export type Assertion =
   // The agent's user-facing transcript must include this string (e.g. a refusal or status message).
   | { type: "transcript"; includes: string };
 
+/** The distinct ways a run can (correctly or not) fail. The first four are intrinsic to the
+ *  interaction (plus the fragile sentinel); the last three correspond one-to-one to the Assertion
+ *  types. `expectFail` names exactly one of these. */
+export type FailureKind =
+  | "fragile_abort" // agent emitted a FRAGILE-ABORT sentinel
+  | "unanswered" // a required answer-map question was never asked
+  | "asked_unmapped_question" // agent asked a question with no answer-map entry
+  | "timeout" // the agent session timed out
+  | "command" // a `command` assertion hit the wrong exit code
+  | "diff_mismatch" // a `check-diff` assertion's verdict was fail
+  | "transcript_missing"; // a `transcript` assertion's substring was absent
+
 export interface TestDefinition {
   name: string;
   /** Skill to install for this run, as a repo-root-relative path (e.g. "skills/ag-update").
@@ -32,13 +44,14 @@ export interface TestDefinition {
   /** The simulator answers questions only from this map. */
   answers: AnswerEntry[];
   assertions?: Assertion[];
-  /** Whether the validations are expected to pass or to (correctly) fail. Default "pass". */
-  expectOutcome?: "pass" | "fail";
+  /** Expected failure. Omit to require a clean pass (no failure signals at all). Set to a
+   *  FailureKind to require the run to (correctly) fail for EXACTLY that one reason (strict): if the
+   *  run also fails for a different distinct reason, the test fails — that other reason is a real
+   *  problem masquerading as the expected one. */
+  expectFail?: FailureKind;
   /** Fragile mode (real-skill cases): inject the fail-fast-on-confusion preamble. Default on for
    *  cases with a `skill`. Set false for a normal-mode fidelity run, true to opt a harness case in. */
   fragile?: boolean;
-  /** Meta-test of fragile mode: the run passes iff the agent produced a FRAGILE-ABORT. */
-  expectFragileAbort?: boolean;
   /** Under-test model. Default "sonnet". */
   model?: string;
 }
@@ -62,9 +75,12 @@ export interface AssertionResult {
 
 export interface RunResult {
   name: string;
-  /** Did the actual outcome match expectOutcome? */
+  /** Did the actual outcome match expectFail (a clean pass when expectFail is unset)? */
   passed: boolean;
-  expectOutcome: "pass" | "fail";
+  /** The expected failure for this case, if any. */
+  expectFail?: FailureKind;
+  /** All distinct failure kinds the run actually produced (empty == clean pass). */
+  failures: FailureKind[];
   assertionResults: AssertionResult[];
   interaction: Omit<InteractionResult, "transcript">;
   logPath: string;

@@ -11,7 +11,7 @@ const def: TestDefinition = {
     { when: "asked for the user's favourite colour", reply: "blue" },
   ],
   assertions: [],
-  expectOutcome: "fail",
+  expectFail: "unanswered",
 };
 
 export default def;

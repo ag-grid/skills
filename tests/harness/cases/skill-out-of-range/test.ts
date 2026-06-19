@@ -11,7 +11,6 @@ const def: TestDefinition = {
     { type: "check-diff", expected: "No changes at all — the project is left exactly as it was." },
     { type: "transcript", includes: "25" },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

@@ -18,7 +18,6 @@ const def: TestDefinition = {
         "ag-grid-community upgraded to the latest version in package.json. In src/main.ts, the removed `new Grid(element, gridOptions)` call is replaced by `createGrid(element, gridOptions)` (the vanilla-only API change), with the import updated accordingly. Module registration (ModuleRegistry with AllCommunityModule) added as required from v33. CSS/theming handled appropriately. No unrelated changes.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

@@ -28,7 +28,7 @@ v32 → latest (35). Crosses **v33** (Theming API default; CSS themes deprecated
 - `check-diff` expected: "migrated to Theming API (`theme` prop set, legacy CSS imports removed)".
 - **Eyeball:** `old/` vs `new/` rendered visually — outside the automated gate.
 - interaction: scope; target latest; approve; decline feedback.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Build notes
 Lowest automated value; kept for the visual `old/new` diff. Build last.

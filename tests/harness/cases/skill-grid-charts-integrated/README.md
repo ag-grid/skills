@@ -31,7 +31,7 @@ v32 → latest (35). Crosses **v33** (`ag-grid-charts-enterprise` removed; integ
   `ag-charts-enterprise` added (compatible versions); `IntegratedChartsModule.with(AgChartsEnterpriseModule)`
   registered; no unrelated changes." Do **not** hardcode the charts major — see open item.
 - interaction: scope; target latest; approve; decline feedback.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Open item — grid↔charts version pairing (UNRESOLVED, affects the skill, not just this fixture)
 The skill currently encodes "charts major = grid major − 22" (e.g. grid 34 ↔ charts 12). This is

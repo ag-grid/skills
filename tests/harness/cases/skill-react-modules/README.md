@@ -34,7 +34,7 @@ Theming API default).
 - `check-diff` expected: "feature packages replaced by `ag-grid-community` + `ag-grid-react` at
   latest; imports and module registration updated; no unrelated source changes."
 - interaction: scope; target latest; approve; decline feedback.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Build notes
 Crib the v31 feature-package layout from `../ag-grid-1` at the `v31` tag. The skill applies the

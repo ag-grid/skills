@@ -32,7 +32,7 @@ v30 → latest (35.x). Crosses **v31** (`createGrid` introduced, `new Grid` depr
 - `check-diff` expected: "uses `createGrid` instead of `new Grid`; `ag-grid-community` at latest;
   module registration added. No unrelated changes."
 - interaction: scope = whole app; target = latest; approve plan; decline feedback.
-- `expectOutcome`: pass.
+- `expectFail`: none (a clean pass is required).
 
 ## Build notes
 Hand-scaffold a minimal vanilla Vite + TS app. Crib the v30 `new Grid` usage from `../ag-grid-1`

@@ -11,7 +11,6 @@ const def: TestDefinition = {
       expected: "In app.mjs, the exported `value` constant changed from 1 to 2. Nothing else.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

@@ -18,7 +18,6 @@ const def: TestDefinition = {
         "The legacy @ag-grid-community/* feature packages (core, client-side-row-model, react, styles) are removed and replaced by the consolidated ag-grid-community and ag-grid-react packages at the latest version in package.json. Imports in src updated to import from ag-grid-community / ag-grid-react instead of the @ag-grid-community/* packages. Module registration still present and valid for the new packages. CSS theme handling migrated appropriately for v33+. No unrelated source changes.",
     },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

@@ -12,7 +12,6 @@ const def: TestDefinition = {
     { type: "check-diff", expected: "No changes — the project is already on the latest version." },
     { type: "transcript", includes: "latest" },
   ],
-  expectOutcome: "pass",
 };
 
 export default def;

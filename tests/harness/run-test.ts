@@ -5,7 +5,7 @@ import { runAgentSession } from "./driver.ts";
 import { runAssertion } from "./assertions.ts";
 import { JsonlLog } from "./log.ts";
 import type { Reporter } from "./report.ts";
-import type { RunResult, TestDefinition } from "./types.ts";
+import type { Assertion, FailureKind, RunResult, TestDefinition } from "./types.ts";
 
 // This file is tests/harness/; repo root is two levels up. work/results/fixtures live under tests/.
 const REPO = resolve(import.meta.dirname, "../..");
@@ -108,30 +108,35 @@ export async function runTest(
     interaction.transcript.match(/FRAGILE-ABORT:[^\n]*/)?.[0] ?? null;
   if (fragileAbort) reporter.sim(fragileAbort, true);
 
-  const expectOutcome = def.expectOutcome ?? "pass";
-  let passed: boolean;
-  if (def.expectFragileAbort) {
-    // Meta-test of fragile mode itself: success == the agent produced a FRAGILE-ABORT.
-    passed = Boolean(fragileAbort) && !interaction.timedOut;
-  } else {
-    const actualPass =
-      !interaction.noMatch &&
-      !interaction.timedOut &&
-      !fragileAbort &&
-      interaction.unanswered.length === 0 &&
-      assertionResults.every((r) => r.passed);
-    // A timeout never counts as the expected outcome (even for expect-fail), so it always fails.
-    passed = interaction.timedOut
-      ? false
-      : expectOutcome === "pass"
-        ? actualPass
-        : !actualPass;
-  }
+  // Collect every distinct reason the run failed. Each Assertion type maps to one kind.
+  // Duplicates collapse (we assert on kinds, not counts), so a run that fails two check-diffs
+  // still reads as a single `diff_mismatch`.
+  const ASSERTION_KIND: Record<Assertion["type"], FailureKind> = {
+    command: "command",
+    "check-diff": "diff_mismatch",
+    transcript: "transcript_missing",
+  };
+  const failures: FailureKind[] = [];
+  if (fragileAbort) failures.push("fragile_abort");
+  if (interaction.unanswered.length > 0) failures.push("unanswered");
+  if (interaction.noMatch) failures.push("asked_unmapped_question");
+  if (interaction.timedOut) failures.push("timeout");
+  (def.assertions ?? []).forEach((a, i) => {
+    if (!assertionResults[i].passed) failures.push(ASSERTION_KIND[a.type]);
+  });
+  const kinds = [...new Set(failures)];
+
+  // Strict expectFail: with it unset, the run must be a clean pass (no failures at all). With it
+  // set, the run must fail for EXACTLY that one reason — any other distinct reason fails the test.
+  const passed = def.expectFail
+    ? kinds.length === 1 && kinds[0] === def.expectFail
+    : kinds.length === 0;
 
   const result: RunResult = {
     name: def.name,
     passed,
-    expectOutcome,
+    expectFail: def.expectFail,
+    failures: kinds,
     assertionResults,
     interaction: {
       answersSent: interaction.answersSent,
@@ -143,6 +148,6 @@ export async function runTest(
     },
     logPath,
   };
-  log.write({ event: "result", passed, expectOutcome, fragileAbort });
+  log.write({ event: "result", passed, expectFail: def.expectFail, failures: kinds, fragileAbort });
   return result;
 }
