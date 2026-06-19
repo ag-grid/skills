@@ -9,9 +9,9 @@ can upgrade this, it can upgrade anything.**
 ## Packages (`fixture/packages/*`)
 | Package | Uses AG? | Start | Notable hard bits |
 |---|---|---|---|
-| `grid-config` | yes (shared lib) | `ag-grid-community@31.3.4` | Exports a column + grid options consumed by **both** apps; uses community-safe deprecated options (string `rowSelection:'multiple'` + `suppressRowClickSelection`) so the migration ripples through every consumer. |
-| `react-app` | yes | `@ag-grid-*@31.3.4` (scoped **modules** layout) | Enterprise + integrated charts (`createRangeChart`), `enableRangeSelection`/`enableCharts`, OLD-format sparkline column, class `ICellRendererComp` via `components`, deprecated `params.columnApi`, custom-styled legacy `ag-theme-alpine`, consumes `grid-config`. |
-| `angular-app` | yes | `ag-grid-angular@32` + Angular 16 (**umbrella packages**) | **Version skew** vs the v31 packages; `AgGridModule` NgModule → standalone migration + Angular min-version bump; depends on `@ag-grid-community/locale` (NOT legacy — bump, don't flag); consumes `grid-config`. |
+| `grid-config` | yes (shared lib) | `ag-grid-community@31.3.4` + `ag-charts-community@9.3.1` | Exports a grid column + grid options **and** standalone `AgChartOptions`, consumed by **both** apps; uses community-safe deprecated grid options (string `rowSelection:'multiple'` + `suppressRowClickSelection`) so the migration ripples through every consumer. |
+| `react-app` | yes | `@ag-grid-*@31.3.4` (scoped **modules**) + `ag-charts-react@9.3.1` | Enterprise + integrated charts (`createRangeChart`), `enableRangeSelection`/`enableCharts`, OLD-format sparkline column, class `ICellRendererComp` via `components`, deprecated `params.columnApi`, **standalone AG Charts** beside the grid, custom-styled legacy `ag-theme-alpine`, consumes `grid-config`. |
+| `angular-app` | yes | `ag-grid-angular@32` + Angular 16 (**umbrella**) + `ag-charts-angular@10.3.3` | **Version skew** vs the v31 packages (grid + charts); `AgGridModule` NgModule → standalone migration + Angular min-version bump; **standalone AG Charts** (`AgCharts`) beside the grid; depends on `@ag-grid-community/locale` (NOT legacy — bump, don't flag); consumes `grid-config`. |
 | `legacy-grid` | yes | `ag-grid-community@31.3.4` | The team **decides NOT to upgrade this**. Must be left untouched (the scope answer excludes it). |
 | `no-grid` | **no** | npm `grid@^4.10.8` | DECOY — depends on the unrelated npm package literally named `grid` (a non-AG grid lib) and imports `from "grid"`. The skill must not mistake it for AG. |
 
@@ -23,12 +23,15 @@ styles** (scoped modules in react-app; umbrella packages in angular-app/grid-con
 **two start majors** (v31 and v32).
 
 ## Difficult cases exercised
-Monorepo partial scope · version skew (v31 vs v32) · mixed packaging (scoped modules vs umbrella) ·
-shared AG dependency whose migration ripples into consumers · two frameworks (React + Angular) ·
-Angular `AgGridModule` → standalone + Angular bump · integrated charts (`createRangeChart`) ·
-old-format sparklines · deprecated `columnApi` · string→object `rowSelection` · class cell renderer ·
-custom-styled legacy theme → Theming API · `@ag-grid-community/locale` not-legacy trap · a non-AG
-`grid` decoy package · an explicitly-excluded AG package.
+Monorepo partial scope · version skew (v31 vs v32, grid **and** charts) · mixed packaging (scoped
+modules vs umbrella) · shared AG dependency whose migration ripples into consumers · two frameworks
+(React + Angular) · Angular `AgGridModule` → standalone + Angular bump · integrated charts
+(`createRangeChart`) · **standalone AG Charts** beside the grid (`ag-charts-react@9` / `ag-charts-angular@10`)
+with the grid↔charts version-pairing rule (31↔9, 32↔10) · the v9→v10 charts wrapper rename
+(`AgChartsReact`/`AgChartsAngular` → `AgCharts`) · old-format sparklines · deprecated `columnApi` ·
+string→object `rowSelection` · class cell renderer · custom-styled legacy theme → Theming API ·
+`@ag-grid-community/locale` not-legacy trap · a non-AG `grid` decoy package · an explicitly-excluded
+AG package.
 
 ## Optional change: Theming API migration (deliberate, currently-failing)
 The Theming-API migration is modelled as an **optional change** the agent should surface and ask
@@ -50,13 +53,14 @@ authored ahead of the skill feature.
 Built and validated at the **starting** versions:
 - `npm install` clean; **full monorepo `npm run typecheck` passes** (all 5 packages, Angular via a
   real `ng build`).
-- **React app** (`vite build`) **renders in Chrome**: custom blue legacy theme applied, class renderer
-  colouring prices, integrated range chart drawn, sparkline column present. Console clean apart from
-  the expected enterprise trial-license watermark — and it emits the deprecation warning
-  `columnApi.autoSizeAllColumns -> api.autoSizeAllColumns`, confirming that trap is live.
-- **Angular app** (`ng build` / `ng serve`) **renders in Chrome**: custom pink legacy theme, the
-  rows, and the shared `grid-config` `priceColumn()` formatting prices. Console clean apart from the
-  expected `rowSelection`/`suppressRowClickSelection` deprecation warnings (the shared lib's options).
+- **React app** (`vite build`) **renders in Chrome**: custom blue legacy theme, class renderer
+  colouring prices, integrated range chart, sparkline column, **and the standalone AG Charts bar
+  chart beside the grid**. Console clean apart from the expected enterprise trial-license watermark —
+  and it emits the `columnApi.autoSizeAllColumns -> api.autoSizeAllColumns` deprecation warning,
+  confirming that trap is live.
+- **Angular app** (`ng build` / `ng serve`) **renders in Chrome**: custom pink legacy theme, the grid
+  with the shared `grid-config` `priceColumn()` formatting, **and the standalone AG Charts bar chart
+  beside the grid**. Console clean (no errors).
 
 Cross-version note: where the v31 `grid-config` types meet the React app's scoped `@ag-grid-community/core`
 types (and the v32 Angular types), the consumers cast at the boundary — the realistic pattern for a

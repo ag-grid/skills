@@ -14,3 +14,6 @@ coverage/
 
 # Local-only symlinked skill installs for manual iteration inside fixtures
 tests/harness/cases/*/fixture/.claude/
+
+# Work files when running skill locally
+AG_UPDATE_*.md

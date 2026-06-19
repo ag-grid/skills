@@ -23,19 +23,26 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
 
 ## Check for clear plan
 
-- Look for AG_UPGRADE_INFO.md or AG_UPGRADE_PLAN.md in the current directory
+- Look for AG_UPDATE_SCOPE.md or AG_UPDATE_CHANGES.md in the current directory
 - If either exist, then:
   - if you were invoked with specific instructions to "resume the in-progress migration", then continue with this skill, but at each step, if it seems that the information produced by that step is already fully present in these files, skip the step.
-  - otherwise, ask the user whether to proceed, making clear that proceeding will result in these files being rewritten, and if the user opts to proceed the delete the AG_UPGRADE_INFO.md or AG_UPGRADE_PLAN.md files.
+  - otherwise, ask the user whether to proceed, making clear that proceeding will result in these files being rewritten, and if the user opts to proceed the delete the AG_UPDATE_SCOPE.md or AG_UPDATE_CHANGES.md files.
 
-## Determine scope of update
+## Determine scope
 
-1. Determine the full set of potential projects to update. There are instructions in the file `get-scope-of-update.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. If this skill was invoked with instructions to upgrade specific projects, filter the list by those projects.
-2. Determine the latest versions of the product(s) in use with `npm view ag-grid-community version` and/or `npm view ag-charts-community version`
-3. Tell the user which projects you found, what current versions they're on, and the latest version you propose updating to. Ask them if they'd like to continue, giving them the option to change the target version, or select a subset of projects if applicable.
-4. Record the user's decisions in AG_UPGRADE_INFO.md under the `## Projects to update` heading with entries like . Write the file immediately before continuing.
+This section populates the AG_UPDATE_SCOPE.md file
 
-## 1. Determine context
+1. Determine the full set of potential projects to update. There are instructions in the file `get-scope-of-update.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. If this skill was invoked with instructions to upgrade specific projects, pass that to the sub agent.
+2. Determine whether this update is grid-only, charts-only, or grid & charts. In the case of grid-only or charts-only repos, **do not mention the other product**. There is no need to confuse the process by referring to a product that the user does not have installed on.
+3. Determine the latest versions of the product(s) in use with `npm view ag-grid-community version` and/or `npm view ag-charts-community version`
+4. Tell the user which projects you found, what current versions they're on, and the latest version you propose updating to. Ask them if they'd like to continue, giving them the option to change the target version, or select a subset of projects if applicable.
+5. Record the user's decisions in AG_UPDATE_SCOPE.md before continuing
+
+## Determine the
+
+This stage populates the AG_UPDATE_CHANGES.md file
+
+!!!PROGRESS!!! same deal here, sub-agent, surface results, ask user
 
 1. Determine projects
 2. Determine products and versions
@@ -51,13 +58,12 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
    - Establish search term to work out if we're affected
    - Add 3 headings to the document, `## Applicable breaking changes`, `## Ignored breaking changes`, `## Behaviour changes` and `## Optional changes`
 
-- Determine the latest available version with `npm view <package> version` for the `ag-grid-community` and `ag-charts-community` packages. Propose a target to the user.
 - Identify any legacy/removed packages in use and the migrations they force (see the product reference files).
 - Gather changes: for each version step and each in-scope framework, load the correct upgrade page (URL patterns in the product reference files) and extract the relevant change categories. Charts pages classify changes as must-fix, sign-off, and advisory — see `references/charts.md`.
 
 ## 2. Build the upgrade plan
 
-Write a plan file (e.g. `AG_UPGRADE_PLAN.md`) with these sections:
+Write a plan file (e.g. `AG_UPDATE_PLAN.md`) with these sections:
 
 - Upgrade one major version at a time; commit after each successful step.
 

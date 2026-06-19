@@ -18,6 +18,8 @@
     "@ag-grid-enterprise/charts-enterprise": "31.3.4",
     "@ag-grid-enterprise/sparklines": "31.3.4",
     "@ag-grid-enterprise/menu": "31.3.4",
+    "ag-charts-react": "9.3.1",
+    "ag-charts-community": "9.3.1",
     "grid-config": "*",
     "react": "18.3.1",
     "react-dom": "18.3.1"

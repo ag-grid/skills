@@ -16,6 +16,8 @@
     "ag-grid-angular": "32.3.4",
     "ag-grid-community": "32.3.4",
     "@ag-grid-community/locale": "32.3.4",
+    "ag-charts-angular": "10.3.3",
+    "ag-charts-community": "10.3.3",
     "grid-config": "*",
     "rxjs": "7.8.1",
     "tslib": "2.6.2",

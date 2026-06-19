@@ -6,7 +6,9 @@ import type {
   GridOptions,
   GridReadyEvent,
 } from "@ag-grid-community/core";
-import { commonGridOptions, priceColumn } from "grid-config";
+import { AgChartsReact } from "ag-charts-react";
+import type { AgChartOptions } from "ag-charts-community";
+import { chartOptions, commonGridOptions, priceColumn } from "grid-config";
 import "./ag-modules";
 import { PriceRenderer } from "./PriceRenderer";
 // Legacy CSS theming: structural styles + the Alpine theme, then the custom overrides.
@@ -80,23 +82,33 @@ export function Grid() {
     });
   }, []);
 
+  // Standalone AG Charts options come from the shared grid-config library too (charts v9, paired
+  // with grid v31). Cast at the boundary for the version-skewed shared types.
+  const chart = chartOptions() as unknown as AgChartOptions;
+
   return (
-    <div className="ag-theme-alpine" style={{ width: "100%", height: 480 }}>
-      <AgGridReact
-        // Shared options (string rowSelection + suppressRowClickSelection + enableRangeSelection)
-        // come from the shared grid-config library and must migrate there.
-        gridOptions={commonGridOptions() as unknown as GridOptions}
-        rowData={rowData}
-        columnDefs={columnDefs}
-        getRowId={(params) => params.data.id}
-        components={{ priceRenderer: PriceRenderer }}
-        // enableRangeSelection (enterprise) deprecated v32.2 → cellSelection + CellSelectionModule
-        // in v33; enableCharts deprecated v32.2; integrated charts move behind IntegratedChartsModule.
-        enableRangeSelection
-        enableCharts
-        onGridReady={onGridReady}
-        onFirstDataRendered={onFirstDataRendered}
-      />
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: 12 }}>
+      <div className="ag-theme-alpine" style={{ width: "100%", height: 320 }}>
+        <AgGridReact
+          // Shared options (string rowSelection + suppressRowClickSelection) come from the shared
+          // grid-config library and must migrate there.
+          gridOptions={commonGridOptions() as unknown as GridOptions}
+          rowData={rowData}
+          columnDefs={columnDefs}
+          getRowId={(params) => params.data.id}
+          components={{ priceRenderer: PriceRenderer }}
+          // enableRangeSelection (enterprise) deprecated v32.2 → cellSelection + CellSelectionModule
+          // in v33; enableCharts deprecated v32.2; integrated charts move behind IntegratedChartsModule.
+          enableRangeSelection
+          enableCharts
+          onGridReady={onGridReady}
+          onFirstDataRendered={onFirstDataRendered}
+        />
+      </div>
+      {/* Standalone AG Charts, rendered next to the grid in the same view. */}
+      <div style={{ width: "100%", height: 320 }}>
+        <AgChartsReact options={chart} />
+      </div>
     </div>
   );
 }
