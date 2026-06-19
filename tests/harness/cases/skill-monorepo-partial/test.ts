@@ -8,7 +8,6 @@ const def: TestDefinition = {
     { when: "asked to confirm the scope of the update (which packages/apps to upgrade)", reply: "The whole monorepo — upgrade every package that uses AG Grid.", optional: true },
     { when: "asked which version to upgrade to", reply: "The latest version.", optional: true },
     { when: "asked to review or approve the upgrade plan before changes are made", reply: "Approved, go ahead." },
-    { when: "asked whether to send feedback to the AG team", reply: "No thanks, skip the feedback.", optional: true },
   ],
   assertions: [
     { type: "command", run: "npm install --no-audit --no-fund && npm run typecheck" },

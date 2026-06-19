@@ -10,7 +10,6 @@ const def: TestDefinition = {
     { when: "asked to choose a theming approach — migrate to the Theming API or keep legacy CSS themes", reply: "Migrate to the new Theming API.", optional: true },
     { when: "asked to review or approve the upgrade plan before changes are made", reply: "Approved, go ahead.", optional: true },
     { when: "asked whether to also upgrade Angular itself / about the required Angular version", reply: "Yes, bump Angular to the minimum version AG Grid requires.", optional: true },
-    { when: "asked whether to send feedback to the AG team", reply: "No thanks, skip the feedback.", optional: true },
   ],
   assertions: [
     { type: "command", run: "npm install --no-audit --no-fund --legacy-peer-deps && npm run typecheck" },

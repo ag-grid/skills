@@ -6,7 +6,6 @@ const def: TestDefinition = {
   prompt: "Use the ag-update skill to upgrade AG Grid in this project to the latest version.",
   answers: [
     { when: "asked to confirm the scope of the update", reply: "The whole app.", optional: true },
-    { when: "asked whether to send feedback to the AG team", reply: "No thanks.", optional: true },
   ],
   assertions: [
     { type: "check-diff", expected: "No changes — the project is already on the latest version." },
