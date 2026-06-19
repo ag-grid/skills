@@ -10,7 +10,18 @@
 
 ## Grid coupling
 
-When grid is also present, apply the grid/charts major-version rule defined in `SKILL.md`. Standalone charts has no coupling.
+When grid and charts are used together (integrated charts), the two must use compatible versions.
+AG Grid and AG Charts are released in lockstep but with different major numbers, and the offset is
+NOT a reliable constant — do not compute it with a fixed formula. Instead, determine the
+`ag-charts-enterprise` (or `ag-charts-community`) version that pairs with the target `ag-grid`
+version from the docs — the integrated-charts installation page
+(`https://www.ag-grid.com/{framework}-data-grid/integrated-charts-installation/`) shows the
+matching charts version and the module registration. When upgrading to the latest AG Grid, use the
+latest matching AG Charts version. Standalone charts (no grid) has no coupling.
+
+When `ag-grid-charts-enterprise` was removed in v33, integrated charts moved to registering
+`IntegratedChartsModule.with(AgChartsEnterpriseModule)` (community: `AgChartsCommunityModule`) from
+the separately-installed `ag-charts-enterprise`/`ag-charts-community` package.
 
 ## Supported version range (provisional)
 

@@ -19,7 +19,7 @@ Branch: `phase2-fixtures`. Updated as work proceeds.
 | skill-monorepo-partial | ✅ | ✅ PASS | only grid-app upgraded, util untouched (correct scope) |
 | skill-angular-standalone | ⏳ | — | |
 | skill-vue2-to-vue3 | ✅ | ✅ PASS | stops at Vue2 boundary, advises Vue 3 migration, no changes |
-| skill-grid-charts-integrated | ⏳ | — | |
+| skill-grid-charts-integrated | ✅ | ⚠️ PARTIAL | fragile-abort (dangling −22 ref) fixed; skill splits ag-grid-charts-enterprise → ag-grid-enterprise + ag-charts-enterprise and typechecks at v35. Remaining: missed `enableRangeSelection`→`cellSelection` rename (deprecation) + plan-file cleanup in last run. Worth one more pass when resumed. |
 | skill-theming-api-v33 | ✅ | ✅ PASS | v32 CSS theme → v35 Theming API (themeQuartz) + module registration |
 
 Legend: ⏳ todo · ✅ done · ⚠️ blocked
@@ -34,6 +34,9 @@ Legend: ⏳ todo · ✅ done · ⚠️ blocked
   must not plan/attempt an upgrade past v31; it advises migrating the app to Vue 3 first.
 - grid.md: added "Theming (changed in v33)" gotcha — CSS-themed apps must migrate to the Theming
   API or set theme:"legacy"; required mitigation, not caught by typecheck.
+- charts.md: fixed a dangling reference (it pointed to a grid/charts "−22" rule in SKILL.md that
+  no longer exists — caught by fragile mode). Replaced the unreliable fixed-offset formula with
+  docs-driven version pairing + the integrated-charts module-registration note.
 
 ## Harness changes (during Phase 2)
 - Fragile mode default-on for skill cases (off for harness); `harness-fragile-mode-aborts` meta-test.
