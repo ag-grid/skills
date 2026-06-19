@@ -1,5 +1,5 @@
-// v31 module registration using the legacy scoped feature packages. The whole layout below is
-// removed in v33 (package consolidation): the scoped packages collapse into ag-grid-community /
+// v31 module registration using the legacy scoped feature packages. This whole layout is removed
+// in v33 (package consolidation): scoped packages collapse into ag-grid-community /
 // ag-grid-enterprise, GridChartsModule becomes IntegratedChartsModule.with(AgChartsEnterpriseModule)
 // with ag-charts-enterprise as a separate dependency, and RangeSelectionModule becomes
 // CellSelectionModule.

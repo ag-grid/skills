@@ -2,7 +2,6 @@ import type { ICellRendererComp, ICellRendererParams } from "@ag-grid-community/
 
 // Class-based cell renderer, registered by key via the grid's `components` map.
 // (frameworkComponents was removed in v31, so `components` is the only option here.)
-// Class renderers still work at v35, but the surrounding APIs around them do not.
 export class PriceRenderer implements ICellRendererComp {
   private eGui!: HTMLSpanElement;
 

@@ -1,8 +1,7 @@
-/* Custom styling layered on the legacy Alpine CSS theme via CSS custom properties and a couple
-   of class overrides. Under the v33 Theming API these `--ag-*` variables and `.ag-theme-alpine`
-   class selectors no longer take effect — to preserve this look the upgrade must port them to
-   themeAlpine.withParams({ ... }) (plus any class-level tweaks). This is the hard part of the
-   theming migration. */
+/* Custom styling layered on the legacy Alpine CSS theme via CSS custom properties and a couple of
+   class overrides. Under the v33 Theming API these `--ag-*` variables and `.ag-theme-alpine` class
+   selectors no longer take effect — to preserve this look the upgrade must port them to
+   themeAlpine.withParams({ ... }). This is the hard part of the theming migration. */
 .ag-theme-alpine {
   --ag-foreground-color: rgb(14, 68, 145);
   --ag-background-color: rgb(252, 253, 255);

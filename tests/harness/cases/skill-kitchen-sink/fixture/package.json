@@ -1,30 +1,19 @@
 {
-  "name": "kitchen-sink-app",
+  "name": "kitchen-sink-monorepo",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "workspaces": [
+    "packages/grid-config",
+    "packages/no-grid",
+    "packages/legacy-grid",
+    "packages/react-app",
+    "packages/angular-app"
+  ],
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build"
-  },
-  "dependencies": {
-    "@ag-grid-community/core": "31.3.4",
-    "@ag-grid-community/client-side-row-model": "31.3.4",
-    "@ag-grid-community/styles": "31.3.4",
-    "@ag-grid-community/react": "31.3.4",
-    "@ag-grid-enterprise/core": "31.3.4",
-    "@ag-grid-enterprise/range-selection": "31.3.4",
-    "@ag-grid-enterprise/charts-enterprise": "31.3.4",
-    "@ag-grid-enterprise/sparklines": "31.3.4",
-    "@ag-grid-enterprise/menu": "31.3.4",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
-  },
-  "devDependencies": {
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "@vitejs/plugin-react": "4.3.1",
-    "typescript": "5.5.4",
-    "vite": "5.4.2"
+    "build:config": "npm -w grid-config run build",
+    "typecheck": "npm run build:config && npm -w no-grid run typecheck && npm -w legacy-grid run typecheck && npm -w react-app run typecheck && npm -w angular-app run typecheck",
+    "build": "npm run build:config && npm -w react-app run build && npm -w angular-app run build",
+    "dev:react": "npm run build:config && npm -w react-app run dev",
+    "dev:angular": "npm run build:config && npm -w angular-app run dev"
   }
 }

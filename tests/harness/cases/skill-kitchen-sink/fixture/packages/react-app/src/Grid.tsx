@@ -3,13 +3,15 @@ import { AgGridReact } from "@ag-grid-community/react";
 import type {
   ColDef,
   FirstDataRenderedEvent,
+  GridOptions,
   GridReadyEvent,
 } from "@ag-grid-community/core";
+import { commonGridOptions, priceColumn } from "grid-config";
 import "./ag-modules";
 import { PriceRenderer } from "./PriceRenderer";
 // Legacy CSS theming: structural styles + the Alpine theme, then the custom overrides.
-// At v33+ these CSS imports stop applying unless `theme="legacy"` is set, or the look is
-// ported to the Theming API.
+// At v33+ these CSS imports stop applying unless `theme="legacy"` is set, or the look is ported
+// to the Theming API.
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.css";
 import "./grid-theme.css";
@@ -31,12 +33,14 @@ const rows: Car[] = [
 
 export function Grid() {
   const [rowData] = useState<Car[]>(rows);
-  const [columnDefs] = useState<ColDef<Car>[]>([
+  // Non-generic ColDef[] so the shared grid-config column (typed against its own AG version) fits.
+  const [columnDefs] = useState<ColDef[]>([
     { field: "make" },
     { field: "model" },
     {
-      field: "price",
-      // Class-based renderer referenced by key from the `components` map below.
+      // Column definition comes from the shared grid-config library (version-skewed types, hence
+      // the cast); the local class renderer is layered on top.
+      ...(priceColumn() as unknown as ColDef),
       cellRenderer: "priceRenderer",
     },
     {
@@ -78,17 +82,16 @@ export function Grid() {
 
   return (
     <div className="ag-theme-alpine" style={{ width: "100%", height: 480 }}>
-      <AgGridReact<Car>
+      <AgGridReact
+        // Shared options (string rowSelection + suppressRowClickSelection + enableRangeSelection)
+        // come from the shared grid-config library and must migrate there.
+        gridOptions={commonGridOptions() as unknown as GridOptions}
         rowData={rowData}
         columnDefs={columnDefs}
         getRowId={(params) => params.data.id}
         components={{ priceRenderer: PriceRenderer }}
-        // String selection form + suppressRowClickSelection — both deprecated in v32.2 in favour
-        // of the object `rowSelection` form; must migrate by v35.
-        rowSelection="multiple"
-        suppressRowClickSelection
-        // enableRangeSelection/enableCharts deprecated v32.2; enableRangeSelection removed v33
-        // (RangeSelectionModule -> CellSelectionModule, cellSelection option).
+        // enableRangeSelection (enterprise) deprecated v32.2 → cellSelection + CellSelectionModule
+        // in v33; enableCharts deprecated v32.2; integrated charts move behind IntegratedChartsModule.
         enableRangeSelection
         enableCharts
         onGridReady={onGridReady}

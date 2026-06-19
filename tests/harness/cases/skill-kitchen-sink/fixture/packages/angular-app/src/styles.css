@@ -1,0 +1,17 @@
+/* Custom styling on the legacy Alpine theme (the base ag-grid.css + ag-theme-alpine.css are loaded
+   via angular.json "styles"). Same Theming-API migration concern as the React app: these `--ag-*`
+   variables and class overrides stop applying at v33+ unless ported to themeAlpine.withParams(...). */
+.ag-theme-alpine {
+  --ag-foreground-color: rgb(120, 30, 90);
+  --ag-header-background-color: rgb(250, 235, 245);
+  --ag-header-foreground-color: rgb(120, 30, 90);
+  --ag-odd-row-background-color: rgb(252, 246, 250);
+  --ag-border-color: rgb(235, 210, 226);
+  --ag-font-size: 14px;
+  --ag-row-height: 44px;
+  --ag-header-height: 48px;
+}
+
+.ag-theme-alpine .ag-header-cell-label {
+  font-weight: 700;
+}

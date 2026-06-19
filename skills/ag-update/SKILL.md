@@ -24,31 +24,24 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
 ## Check for clear plan
 
 - Look for AG_UPGRADE_INFO.md or AG_UPGRADE_PLAN.md in the current directory
-- If either exist then ask the user whether to proceed, making clear that proceeding will result in these files being rewritten
-  - If the user opts to proceed with these files in place, truncate them (replace with emptry text content)
+- If either exist, then:
+  - if you were invoked with specific instructions to "resume the in-progress migration", then continue with this skill, but at each step, if it seems that the information produced by that step is already fully present in these files, skip the step.
+  - otherwise, ask the user whether to proceed, making clear that proceeding will result in these files being rewritten, and if the user opts to proceed the delete the AG_UPGRADE_INFO.md or AG_UPGRADE_PLAN.md files.
 
-## Validate scope of change
+## Determine scope of update
 
-- Determine the projects to operate on. A "project" is a folder containing a package.json.
-  - If this skill was invoked with instructions to upgrade specific projects, use them
-  - Otherwise, recursively find all projects in the current directory that contain dependencies starting "ag-grid-" or "ag-charts-". Ignore projects that are not part of the software in this folder, e.g. inside node_modules and build artefacts. Show these projects to the user and ask them which they want to update.
-- Determine the products, frameworks and library versions in use for each project
-  - The product is "grid" or "charts" as indicated by the dependencies, and it is valid for a project to have both grid and charts products.
-  - The version is determined by the library version in package.json
-- If more than one framework or more than one version of the same ag dependency is in use across the projects, they can not be updated together. Tell this to the user, suggest that they run the skill on a smaller set of projects, and stop. The skill invocation is now finished. Do not follow any of the other instructions in this file.
+1. Determine the full set of potential projects to update. There are instructions in the file `get-scope-of-update.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. If this skill was invoked with instructions to upgrade specific projects, filter the list by those projects.
+2. Determine the latest versions of the product(s) in use with `npm view ag-grid-community version` and/or `npm view ag-charts-community version`
+3. Tell the user which projects you found, what current versions they're on, and the latest version you propose updating to. Ask them if they'd like to continue, giving them the option to change the target version, or select a subset of projects if applicable.
+4. Record the user's decisions in AG_UPGRADE_INFO.md under the `## Projects to update` heading with entries like . Write the file immediately before continuing.
 
 ## 1. Determine context
 
-Draft process:
-
-Context: keep log
-
-1. If `AG_UPGRADE_PLAN.md` exists prompt to delete it
-2. Determine projects
-3. Determine products and versions
-4. Bail if not a simple process
-5. Propose version(s) to user and ask for confirmation
-6. Extract full set of breaking changes and behaviour changes TODO split out into reference file
+1. Determine projects
+2. Determine products and versions
+3. Bail if not a simple process
+4. Propose version(s) to user and ask for confirmation
+5. Extract full set of breaking changes and behaviour changes TODO split out into reference file
    - Launch one sub-agent each for for grid and charts as appropriate
    - Load grid.md or charts.md as appropriate
    - Establish full set of documentation URLs
