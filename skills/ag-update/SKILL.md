@@ -10,6 +10,7 @@ description: Update AG Grid and/or AG Charts to a newer version
 - If you are instructed "Tell the user X" then show the message to the user and **continue**.
 - If you are instructed "Ask the user X" then show the question to the user and **stop**. Do not continue until you receive a response. If you have a tool available designed to ask the user a question you may use it.
 - This skill consistes of a set of sequential steps, each of which writes a file with results. Ensure that the file is written before moving on to the next step. DO NOT combine steps, or refer to information in future steps while handling a previous step.
+- When this skill finishes executing, either because it reaches the end of the migration process or is stopped by an early termination condition,
 
 ## Explain process to user
 
@@ -22,7 +23,7 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
   - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting claude and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they they type "continue" to do so.
   - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit claude and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
 
-## Check for clear plan
+## Check for existing plan
 
 - Look for files matching `AG_UPDATE_*.md` in the current directory
 - If any exist, then ask the user whether they'd like to start fresh and delete these files or resume.
@@ -39,16 +40,22 @@ This section populates the AG_UPDATE_SCOPE.md file
 4. Tell the user which projects you found, what current versions they're on, and the latest version you propose updating to. Ask them if they'd like to continue, giving them the option to change the target version, or select a subset of projects if applicable.
 5. Record the user's decisions in AG_UPDATE_SCOPE.md before continuing. Under `## Projects to update` record the projects and dependencies in exactly the same 2-level markdown list format as it was generated in, removing any projects that the user indicated that they did not want to update. Under `## Target versions` record the target version of grid and/or charts to update to.
 
+## Warn on unsupported versions
+
+The earliest supported major version to migrate _from_ is 25 for grid and 8 for charts. If the application uses earlier versions, **stop** the skill execution and tell the user why (it is because this skill only has change information going back to these versions versions).
+
 ## Determine the full set of changes
 
 This stage populates the AG_UPDATE_CHANGES_RAW.md file
 
-1. Determine the full set of potential changes to make. There are instructions in the file `determine-changes.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. Pass the sub-agent the data recorded in AG_UPDATE_SCOPE.md
+1. Determine the full set of potential changes to make. There are instructions in the file `determine-changes.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. Pass the sub-agent the path to AG_UPDATE_SCOPE.md
 2. Write the results verbatim to AG_UPDATE_CHANGES_RAW.md before continuing to the next step.
 
 ## Make an update plan
 
 This stage populates the AG_UPDATE_CHANGES_APPROVED.md file
+
+TODO handle Framework blockers by stopping
 
 1. Summarise the changes in AG_UPDATE_CHANGES_RAW.md to the user. Surface the information most important for a senior engineer to make a decision. If there is a large amount of detail, refer the user to regions in the AG_UPDATE_CHANGES_RAW.md file rather than printing large amounts of text to the chat. For the summary:
    - Breaking changes: these can be summarised as a sentence or paragraph. Since they are non-optional, details aren't important, just note the names of APIs affected e.g. "Update 3 grid options to new versions: optionA, optionB, optionC"
@@ -67,13 +74,15 @@ Present the plan. Make no changes until the user approves. Apply any changes the
 For each version step (one major at a time):
 
 - Apply the package updates and breaking-change mitigations for that step.
-- Run the project's tests. Running a subset is acceptable if you are confident the changes cannot affect the rest.
-- If tests fail: stop, report, do not proceed.
+- Run the project's tests. Running a subset is acceptable if you are confident the changes made cannot affect the rest.
+- If tests fail, iterate to fix the failing tests but _do not go beyond the scope of what was agreed with the user earlier_. If new decisions are required, ask the user rather than assuming.
 - If tests pass: commit, then move to the next step.
 
 ## 5. Results
 
 Once all steps have completed successfully, delete the plan file you created in step 2 (it is a
-working artifact, not something to leave in the user's project).
+working artefact, not something to leave in the user's project).
 
 Summarise versions moved, steps completed, mitigations applied, and anything left outstanding.
+
+## Feedback
