@@ -1,0 +1,19 @@
+{
+  "name": "kitchen-sink-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/grid-config",
+    "packages/no-grid",
+    "packages/legacy-grid",
+    "packages/react-app",
+    "packages/angular-app"
+  ],
+  "scripts": {
+    "build:config": "npm -w grid-config run build",
+    "typecheck": "npm run build:config && npm -w no-grid run typecheck && npm -w legacy-grid run typecheck && npm -w react-app run typecheck && npm -w angular-app run typecheck",
+    "build": "npm run build:config && npm -w react-app run build && npm -w angular-app run build",
+    "dev:react": "npm run build:config && npm -w react-app run dev",
+    "dev:angular": "npm run build:config && npm -w angular-app run dev"
+  }
+}

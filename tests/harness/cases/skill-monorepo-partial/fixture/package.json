@@ -1,0 +1,9 @@
+{
+  "name": "monorepo-root",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

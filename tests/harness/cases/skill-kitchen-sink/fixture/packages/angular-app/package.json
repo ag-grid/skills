@@ -1,0 +1,32 @@
+{
+  "name": "angular-app",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "ng serve",
+    "build": "ng build --configuration development",
+    "typecheck": "ng build --configuration development"
+  },
+  "dependencies": {
+    "@angular/common": "16.2.12",
+    "@angular/compiler": "16.2.12",
+    "@angular/core": "16.2.12",
+    "@angular/platform-browser": "16.2.12",
+    "@angular/platform-browser-dynamic": "16.2.12",
+    "ag-grid-angular": "32.3.4",
+    "ag-grid-community": "32.3.4",
+    "@ag-grid-community/locale": "32.3.4",
+    "ag-charts-angular": "10.3.3",
+    "ag-charts-community": "10.3.3",
+    "grid-config": "*",
+    "rxjs": "7.8.1",
+    "tslib": "2.6.2",
+    "zone.js": "0.13.3"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "16.2.12",
+    "@angular/cli": "16.2.12",
+    "@angular/compiler-cli": "16.2.12",
+    "typescript": "5.1.6"
+  }
+}

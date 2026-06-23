@@ -1,0 +1,25 @@
+/* Custom styling layered on the legacy Alpine CSS theme via CSS custom properties and a couple of
+   class overrides. Under the v33 Theming API these `--ag-*` variables and `.ag-theme-alpine` class
+   selectors no longer take effect — to preserve this look the upgrade must port them to
+   themeAlpine.withParams({ ... }). This is the hard part of the theming migration. */
+.ag-theme-alpine {
+  --ag-foreground-color: rgb(14, 68, 145);
+  --ag-background-color: rgb(252, 253, 255);
+  --ag-header-background-color: rgb(228, 237, 250);
+  --ag-header-foreground-color: rgb(14, 68, 145);
+  --ag-odd-row-background-color: rgb(245, 247, 250);
+  --ag-border-color: rgb(210, 222, 240);
+  --ag-font-size: 14px;
+  --ag-font-family: "Inter", system-ui, sans-serif;
+  --ag-row-height: 44px;
+  --ag-header-height: 48px;
+}
+
+.ag-theme-alpine .ag-header-cell-label {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ag-theme-alpine .ag-cell-focus {
+  border-color: rgb(14, 68, 145);
+}

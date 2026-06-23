@@ -1,1 +1,19 @@
 .DS_Store
+node_modules
+tests/work
+tests/results
+
+# Build artifacts / generated output (any location in the repo)
+dist/
+build/
+out-tsc/
+.angular/
+.vite/
+coverage/
+*.tsbuildinfo
+
+# Local-only symlinked skill installs for manual iteration inside fixtures
+tests/harness/cases/*/fixture/.claude/
+
+# Work files when running skill locally
+AG_UPDATE_*.md
