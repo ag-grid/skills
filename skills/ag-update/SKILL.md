@@ -3,10 +3,6 @@ name: ag-update
 description: Update AG Grid and/or AG Charts to a newer version
 ---
 
-## Self-update mode
-
-If invoked with instructions like "Update the AG Update skill to the latest version" then follow the instructions in [./references/self-update.md]
-
 ## Rules
 
 - Never use or mention the AG Grid codemod or MCP server. They are not relavent to the task you are now completing
