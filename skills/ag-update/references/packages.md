@@ -4,7 +4,7 @@ A guide to present and legacy package names
 
 ## Grid
 
-Using any of these current or legcay grid packages implies that a project uses the "grid" product, and breaking changes should be loaded from the grid documentation site.
+Using any of these current or legacy grid packages implies that a project uses the "grid" product, and breaking changes should be loaded from the grid documentation site.
 
 ### Current grid packages
 
@@ -12,7 +12,6 @@ Using any of these current or legcay grid packages implies that a project uses t
 - `ag-grid-enterprise`
 - `ag-grid-react`, `ag-grid-angular`, `ag-grid-vue3` — framework wrappers
 - `@ag-grid-community/locale` - locales
-- `@ag-grid-community/styles` - legacy themes
 
 ## Legacy / removed packages and required migrations
 
@@ -36,7 +35,8 @@ highest major a package can be used at; moving past it requires the migration de
   tree-shakable top-level packages. See
   `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/`.
   - `@ag-grid-enterprise/*` replaced by `ag-grid-enterprise`
-  - `@ag-grid-community/*` (except locale and styles) replaced by `ag-grid-community`
+  - `@ag-grid-community/*` (except locale) replaced by `ag-grid-community`
+  - `@ag-grid-community/styles` replaced by import from `ag-grid-community/styles`
   - `@ag-grid-community/{react,angular,vue3}` (framework wrappers, vue3 from `24.1.1`): replaced by
     `ag-grid-{react,angular,vue3}`
 - `ag-grid-charts-enterprise` was removed in v33. Import `AgChartsEnterpriseModule` from `ag-grid-enterprise` instead, see
