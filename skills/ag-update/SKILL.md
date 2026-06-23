@@ -3,6 +3,10 @@ name: ag-update
 description: Update AG Grid and/or AG Charts to a newer version
 ---
 
+## Self-update mode
+
+If invoked with instructions like "Update the AG Update skill to the latest version" then follow the instructions in [./references/self-update.md]
+
 ## Rules
 
 - Never use or mention the AG Grid codemod or MCP server. They are not relavent to the task you are now completing
@@ -46,43 +50,30 @@ The earliest supported major version to migrate _from_ is 25 for grid and 8 for 
 
 ## Determine the full set of changes
 
-This stage populates the AG_UPDATE_CHANGES_RAW.md file
+This stage populates the AG_UPDATE_CHANGES.md file
 
-1. Determine the full set of potential changes to make. There are instructions in the file `determine-changes.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. Pass the sub-agent the path to AG_UPDATE_SCOPE.md
-2. Write the results verbatim to AG_UPDATE_CHANGES_RAW.md before continuing to the next step.
+1. Determine the full set of potential changes to make. There are instructions in the file `determine-changes.md`. If you have access to sub-agents, give that file path to a sub-agent and it will write the results to AG_UPDATE_CHANGES.md. Otherwise follow the steps yourself. Pass the sub-agent the path to AG_UPDATE_SCOPE.md
+2. Write the results verbatim to AG_UPDATE_CHANGES.md before continuing to the next step.
 
-## Make an update plan
+## Trim behaviour changes
 
-This stage populates the AG_UPDATE_CHANGES_APPROVED.md file
+For behaviour changes there is a choice about whether to do nothing and accept the change, or apply a mitigation to restore the old behaviour. The user must make this decision.
 
-TODO handle Framework blockers by stopping
+1. Extract the changes tagged BEHAVIOUR in AG_UPDATE_CHANGES.md
+2. Count them and tell the user "There are $COUNT behaviour changes, in each case I need to know whether to accept the new behaviour or restore the old behaviour"
+3. Show the behaviour changes to the user (only the description, not the mitigation)
+4. Offer the explain any behaviour change in more detail, and ask the user which behaviour changes to accept and which to mitigate (NOTE: if there are many do this as a plain conversation, avoid using any tools to ask the user this question)
+5. Once you have the user's response, edit the AG_UPDATE_CHANGES.md file to remove all behaviour changes that the user wants to accept, leaving only the ones to mitigate.
+6. If any behaviour changes remain, add a section to the end of the AG_UPDATE_CHANGES.md file `# Validation` with the text content "All changes marked "BEHAVIOUR" are optional changes that the user has decided to apply. Double-check, using a sub-agent if available, that they have all been applied because tests/typechecking may not fail if the change has not been applied."
 
-1. Summarise the changes in AG_UPDATE_CHANGES_RAW.md to the user. Surface the information most important for a senior engineer to make a decision. If there is a large amount of detail, refer the user to regions in the AG_UPDATE_CHANGES_RAW.md file rather than printing large amounts of text to the chat. For the summary:
-   - Breaking changes: these can be summarised as a sentence or paragraph. Since they are non-optional, details aren't important, just note the names of APIs affected e.g. "Update 3 grid options to new versions: optionA, optionB, optionC"
-   - Ignored breaking changes: very low priority just say e.g. "Ignoring 28 breaking changes on APIs not in use, see AG_UPDATE_CHANGES_RAW.md for details"
-   - Optional changes: for changes involving deprecated APIs, the user has the choice of updating now or continuing to use the deprecated API. This is an important choice and needs enough context to make the decision, including old API, new api, and a link to the migration guide or documentation covering the change if one exists.
-   - Behaviour changes: these are instances where the grid's default behaviour has changed. The user must decide whether the new behaviour is desirable.
-2. Ask the user which changes to apply. Make clear that breaking changes are always applied, and a decision must be made on whether to apply optional changes, and whether to revert to the old behaviour in the case of behaviour changes.
-3. Write a file AG_UPDATE_CHANGES_APPROVED.md that contains all the changes that the user has decided to make and OMITS anything that is not being done, so no "Ignored breaking changes" section, and no mention of any optional changes or behaviour changes that the user has decided not to act on for now.
+## Report completion to the user
 
-## 3. Get approval
+Tell the user that the file is now ready to apply and give them the path to AG_UPDATE_CHANGES.md.
 
-Present the plan. Make no changes until the user approves. Apply any changes they ask for.
+Show this text verbatim:
 
-## 4. Execute
+```
+For best results we suggest that you start a new agent session or clear the context of this one, and prompt your agent to plan an update based on the changes listed in AG_UPDATE_CHANGES.md.
 
-For each version step (one major at a time):
-
-- Apply the package updates and breaking-change mitigations for that step.
-- Run the project's tests. Running a subset is acceptable if you are confident the changes made cannot affect the rest.
-- If tests fail, iterate to fix the failing tests but _do not go beyond the scope of what was agreed with the user earlier_. If new decisions are required, ask the user rather than assuming.
-- If tests pass: commit, then move to the next step.
-
-## 5. Results
-
-Once all steps have completed successfully, delete the plan file you created in step 2 (it is a
-working artefact, not something to leave in the user's project).
-
-Summarise versions moved, steps completed, mitigations applied, and anything left outstanding.
-
-## Feedback
+This skill is under active development, please report issues to https://github.com/ag-grid/skills/issues or report your results and share ideas at https://github.com/ag-grid/skills/discussions
+```
