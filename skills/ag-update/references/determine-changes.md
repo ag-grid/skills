@@ -48,7 +48,7 @@ Charts documentation URLs are `https://www.ag-grid.com/charts/{framework}/upgrad
 
 - for each product in use (grid and/or charts):
   - for each major version greater than the earliest current dependency version and less than or equal to the target version:
-    - read the page at the documentation URL and extract a full list of changes. For each change:
+    - read the page at the documentation URL using your standard tool for fetching web content (avoid using a real browser or tool like playwright or curl / raw HTTP if possible) and extract a full list of changes. For each change:
       - Do a dumb search through the source code of the projects to determine if this change MIGHT apply. DO NOT read project source code or analyse whether this change in fact does apply. Doing so will overflow the context and lead to unreliable results. For example, if the change is a removal of the "fooBarBaz" grid option, simply include the change if any project contains the string "fooBarBaz", even if in a comment.
         - If a change does not affect any project, skip it and continue to the next change.
       - classify the changes according to these rules:

@@ -14,10 +14,22 @@ Update to the latest version at any time:
 npx skills update ag-grid/skills
 ```
 
-## Skills
+## ag-update skill
 
-- **ag-update** — Upgrade AG Grid and/or AG Charts to a newer version across a project or monorepo. Determines scope, gathers the relevant breaking changes from the official docs, presents a plan for approval, then applies the upgrade one major version at a time, running tests and committing after each step. At the end it offers to send feedback to the AG team.
+The skill produces a markdown file detailing all the changes that need to be applied to your project in order to update to a new version.
 
-## Feedback
+In your coding agent you can invoke the skill and it will analyse your codebase and propose what updates can be applied:
 
-We use feedback to improve these skills. After an upgrade, `ag-update` offers to assemble a sanitised summary for you to email to **skill-feedback@ag-grid.com**.
+```
+Use the ag-update skill
+```
+
+Alternatively, tell the skill exactly what you want to update:
+
+```
+Use the ag-update skill to update all projects in this monorepo except apps/demo-app to ag grid v36
+```
+
+The skill will analyse your repo and our breaking change documentation and produce a markdown file containing a list of changes to apply. In the case of optional changes you'll be asked whether you want to apply them.
+
+You can then review the generated file and ask your agent to make an implementation plan based on it.
