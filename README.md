@@ -5,13 +5,13 @@ Agent skills for working with [AG Grid](https://www.ag-grid.com/) and [AG Charts
 ## Install
 
 ```
-npx skills add ag-grid/ag-skills
+npx skills add ag-grid/skills
 ```
 
 Update to the latest version at any time:
 
 ```
-npx skills update ag-grid/ag-skills
+npx skills update ag-grid/skills
 ```
 
 ## ag-update skill
