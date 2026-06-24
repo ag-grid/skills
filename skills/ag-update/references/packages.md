@@ -59,4 +59,4 @@ Using any of these charts packages implies that an app uses the "charts" product
 When the grid integrated charts feature is used, the grid and charts dependencies must use compatible versions
 
 AG Grid and AG Charts are released in lockstep on the same day, with a constant major-version
-offset of 22, and a requierment to sue the same minor and patch version, so for example when using grid v34.2.1, charts v22.2.1 must be used for integrated charts.
+offset of 22, and a requirement to use the same minor and patch version, so for example when using grid v34.2.1, charts v12.2.1 must be used for integrated charts.

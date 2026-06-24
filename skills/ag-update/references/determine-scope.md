@@ -20,4 +20,4 @@ Do not include any other information in the output
   - If you were provided with a list of projects, use it
   - Otherwise, recursively find all projects in the current directory that contain dependencies starting "ag-grid-" or "ag-charts-". Ignore projects that are not part of the software in this folder, e.g. inside node_modules and build artefacts. Show these projects to the user and ask them which they want to update.
 - Determine the dependency versions in use for each project
-  - The version can be determined from package.json if a explicit version like "31.2.0" is used, otherwise use the package manager to determine what actual version is installed.
+  - The version can be determined from package.json if an explicit version like "31.2.0" is used, otherwise use the package manager to determine what actual version is installed.

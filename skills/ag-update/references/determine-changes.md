@@ -38,7 +38,7 @@ An example file with a single change record:
 
 ## Documentation URLs
 
-Documentation URLs include the framework. Frameworks are `react`, `angular`, `vue`. You can determine the framework in use by checking the framerwork wrapper dependency. If no framework is in use, use `javascript`.
+Documentation URLs include the framework. Frameworks are `react`, `angular`, `vue`. You can determine the framework in use by checking the framework wrapper dependency. If no framework is in use, use `javascript`.
 
 Grid documentation URLs are `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-{version}/` where version is a major version from 26 to 36 inclusive.
 
