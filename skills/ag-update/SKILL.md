@@ -18,10 +18,10 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
 
 ## Version check
 
-- Read `VERSION.md` in this skill folder. Fetch the latest: `https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md`.
+- Read `VERSION.md` in this skill folder. Fetch the latest: `https://raw.githubusercontent.com/ag-grid/ag-skills/main/skills/ag-update/VERSION.md`.
 - Compare as semver:
-  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting claude and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they they type "continue" to do so.
-  - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit claude and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
+  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting claude and running `npx skills update ag-grid/ag-skills`. Ask the user if they'd like to continue with this old skill version, suggesting they they type "continue" to do so.
+  - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit claude and run `npx skills update ag-grid/ag-skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
 
 ## Check for existing plan
 
@@ -71,5 +71,5 @@ Show this text verbatim:
 ```
 For best results we suggest that you start a new agent session or clear the context of this one, and prompt your agent to plan an update based on the changes listed in AG_UPDATE_CHANGES.md.
 
-This skill is under active development, please report issues to https://github.com/ag-grid/skills/issues or report your results and share ideas at https://github.com/ag-grid/skills/discussions
+This skill is under active development, please report issues to https://github.com/ag-grid/ag-skills/issues or report your results and share ideas at https://github.com/ag-grid/ag-skills/discussions
 ```
