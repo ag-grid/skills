@@ -55,7 +55,8 @@ Charts documentation URLs are `https://www.ag-grid.com/charts/{framework}/upgrad
         - BREAKING if code written for the older version will no longer work unless updated. Backwards-incompatible API type changes, removals of deprecated APIs, and increases in the minimum versions of angular, react, vue or typescript required, all count as breaking changes.
         - BEHAVIOUR if the same code is valid, but produces different results (on some documentation pages, changes that are clearly behavioural are wrongly flagged as breaking, look at each change to classify it)
         - Ignore deprecations and additions of new APIs
-      - Create a Mitigation section. If the docs has precise mitigation instructions, copy it verbatim. If the instructions are long, replace them with a URL and indication of where in the page to find the content. This should be GENERIC mitigation advice DO NOT read the project source code to create specific mitigation steps, that is a job for a later agent.
+      - Create a Mitigation section. If the docs have precise mitigation instructions, copy them verbatim. If the instructions are long, replace them with a URL and indication of where in the page to find the content. This should be GENERIC mitigation advice DO NOT read the project source code to create specific mitigation steps, that is a job for a later agent.
+        - If the docs page mitigation mentions the official codemod, remove that mention
     - add the changes to the appropriate level-2 heading in the output file
 
 ## Special rules
@@ -68,7 +69,7 @@ After generating the structured list of changes, validate it against these rules
 
 ### Module registration
 
-If the list of upgrade versions includes v33, this is the version at which module registration becomes required. Application projects (those that create grids) must have a `ModuleRegistry.registerModules` call activating the modules they require does not already contain `ModuleRegistry.registerModules` is migrating to modules, ensure that the mitigation steps include both a requirement to register the correct modules, and a link to the migration guide `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/#migrating-from-packages`
+If the list of upgrade versions includes v33, this is the version at which module registration becomes required. Application projects (those that create grids) must have a `ModuleRegistry.registerModules` call activating the modules they require. When an application project that does not already contain `ModuleRegistry.registerModules` is migrating to v33+, ensure that the mitigation steps include both a requirement to register the correct modules, and a link to the migration guide `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/#migrating-from-packages`
 
 ### Theming
 
