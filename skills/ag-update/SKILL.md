@@ -5,12 +5,11 @@ description: Update AG Grid and/or AG Charts to a newer version
 
 ## Rules
 
-- Never use or mention the AG Grid codemod or MCP server. They are not relevant to the task you are now completing
+- Do not make use of the codemod or MCP server, or suggest their use or installation. They are not relevant to the task you are now completing
 - Follow the process documented below exactly
 - If you are instructed "Tell the user X" then show the message to the user and **continue**.
 - If you are instructed "Ask the user X" then show the question to the user and **stop**. Do not continue until you receive a response. If you have a tool available designed to ask the user a question you may use it.
 - This skill consists of a set of sequential steps, each of which writes a file with results. Ensure that the file is written before moving on to the next step. DO NOT combine steps, or refer to information in future steps while handling a previous step.
-- When this skill finishes executing, either because it reaches the end of the migration process or is stopped by an early termination condition,
 
 ## Explain process to user
 
@@ -20,8 +19,8 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
 
 - Read `VERSION.md` in this skill folder. Fetch the latest: `https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md`.
 - Compare as semver:
-  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting claude and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they type "continue" to do so.
-  - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit claude and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
+  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting the harness and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they type "continue" to do so.
+  - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit the harness and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
 
 ## Check for existing plan
 
