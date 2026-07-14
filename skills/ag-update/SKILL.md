@@ -19,11 +19,9 @@ TODO inline the two above instructions into the output of each invocation.
 
 Tell the user "Welcome to the AG Update skill. Let's start by gathering some context on your application"
 
-Run `node path/to/skills/ag-update/scripts/analyse-update.js` from within the repo to update.
+Run `node <ag-update-folder>/scripts/analyse-update.js` where <ag-update-folder> is the path to the folder containing this SKILL.md.
 
-// REVIEW: "path/to/skills" is a placeholder with no instruction telling the agent how to resolve the actual skill folder path (e.g. "the folder containing this SKILL.md file"). Spell it out — agents will otherwise guess.
-
-Invoke the command with no named arguments, unless you have already been told that the projects to update are all under a specific folder, in which case set --root to that folder.
+Invoke the command with no named arguments, unless you have already been told to update a single project in which case set --root to that folder.
 
 On success, the script's output summarises the projects found and the reports written, and instructs you how to proceed: confirm the target version and project set with the user, then use the reports to plan the update.
 
@@ -31,8 +29,6 @@ On success, the script's output summarises the projects found and the reports wr
 
 Invoking with no arguments is the normal case. If an error message tells you to add arguments, it will tell you which. For documentation, the supported arguments are:
 
-    --output-folder=path # folder for report output (optional; if provided, must be an empty directory)
-    // REVIEW: default when omitted is undocumented here and unspecified in the plan (proposal in plan: mkdtemp) — document once decided
     --root=path # folder to scan for projects (optional; default=root of the current Git repo)
-    --changes-url-prefix=url (optional; default "https://ag-grid.com/", file urls supported)
     --allow-old-version (skip the version check, allowing an old version of the skill to be used)
+    --changes-url-prefix=url (optional; default "https://ag-grid.com/", file urls supported; used for testing do not add this argument unless explicitly instructed to)

@@ -20,9 +20,14 @@ The script follows the following steps
 
 ### Version check
 
-The first operation of the script is to check the node version. To prevent static imports being imported above the version check, put it in its own file "version-check.ts" that is first in the import list with a comment explaining that it must be kept as the first import. If the node version is less than 20, we exit immediately with a process.stderr.write(`Minimum Node.js 20 version require (current version = ${version})\n`) message. DO NOT call any other files or use functions for outputting messages, since including files may fail due to unsupported node APIs.
+The first operation of the script is to check the node version. To prevent static imports being imported above the version check, put it in its own file "version-check.ts" that is first in the import list with a comment explaining that it must be kept as the first import. If the node version is less than 20, we exit immediately with a process.stderr.write(`ERROR: minimum Node.js 20 version required (current version = ${version})\n`) message. DO NOT call any other files or use functions for outputting messages, since including files may fail due to unsupported node APIs.
 
 Next we check the skill version
+
+```ts
+/** Resolves normally when OK to continue; throws ExitWithError when a newer skill version is available. */
+function checkSkillVersion(allowOldVersion: boolean): Promise<void>
+```
 
 Skip the skill version check if --allow-old-version is passed
 
@@ -55,6 +60,11 @@ This skill needs to be run in a Git repo, since it uses `git ls-files` and `git 
 
 Verify that we're in a Git repo.
 
+```ts
+/** Returns the absolute path of the Git repo root; throws ExitWithError when not in a repo / git missing. */
+function gitRepoRoot(cwd: string): string
+```
+
 Run `git rev-parse --show-toplevel` via `execFileSync` from cwd. A non-zero exit means we're not in a Git repo or git is not installed. On success, stdout is the absolute path of the repo root — keep it, it is the default root in "Determining the root folder" below, so no second git call is needed.
 
 test: script exits with the not-in-a-Git-repo error outside a repo
@@ -75,6 +85,11 @@ If not in a Git repo, exit with an error:
 
 ### Determining the root folder
 
+```ts
+/** Returns the absolute root folder to scan for projects. */
+function determineRoot(cwd: string, rootArg: string | undefined, gitRepoRoot: string): string
+```
+
 1. If --root specified, resolve it relative to cwd and use it
 2. Otherwise, use the root of the current Git repo
 
@@ -85,6 +100,11 @@ test: Git repo root is used if no root provided
 ### Locating projects
 
 A project is a folder containing a Git-tracked package.json file under the root.
+
+```ts
+/** Returns absolute paths of project folders; throws ExitWithError when none are found or ls-files fails. */
+function locateProjects(rootPath: string): string[]
+```
 
 Run (`execFileSync('git', ['-C', rootPath, 'ls-files', '**/package.json', 'package.json'])`)
 
@@ -110,31 +130,28 @@ If ls-files fails or finds no package.json files, exit with a message like:
 function discoverDependencies(projectPath: string): Dependencies {
   ...
 }
-DECISION: added Studio here, review for studio compatibility across project
 type Product = 'grid' | 'charts' | 'studio';
-type Framework = 'react' | 'angular' | 'vue' | 'javascript';
+
+/** Framework wrappers. There is no 'javascript' value: the framework-agnostic core API
+ *  applies to every project regardless of wrappers. */
+type WrapperFramework = 'react' | 'angular' | 'vue';
 
 interface Dependencies {
-  /** Products in use with their resolved current versions. Empty = project uses no AG products. */
+  /** Products in use. Empty = project uses no AG products. */
   products: ProductUsage[];
-  /** Every AG package found in dependencies + devDependencies, as written in package.json. */
-  agPackages: PackageUsage[];
-  /** Inferred from framework wrapper packages; 'javascript' if none. Used to build documentation URLs. */
-  framework: Framework;
-  /** Conditions from packages.md that make this project un-updatable by this skill (see below). */
+  /** Conditions that make this project un-updatable by this skill (see blocker rules below). */
   blockers: Blocker[];
-}
-
-interface PackageUsage {
-  name: string;
-  /** The version spec string as written, e.g. "^32.1.0" */
-  versionSpec: string;
 }
 
 interface ProductUsage {
   product: Product;
   /** Resolved current version, e.g. "32.1.0" */
   currentVersion: string;
+  /** Frameworks this product is used through, evidenced by the product's framework wrapper
+   *  packages (ag-grid-react -> 'react', @ag-grid-community/vue3 -> 'vue', ...). A product can
+   *  be used through several frameworks; empty = used via the vanilla javascript API only.
+   *  Per product, since e.g. studio might be used via React while grid is used vanilla. */
+  frameworks: WrapperFramework[];
 }
 
 interface Blocker {
@@ -144,44 +161,107 @@ interface Blocker {
 }
 ```
 
-Encode the rules in packages.md to determine dependencies used:
+The script recognises product use, framework use and versions from the AG packages in a project's package.json (dependencies + devDependencies). Package migrations (e.g. the v33 move from scoped module packages to top-level packages) are NOT the script's concern — they arrive as change records from the changes database. The full recognition table:
 
-- A project uses `grid` if it depends on any current or legacy grid package (`ag-grid-community`, `ag-grid-enterprise`, wrappers, `@ag-grid-community/*`, `@ag-grid-enterprise/*`, `ag-grid`, `ag-grid-vue`, `ag-grid-charts-enterprise`, ...)
-- A project uses `charts` if it depends on any charts package (`ag-charts-community`, `ag-charts-enterprise`, wrappers, `ag-charts-locale`, ...)
+#### Grid packages
+
+Depending on any of these means the project uses `grid`:
+
+| Package | Notes |
+|---|---|
+| `ag-grid-community`, `ag-grid-enterprise` | current |
+| `ag-grid-react` / `ag-grid-angular` / `ag-grid-vue3` | current framework wrappers -> react / angular / vue |
+| `@ag-grid-community/locale` | current (locale data) |
+| `@ag-grid-community/*`, `@ag-grid-enterprise/*` (all others) | legacy scoped module packages, published 22.0.0 -> 32.3.9. The scoped wrappers `@ag-grid-community/react` / `/angular` / `/vue3` (vue3 from 24.1.1) count as framework wrappers -> react / angular / vue |
+| `ag-grid-charts-enterprise` | legacy (existed until v32) |
+| `ag-grid` | legacy monolithic package, published 2.0.0 -> 18.1.2 — always a blocker, see below |
+| `ag-grid-vue`, `@ag-grid-community/vue` | legacy Vue 2 wrappers, last release 31.3.4 — always a blocker, see below |
+
+#### Charts packages
+
+Depending on any of these means the project uses `charts`:
+
+| Package | Notes |
+|---|---|
+| `ag-charts-community`, `ag-charts-enterprise` | current standalone charts |
+| `ag-charts-react` / `ag-charts-angular` / `ag-charts-vue3` | current framework wrappers -> react / angular / vue |
+| `ag-charts-locale` | current (locale data) |
+| `ag-charts-types` | transitive dependency, not normally installed directly; still counts as charts usage if present |
+| `ag-charts-server-side` | server-side rendering |
+
+// REVIEW: packages.md carried the caveat "ag-charts-server-side — confirm whether user-facing before acting on it". Treating it as plain charts-usage evidence here; confirm that is right.
+
+#### Studio packages
+
+Depending on any of these means the project uses `studio`:
+
+| Package | Notes |
+|---|---|
+| `ag-studio` | current core (bundles grid and charts enterprise as its own dependencies) |
+| `ag-studio-react` / `ag-studio-angular` / `ag-studio-vue3` | current framework wrappers -> react / angular / vue |
+| `ag-studio-locale` | current (locale data) |
+
+Studio's first release is v1; there are no legacy studio packages and no version floor concerns.
+
+#### Rules
+
 - Projects with no AG packages are dropped from the project list and get no report (list them in a NOTICE so the agent knows they were seen and skipped)
-- Current version is parsed from the version spec by stripping range operators (`^`, `~`, `>=` etc.)
-  // REVIEW: version specs that don't contain a concrete version (e.g. "*", "latest", workspace protocols) are not handled — the old flow said "use the package manager to determine what actual version is installed" (references/determine-scope.md) but that isn't specified for this script. Decide: bail with ERROR, or NOTICE and skip the project? DECISION: add to blockers
-- If the grid integrated charts feature is used (detected via enableCharts / integrated-charts module usage) and there is no explicit charts dependency, infer the charts version from the grid version using the constant major offset of 22 (same minor/patch)
-- Blockers (from packages.md): bare `ag-grid` dependency (pre-v18, below the supported floor of grid major >= 25); any grid version below major 25; `ag-grid-vue` or `@ag-grid-community/vue` (Vue 2 wrappers, cannot move past v31 — and this script always targets $mostRecentVersion)
+- Current version is parsed from the version spec by stripping range operators (`^`, `~`, `>=` etc.). A version spec that doesn't contain a concrete version (e.g. "*", "latest", workspace protocols) yields a blocker for that project.
+- If the grid integrated charts feature is used (detected via enableCharts / integrated-charts module usage) and there is no explicit charts dependency, infer the charts version from the grid version: AG Grid and AG Charts are released in lockstep with a constant major-version offset of 22 and the same minor and patch, so grid v34.2.1 implies charts v12.2.1.
 
-  // REVIEW: behaviour when a project has blockers is not specified elsewhere in this plan. Proposal: still write reports for the other projects; for a blocked project write no report, and include the blocker reason in the SUCCESS summary with an instruction to tell the user. Confirm. DECISION: confirm, add to appropriate section
+#### Blocker rules
+
+Each blocker's `reason` carries the explanation below, which is surfaced to the user via the SUCCESS message:
+
+- **Bare `ag-grid` dependency**: the project is pre-v18 (the package was renamed `ag-grid-community` at 18.1.2), far below the supported floor — reason: the project predates the supported upgrade path.
+- **Any grid version below major 25**: below the supported source floor (grid major >= 25) — reason: the current version is older than the oldest version this skill can update from.
+- **`ag-grid-vue` or `@ag-grid-community/vue`**: Vue 2 wrappers whose last release is v31, and this script always targets the latest version. Moving past v31 requires migrating the host application from Vue 2 to Vue 3 and switching to `ag-grid-vue3`, which is outside this skill's scope — reason: the user must first migrate their application to Vue 3 and switch to `ag-grid-vue3`, then re-run this skill.
+
+A project with blockers gets no report. The run still succeeds for the other projects; blocked projects are listed with their blocker reasons in the SUCCESS message with an instruction to tell the user (see "Successful report message").
 
 test: products and versions detected when standard packages used
 ^^^ tests the current packages like ag-grid-community
 test: charts version inferred when no charts dependency is specified
 ^^^ tests constant version offset and discovery of charts dependency via enableCharts (when using combined packages like @ag-grid-enterprise/all-modules charts is pulled in automatically so there will be no charts dependency)
-test: framework detected from wrapper package, javascript when none
+test: per-product frameworks detected from that product's wrapper packages
+test: product with wrappers for two frameworks lists both
+test: product with no wrapper has empty frameworks (vanilla javascript API)
 test: project with no AG dependencies is excluded and listed in a NOTICE
 test: legacy `ag-grid` package yields a blocker
 test: Vue 2 wrapper package yields a blocker
+test: non-concrete version spec (e.g. "latest") yields a blocker
+test: blocked project gets no report and is listed with its reason in the SUCCESS message
 test: version spec range operators are stripped when resolving current version
 
 Don't re-encode all the rules in the tests, test an example of each kind of thing.
 
 ### Downloading version change records
 
-// REVIEW: the compiled change record format, and the URL path(s) requested under --changes-url-prefix, are not defined anywhere in this repo (`CompiledChange` and `detectWords` are referenced below but external/ag-website-shared is an empty/uninitialised submodule). This section can't be completed until that format and its hosting paths are specified. DECISION: external/ag-website-shared is a symlink to a repo containing the types, file is compiled-change-types.ts
+```ts
+/** Downloads one changelog per product in use; throws ExitWithError on download/JSON-parse failure
+ *  or when a changelog's minimumSkillVersion exceeds the local skill version. */
+function downloadChangeRecords(prefix: string, products: Product[]): Promise<Map<Product, CompiledChangelog>>
+```
 
-// REVIEW: how $mostRecentVersion is determined is not specified anywhere in this plan, and it drives change detection, report content, and the SUCCESS message. Proposal: the change records include (or are accompanied by) an index file listing available versions, and $mostRecentVersion is the highest version present. Confirm or specify an alternative (e.g. npm registry query). DECISION: see the compiled type
+The change record format is `CompiledChangelog` defined in external/ag-website-shared/src/changes/compiled-change-types.ts (the authoring format it is compiled from is in change-types.ts alongside). One changelog JSON file is downloaded per product in use, from these paths under --changes-url-prefix:
+
+- grid: `{prefix}/version-change-records.json`
+- charts: `{prefix}/charts/version-change-records.json`
+- studio: `{prefix}/studio/version-change-records.json`
+
+Each changelog carries its own `mostRecentVersion` — so "the latest version" is per product (grid and charts latest differ by the constant major offset of 22).
+
+Each changelog also carries `minimumSkillVersion`: the minimum skill version able to read this compiled format. If the local skill version is below it, exit with the "newer skill version available" ERROR from the version check section (this floor cannot be bypassed with --allow-old-version — the script cannot read the data).
 
 Use `fetch()` to download the content of the relevant change files. Manually detect 'file://' prefix, strip it, and use fs.readFile assuming utf8.
 
-Assume that if the file downloads, it matches the interfaces
-// REVIEW: contradiction — the line above says to assume a downloaded file matches the interfaces, but the test below asserts bailing when files can't be "downloaded or parsed". Decide whether parse failures are handled (ERROR) or undefined behaviour. DECISION: by "parse" I mean "parse as JSON". If it parses, assume it matches the interfaces.
+If a file downloads but is not valid JSON, exit with the download-failure error below. If it parses as JSON, assume it matches the `CompiledChangelog` interface.
 
 test: file:// url supported
 test: http:// url supported
-test: bails with error if the files can't be downloaded or parsed
+test: grid records fetched from prefix root, charts/studio from product subpath
+test: bails with error if the files can't be downloaded or parsed as JSON
+test: bails with newer-skill-version error if local version is below minimumSkillVersion, even with --allow-old-version
 
 #### Exception: downloading version change record files fails
 
@@ -197,19 +277,36 @@ If the download fails, exit with a message like:
 
 ### Change detection
 
-Detection always targets the most recent available version ($mostRecentVersion): for each project, all changes between the project's current version and $mostRecentVersion are detected.
+Detection always targets each product's most recent available version (`CompiledChangelog.mostRecentVersion`): for each project, all changes between the project's current version and the latest version are detected.
 
-This stage is dumb: for each change record applicable to a project's version range, run `git grep` for its detectWords within the project's folder. Any match — even in a comment — means the change is included with its occurrences. No source analysis happens here; interpreting matches is the planning agent's job (mirrors the approach in references/determine-changes.md: "Do a dumb search... DO NOT read project source code"). DECISION: not once per change record, once per project. Search for the combined set of detectWords that potentially apply to that project based on the products it uses, since the version it depends on. When you find the matching files, you'll need to load them to find the actual matched words and line numbers.
-
-// REVIEW: output format below filled in per "Note to plan agent". It assumes a `CompiledChange` shape (id, product, version introduced, type, change/mitigation text, detectWords) that is not yet defined — see the REVIEW note in "Downloading version change records". Adjust once the real interface is available. 
+This stage is dumb: any detectWords match — even in a comment — means the change is included with its occurrences. No source analysis happens here; interpreting matches is the planning agent's job.
 
 ```ts
-/** One change from the compiled records that may affect a project. */
+/** Runs detection for one project against the downloaded changelogs. */
+function detectChanges(
+  projectPath: string,
+  dependencies: Dependencies,
+  changelogs: Map<Product, CompiledChangelog>,
+): ProjectDetectionResult
+```
+
+For each project:
+
+1. **Collect candidate changes**: for each product the project uses, take the changes from that product's changelog that fall in the version range (currentVersion, mostRecentVersion], filtered by framework: include changes whose `framework` is null ("potentially anything") or is in that product's `frameworks`. The version a change belongs to is `removedFrom` for transitions, `version` for simple and dependency changes.
+   // REVIEW: transitions that are only deprecated in the range but not removed by the target (`removedFrom` null or beyond it) are excluded, following the old skill's rule to ignore deprecations. Confirm.
+2. **Dependency changes** (`type: 'dependency'`) have no detectWords and there is no version check: include the change unconditionally when its `dependency` is `'typescript'` or is in that product's `frameworks` (dependency minimums are constraints of the framework wrappers, so a product used via the vanilla API is unaffected). Like detectWords-null changes, they carry empty occurrences and are verified during planning.
+3. **Changes with `detectWords: null`** cannot be ruled out by searching (per the interface contract): include them unconditionally, with empty occurrences. This also covers always-applicable changes such as "module registration required from v33".
+4. **Remaining changes**: run one `git grep -n --fixed-strings` per project (not per change record) over the combined set of detectWords from all the project's candidate changes, scoped to the project's folder. Post-process each matched `file:line:content` result to determine which detectWords actually match the line, applying the whole-word rule from the interface contract: a word matches only when not embedded in a larger identifier (`Bar` matches `Foo-Bar` but not `FooBar`), case-sensitively. Map words back to their changes: a change is included iff at least one of its detectWords has at least one occurrence.
+
+```ts
+/** One compiled change that may affect a project. */
 interface DetectedChange {
-  /** The compiled record verbatim (carries id, type BREAKING|BEHAVIOUR, change and
-   *  mitigation text, and the version that introduced it). */
+  product: Product;
+  /** The CompiledChange record verbatim (see compiled-change-types.ts: a transition,
+   *  simple (requirement | behaviour | style) or dependency change). */
   change: CompiledChange;
-  /** Where the change's detectWords matched in this project, from git grep. */
+  /** Where the change's detectWords matched, from git grep. Empty for dependency changes
+   *  and for changes with detectWords: null, which are included without occurrences. */
   occurrences: Occurrence[];
 }
 
@@ -226,45 +323,61 @@ interface Occurrence {
 interface ProjectDetectionResult {
   projectPath: string;
   dependencies: Dependencies;
-  /** Changes with at least one occurrence. Changes whose detectWords matched nothing are omitted. */
   changes: DetectedChange[];
 }
 ```
 
-// REVIEW: changes that apply unconditionally (e.g. "module registration required from v33", package renames from packages.md) have no detectWords to grep for — the detection model above only includes changes with occurrences. Decide how always-applicable changes are represented (e.g. a `alwaysApplies: true` flag on CompiledChange that includes the change with zero occurrences). DECISION: tell me if this is still relevant once you've seen the data model you're flying blind at the moment.
-
-DECISION: it sounds like you haven't seen the compiled data model, the idea of this exercise was to base the results on it so I'm going to take everything below here as invalid. Look up the compiled format and rework this as required. You may also look at the authoring format in change-types.ts next to compiled-change-types.ts.
-
 test: change with matching detectWords is included with file/line occurrences
 test: change whose detectWords match nothing is omitted
-test: changes outside the project's version range are not scanned for
+test: change with detectWords null is included with empty occurrences
+test: whole-word matching — word embedded in a larger identifier does not match
+test: dependency change included when its dependency is typescript or in the product's frameworks, excluded otherwise
+test: changes outside the project's version range are not included
+test: framework-scoped change excluded when the framework is not in the product's frameworks
+test: framework-scoped change included when the product is used through multiple frameworks including it
+test: transition deprecated but not removed by the target version is excluded
 test: matches outside a project's folder do not count toward that project
 
 ### Report generation
+
+```ts
+/** Renders one project's report as markdown; the caller writes it to the output folder. */
+function renderReport(result: ProjectDetectionResult, changelogs: Map<Product, CompiledChangelog>): string
+```
 
 One report file is written per project to the output folder.
 
 Requirements known so far:
 
-- Each change must be attributed to the version that introduced it, so that if the user chooses to update to an earlier version than $mostRecentVersion, the agent can disregard the items introduced after the chosen version.
-- Optional changes must be presented as decision items (id, summary, recommendation, detected occurrences) so the agent can resolve them with the user while planning the update.
+- Each change must be attributed to the version that introduced it, so that if the user chooses to update to an earlier version than the latest, the agent can disregard the items introduced after the chosen version.
+- Optional changes must be presented as decision items (summary, mitigation, detected occurrences) so the agent can resolve them with the user while planning the update.
 
-// REVIEW: format below filled in per "Note to plan agent". It is based on the existing AG_UPDATE_CHANGES.md format in references/determine-changes.md (product -> major version transition -> change), extended with occurrences and decision items.
-
-// REVIEW: "optional changes" are assumed to be exactly the BEHAVIOUR-type changes (the user decides whether to accept the new behaviour or restore the old), with BREAKING changes always required. Confirm this mapping — if "optional" is a separate concept in the compiled records, the format needs a third grouping.
+// REVIEW: format below reworked against the real CompiledChange types. The required/optional mapping is now: required = `requirement` changes, transitions removed by the target version, and `dependency` minimum bumps; decision items = `behaviour` and `style` changes (old code runs but looks/behaves differently — accept or mitigate). Confirm. Note `behaviour`/`style` changes have no stable id (SimpleChange has only a title), so decision items are identified by title.
 
 The report is markdown, named `{projectFolderName}-report.md`. Structure:
 
-- Preamble: the content of references/changes-file-preamble.md verbatim
-  // REVIEW: changes-file-preamble.md references [./AG_UPDATE_SCOPE.md], which no longer exists in the single-report design — the preamble needs updating or replacing with report-specific text.
-- `# Scope` — project path, framework, products with current versions (flagging inferred ones), target version $mostRecentVersion, and the AG packages found in package.json
-- `# Required changes` — the BREAKING changes, grouped by product (`## Grid` / `## Charts`) then by major version transition (`### Grid v{FROM}.x -> v{TO}.x`), so items after a user-chosen earlier version can be disregarded wholesale by skipping later transition sections
-  - each change: `#### BREAKING: {description}` followed by a "Change: " paragraph, a "Mitigation: " paragraph (both from the compiled record), and a "Detected in: " list of `{file}:{line} ({word})` occurrences
-- `# Optional changes` — the BEHAVIOUR changes, grouped and formatted identically, each with heading `#### DECISION {id}: {description}` and an additional "Recommendation: " line from the compiled record. The section starts with a fixed sentence instructing the agent to resolve each decision with the user during planning.
+- Preamble: this fixed text (adapted from the old skill's changes-file preamble, which is now deleted):
+
+      # AG dependency update report
+
+      This file contains a list of changes to apply to the project described in the Scope section
+      below. Combine it with your knowledge of the coding conventions and verification tools
+      available for this project to plan and execute an update. After applying these changes use
+      the appropriate tools at your disposal to validate that the changes were successful, such as
+      running the build, typechecking, tests, and starting the dev server and accessing it with a
+      browser.
+- `# Scope` — project path, and per product: current version, target (most recent) version, and the frameworks it is used through
+- `# Required changes` — grouped by product (`## Grid` / `## Charts` / `## Studio`) then by major version transition (`### Grid v{FROM}.x -> v{TO}.x`), so items after a user-chosen earlier version can be disregarded wholesale by skipping later transition sections. Contains, rendered per type:
+  - transitions removed by the target version: `#### REMOVED: {oldApi}` — a paragraph generated from the record ("As of v{removedFrom}, {oldApi} has been removed." plus oldDescription; "Use {newApi} instead." plus newDescription, or "It has no replacement." when newApi is null)
+  - `requirement` changes: `#### REQUIRED: {title}` with the description paragraph
+  - `dependency` changes: `#### DEPENDENCY: {dependency} >= {minVersion}` with the reason
+  - each followed by "Mitigation: " (the record's mitigation entries whose frameworks intersect the product's frameworks plus 'javascript'; omit the line if none apply) and "Detected in: " — a list of `{file}:{line} ({word})` occurrences, or a fixed sentence stating the change cannot be ruled out by search and must be checked during planning (detectWords null / dependency changes)
+- `# Optional changes` — the `behaviour` and `style` changes, grouped and formatted the same way with heading `#### DECISION: {title}`. Mitigation here is the way to restore the old behaviour; no mitigation entries = accept-only (the report says so). The section starts with a fixed sentence instructing the agent to resolve each decision with the user during planning.
 
 test: report groups changes by product and version transition
-test: BREAKING changes appear under Required changes, BEHAVIOUR under Optional changes
-test: occurrences are listed with file and line
+test: requirement/removal/dependency changes appear under Required changes; behaviour/style under Optional changes
+test: mitigation entries are filtered to the product's frameworks plus javascript
+test: occurrences are listed with file and line; detectWords-null changes get the cannot-rule-out sentence
 test: report written per project with expected filename
 
 ### Successful report message
@@ -277,14 +390,20 @@ Exit 0 with a message like:
 
   SUCCESS: report files produced
 
-  The latest version is $mostRecentVersion.
+  The latest versions are: Grid v$gridMostRecentVersion, Charts v$chartsMostRecentVersion (only listing products in use across the projects).
 
   Discovered the following projects and created update reports:
 
   - /path/to/project1: using Grid v$currentVersionProject1 -> /path/to/output/folder/project1-report.md
   - /path/to/project2: using Grid v$currentVersionProject2 -> /path/to/output/folder/project2-report.md
 
-  Confirm with the user that they want to update to v$mostRecentVersion. If they choose an earlier version, disregard the report items introduced after the chosen version.
+  The following projects cannot be updated by this skill and have no report. Tell the user about them and continue:
+
+  - /path/to/project3: $blockerReason
+
+  (omit this section when no projects are blocked)
+
+  Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.
 
   Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.
 
@@ -348,7 +467,7 @@ Source in `skills/ag-update/scripts/src/`, compiled output committed at `skills/
       args.ts            # argument parsing and validation -> Args type
       git.ts             # execFile wrappers: repoRoot(), lsFiles(), grep()
       projects.ts        # locate projects from git ls-files output
-      dependencies.ts    # discoverDependencies() and packages.md rules
+      dependencies.ts    # discoverDependencies() and the package recognition table
       records.ts         # fetch change records (http/https/file), parse, mostRecentVersion
       detect.ts          # run git grep for detectWords -> ProjectDetectionResult[]
       report.ts          # render report markdown from ProjectDetectionResult
