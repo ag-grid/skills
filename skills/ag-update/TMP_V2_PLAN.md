@@ -1,7 +1,6 @@
-
-
-
 # Script specification
+
+The script runs once. It scans the repo widely, finds all projects, writes one update report per project, prints a summary for the agent, and exits. There is no back-and-forth refinement, no state carried between invocations, and no caching of results.
 
 ## Arguments
 
@@ -16,9 +15,8 @@ The script follows the following steps
 - Determines project dependencies
 - Downloads version change records for projects in use
 - Scans source for detectWords markers
-- Surfaces decisions to user
 - Produces one report per project
-- Exits with message describing how to use report
+- Exits with a summary message describing how to use the reports
 
 ### Version check
 
@@ -29,8 +27,6 @@ Next we check the skill version
 Skip the skill version check if --allow-old-version is passed
 
 Use `fetch()` to load the current skill version from "https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md".
-
-Cache the file locally (in output-folder/cache) for better performance on the next invocation. Create a function to do a cached GET caching for 10 minutes that can be shared between this and the loading of change records.
 
 Also load local version from VERSION.md in skill folder
 
@@ -48,7 +44,7 @@ Exit with error:
 
       Tell the user that they are recommended to update the skill by running `npx skills update ag-grid/skills`, but alternatively may choose to continue running this outdated version.
 
-      Stop and wait for the user to respond. If they ask to continue using this version, invoke the script again adding the --allow-old-version argument
+      Stop and wait for the user to respond. If they ask to continue using this version, invoke the script again adding the --allow-old-version argument.
 
 test: command exits early if newer skill available
 test: --allow-old-version skips version check
@@ -71,7 +67,7 @@ If not in a Git repo, exit with an error:
 
     Ensure that the cwd is inside the source code Git repo.
 
-    To run the script on files not tracked by Git, create a temporary Git repo in an appropriate parent directory and commit the project source files to it. Use .gitignore files to declare which files are not source code files, including node_modules files and build output folders.
+    To run the script on files not tracked by Git, create a temporary Git repo in an appropriate parent directory and commit the project source files to it. Use .gitignore files to declare which files are not source code files, including node_modules files and build output folders. If there is an alternative VCS in use, use its ignore files or other relavent project configuration to determine the apporpriate files to ignore.
 
     IMPORTANT: creating this temporary Git repo will affect the user's workspace, ask them for permission before going ahead and creating a temporary Git repo.
 
@@ -85,30 +81,24 @@ test: absolute root path is supported
 
 ### Locating projects
 
-If projects are provided with --project, use them
+Projects are located with Git only. A project is a folder containing a Git-tracked package.json file under the root.
 
 Run (`execFileSync('git', ['-C', rootPath, 'ls-files', '**/package.json', 'package.json'])`)
 
 test: tracked package.json files are located with Git
 ^^^ includes writing an ignored package.json and asserting that it doesn't show up
 
-test: projects provided are converted to absolute paths
-test: projects provided as paths relative to cwd resolve correctly
-test: projects provided as absolute paths resolve correctly
-test: if the project path is to a package.json file, it resolves to the containing directory
-test: bail with message if any project path does not point to a folder containing a package.json
+test: --root limits located projects to those under the root folder
 
 #### Exception: could not locate projects
 
-If ls-files fails, exit with a message like:
+If ls-files fails or finds no package.json files, exit with a message like:
 
-    ERROR: could not find projects using `git ls-files` ({e.message from thrown error})
+    ERROR: could not find projects using `git ls-files` ({e.message from thrown error, or "no package.json files found under $rootPath"})
 
-    Invoke the command again specifying project and source paths.
-   
-    A project is a folder containing a package.json file. Pass one of more --project="path" arguments
+    A project is a folder containing a package.json file tracked by Git. Check that the root folder is inside the source code Git repo and that the projects' package.json files are committed (or at least staged).
 
-    A source path is a file or folder containing application source code to scan for usage of grid APIs. For folders, _all_ files under that folder recursively will be considered, so avoid specifying folders that contain non-source files e.g. build output or node_modules. Pass at least one --source="path" argument per project to identify the project's source files.
+    To scan a different folder, invoke the command again passing --root="path".
 
 ### Determining dependencies
 
@@ -134,16 +124,13 @@ Note to plan agent: look at packages.md and propose full set of rules, plus test
 
 ### Downloading version change records
 
-Use `fetch()` to download the content of the relevant change files, and cache up t 10 minutes. Manually detect 'file://' prefix, strip it, and use fs.readFile assuming utf8.
+Use `fetch()` to download the content of the relevant change files. Manually detect 'file://' prefix, strip it, and use fs.readFile assuming utf8.
 
 Assume that if the file downloads, it matches the interfaces
 
 test: file:// url supported
 test: http:// url supported
 test: bails with error if the files can't be downloaded or parsed
-test: cache used if not stale
-test: cache not used if stale
-^^^ to guard against agents always passing the same work folder, if cached files are more than 10m old, we'll download new ones
 
 #### Exception: downloading version change record files fails
 
@@ -159,31 +146,20 @@ If the download fails, exit with a message like:
 
 Note to plan agent: the compiled data format is designed to support detection. Comments on the interfaces should make clear how it is anticipated that records are used. The general idea is that you use git grep
 
+Detection always targets the most recent available version ($mostRecentVersion): for each project, all changes between the project's current version and $mostRecentVersion are detected.
+
 Propose a sample output format. The idea is that this stage is dumb, we're just scanning for changes that affect any project.
 
 The format can be based on `CompiledChange`, but a this point we have file and line metadata for where we found the detectWords so should include that.
 
-If changes are detected successfully, exit with message in this format:
+### Report generation
 
-  NEXT: Refine the projects and versions
+One report file is written per project to the output folder.
 
-  The following projects were discovered:
+Note to plan agent: propose the report format here. Requirements known so far:
 
-  - /path/to/project1: using Grid v$currentVersionProject1
-  - /path/to/project2: using Grid v$currentVersionProject2
-
-  The latest version available to update to is Grid v$mostRecentVersion
-
-  Ask the user if the set of projects is correct and they want to update to $mostRecentVersion
-
-  Invoke the command again passing
-
-### Version and project refinement
-
-1. Reviews most recent version (initially mostRecentVersion) and determines whether they want to update to that version or an earlier
-2. Reviews the projects we found and determines that they are the correct set of projects to update
-3. Reviews optional changes and decides which to apply 
-
+- Each change must be attributed to the version that introduced it, so that if the user chooses to update to an earlier version than $mostRecentVersion, the agent can disregard the items introduced after the chosen version.
+- Optional changes must be presented as decision items (id, summary, recommendation, detected occurrences) so the agent can resolve them with the user while planning the update.
 
 ### Successful report message
 
@@ -195,9 +171,13 @@ Exit 0 with a message like:
 
   Discovered the following projects and created update reports:
 
-  - /path/to/project1 -> /path/to/output/folder/project1-report.md
-  - /path/to/project2 -> /path/to/output/folder/project2-report.md
-  
+  - /path/to/project1: using Grid v$currentVersionProject1 -> /path/to/output/folder/project1-report.md
+  - /path/to/project2: using Grid v$currentVersionProject2 -> /path/to/output/folder/project2-report.md
+
+  Confirm with the user that they want to update to v$mostRecentVersion. If they choose an earlier version, disregard the report items introduced after the chosen version.
+
+  Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.
+
   Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan.
 
 ## General exception handling
@@ -262,9 +242,9 @@ With the right architecture, testing should be easy
 
 There is a standard output format
 
-- Each output starts NEXT:, ERROR: or SUCCESS: followed by a status line
+- Each output starts ERROR: or SUCCESS: followed by a status line
 - There's a body message
-- NEXT and ERROR messages have an instruction on how to re-invoke the command with appropriate arguments, including the workspace dir in order to resume
+- ERROR messages have an instruction on how to resolve the issue and, where relevant, re-invoke the command with appropriate arguments
 - Code can add NOTICE: messages to the current output that appears at the bottom of the response
 
 Note to agent: define interfaces / API mechanism for achieving this. I want to see something structured, not just a command returning a response string and assembling this manually with concatenation.
