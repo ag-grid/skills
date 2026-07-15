@@ -26,7 +26,7 @@ Next we check the skill version
 
 ```ts
 /** Resolves normally when OK to continue; throws ExitWithError when a newer skill version is available. */
-function checkSkillVersion(allowOldVersion: boolean): Promise<void>
+function checkSkillVersion(allowOldVersion: boolean): Promise<void>;
 ```
 
 Skip the skill version check if --allow-old-version is passed
@@ -65,7 +65,7 @@ Verify that we're in a Git repo.
 
 ```ts
 /** Returns the absolute path of the Git repo root; throws ExitWithError when not in a repo / git missing. */
-function gitRepoRoot(cwd: string): string
+function gitRepoRoot(cwd: string): string;
 ```
 
 Run `git rev-parse --show-toplevel` via `execFileSync` from cwd. A non-zero exit means we're not in a Git repo or git is not installed. On success, stdout is the absolute path of the repo root — keep it, it is the default root in "Determining the root folder" below, so no second git call is needed.
@@ -90,7 +90,7 @@ If not in a Git repo, exit with an error:
 
 ```ts
 /** Returns the absolute root folder to scan for projects. */
-function determineRoot(cwd: string, rootArg: string | undefined, gitRepoRoot: string): string
+function determineRoot(cwd: string, rootArg: string | undefined, gitRepoRoot: string): string;
 ```
 
 1. If --root specified, resolve it relative to cwd and use it
@@ -106,7 +106,7 @@ A project is a folder containing a Git-tracked package.json file under the root.
 
 ```ts
 /** Returns absolute paths of project folders; throws ExitWithError when none are found or ls-files fails. */
-function locateProjects(rootPath: string): string[]
+function locateProjects(rootPath: string): string[];
 ```
 
 Run (`execFileSync('git', ['-C', rootPath, 'ls-files', '**/package.json', 'package.json'])`)
@@ -174,37 +174,37 @@ The script recognises product use, framework use and versions from the AG packag
 
 Depending on any of these means the project uses `grid`:
 
-| Package | Notes |
-|---|---|
-| `ag-grid-community`, `ag-grid-enterprise` | current |
-| `ag-grid-react` / `ag-grid-angular` / `ag-grid-vue3` | current framework wrappers -> react / angular / vue |
-| `@ag-grid-community/locale` | current (locale data) |
+| Package                                                      | Notes                                                                                                                                                                                                    |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ag-grid-community`, `ag-grid-enterprise`                    | current                                                                                                                                                                                                  |
+| `ag-grid-react` / `ag-grid-angular` / `ag-grid-vue3`         | current framework wrappers -> react / angular / vue                                                                                                                                                      |
+| `@ag-grid-community/locale`                                  | current (locale data)                                                                                                                                                                                    |
 | `@ag-grid-community/*`, `@ag-grid-enterprise/*` (all others) | legacy scoped module packages, published 22.0.0 -> 32.3.9. The scoped wrappers `@ag-grid-community/react` / `/angular` / `/vue3` (vue3 from 24.1.1) count as framework wrappers -> react / angular / vue |
-| `ag-grid-charts-enterprise` | legacy (existed until v32) |
-| `ag-grid` | legacy monolithic package, published 2.0.0 -> 18.1.2 — always a blocker, see below |
-| `ag-grid-vue`, `@ag-grid-community/vue` | legacy Vue 2 wrappers, last release 31.3.4 — always a blocker, see below |
+| `ag-grid-charts-enterprise`                                  | legacy (existed until v32)                                                                                                                                                                               |
+| `ag-grid`                                                    | legacy monolithic package, published 2.0.0 -> 18.1.2 — always a blocker, see below                                                                                                                       |
+| `ag-grid-vue`, `@ag-grid-community/vue`                      | legacy Vue 2 wrappers, last release 31.3.4 — always a blocker, see below                                                                                                                                 |
 
 #### Charts packages
 
 Depending on any of these means the project uses `charts`:
 
-| Package | Notes |
-|---|---|
-| `ag-charts-community`, `ag-charts-enterprise` | current standalone charts |
-| `ag-charts-react` / `ag-charts-angular` / `ag-charts-vue3` | current framework wrappers -> react / angular / vue |
-| `ag-charts-locale` | current (locale data) |
-| `ag-charts-types` | transitive dependency, not normally installed directly; still counts as charts usage if present |
-| `ag-charts-server-side` | server-side rendering |
+| Package                                                    | Notes                                                                                           |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `ag-charts-community`, `ag-charts-enterprise`              | current standalone charts                                                                       |
+| `ag-charts-react` / `ag-charts-angular` / `ag-charts-vue3` | current framework wrappers -> react / angular / vue                                             |
+| `ag-charts-locale`                                         | current (locale data)                                                                           |
+| `ag-charts-types`                                          | transitive dependency, not normally installed directly; still counts as charts usage if present |
+| `ag-charts-server-side`                                    | server-side rendering                                                                           |
 
 #### Studio packages
 
 Depending on any of these means the project uses `studio`:
 
-| Package | Notes |
-|---|---|
-| `ag-studio` | current core (bundles grid and charts enterprise as its own dependencies) |
-| `ag-studio-react` / `ag-studio-angular` / `ag-studio-vue3` | current framework wrappers -> react / angular / vue |
-| `ag-studio-locale` | current (locale data) |
+| Package                                                    | Notes                                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `ag-studio`                                                | current core (bundles grid and charts enterprise as its own dependencies) |
+| `ag-studio-react` / `ag-studio-angular` / `ag-studio-vue3` | current framework wrappers -> react / angular / vue                       |
+| `ag-studio-locale`                                         | current (locale data)                                                     |
 
 Studio's first release is v1; there are no legacy studio packages and no version floor concerns.
 
@@ -245,7 +245,7 @@ Don't re-encode all the rules in the tests, test an example of each kind of thin
 ```ts
 /** Downloads one changelog per product in use; throws ExitWithError on download/JSON-parse failure
  *  or when a changelog's minimumSkillVersion exceeds the local skill version. */
-function downloadChangeRecords(prefix: string, products: Product[]): Promise<Map<Product, CompiledChangelog>>
+function downloadChangeRecords(prefix: string, products: Product[]): Promise<Map<Product, CompiledChangelog>>;
 ```
 
 The change record format is `CompiledChangelog` defined in external/ag-website-shared/src/changes/compiled-change-types.ts (the authoring format it is compiled from is in change-types.ts alongside). One changelog JSON file is downloaded per product in use, from these paths under --changes-url-prefix:
@@ -293,10 +293,7 @@ This stage is dumb: any detectWords match — even in a comment — means the ch
 
 ```ts
 /** Runs detection for one project against the downloaded changelogs. */
-function detectChanges(
-  project: ProjectInfo,
-  changelogs: Map<Product, CompiledChangelog>,
-): ProjectDetectionResult
+function detectChanges(project: ProjectInfo, changelogs: Map<Product, CompiledChangelog>): ProjectDetectionResult;
 ```
 
 For each project:
@@ -349,10 +346,10 @@ unit-test: detectWords containing special characters are matched literally
 
 ```ts
 /** Renders one project's report as markdown; the caller writes it to the output folder. */
-function renderReport(result: ProjectDetectionResult, changelogs: Map<Product, CompiledChangelog>): string
+function renderReport(result: ProjectDetectionResult, changelogs: Map<Product, CompiledChangelog>): string;
 ```
 
-One report file is written per project to the output folder. Like the stderr message, files are not written by the stages: `runCli` returns them in `ScriptOutput.reportFiles` (see Output format), a map of file *name* -> content, and the outer bin wrapper joins each name to `ScriptOutput.outputFolder` and writes — so integration tests assert file names and content on the return value, never the filesystem.
+One report file is written per project to the output folder. Like the stderr message, files are not written by the stages: `runCli` returns them in `ScriptOutput.reportFiles` (see Output format), a map of file _name_ -> content, and the outer bin wrapper joins each name to `ScriptOutput.outputFolder` and writes — so integration tests assert file names and content on the return value, never the filesystem.
 
 On SUCCESS the output folder also gets a `summary.md` containing the verbatim rendered LLM output (starting "SUCCESS:"), saved for inspection. It is included in `reportFiles` like any other file, and never written on ERROR.
 
@@ -373,6 +370,7 @@ The report is markdown, named `{projectFolderName}-report.md`. Structure:
       the appropriate tools at your disposal to validate that the changes were successful, such as
       running the build, typechecking, tests, and starting the dev server and accessing it with a
       browser.
+
 - `# Scope` — project path, and per product: current version, target (most recent) version, and the frameworks it is used through
 - Paths in report files are never absolute: the Scope project path is relative to the repo root, occurrence paths are relative to the project folder. Better DX, and report content is machine-independent (snapshot-friendly).
 - `# Required changes` — grouped by product (`## Grid` / `## Charts` / `## Studio`) then by major version transition (`### Grid v{FROM}.x -> v{TO}.x`), so items after a user-chosen earlier version can be disregarded wholesale by skipping later transition sections. Contains, rendered per type:
@@ -398,32 +396,32 @@ Reports are written to the output folder: the --output-folder argument if passed
 
 Exit 0 with a message like:
 
-  SUCCESS: report files produced
+SUCCESS: report files produced
 
-  The latest versions are: Grid v$gridMostRecentVersion, Charts v$chartsMostRecentVersion (only listing products in use across the projects).
+The latest versions are: Grid v$gridMostRecentVersion, Charts v$chartsMostRecentVersion (only listing products in use across the projects).
 
-  Discovered the following projects and created update reports:
+Discovered the following projects and created update reports:
 
-  - /path/to/project1: using Grid v$currentVersionProject1 -> /path/to/output/folder/project1-report.md
-  - /path/to/project2: using Grid v$currentVersionProject2 -> /path/to/output/folder/project2-report.md
+- /path/to/project1: using Grid v$currentVersionProject1 -> /path/to/output/folder/project1-report.md
+- /path/to/project2: using Grid v$currentVersionProject2 -> /path/to/output/folder/project2-report.md
 
-  The following projects cannot be updated by this skill and have no report. Tell the user about them and continue:
+The following projects cannot be updated by this skill and have no report. Tell the user about them and continue:
 
-  - /path/to/project3: $blockerReason
+- /path/to/project3: $blockerReason
 
-  (omit this section when no projects are blocked)
+(omit this section when no projects are blocked)
 
-  The following projects contain no AG dependencies and were not analysed:
+The following projects contain no AG dependencies and were not analysed:
 
-  - /path/to/project4
+- /path/to/project4
 
-  (omit this section when every project has AG dependencies)
+(omit this section when every project has AG dependencies)
 
-  Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.
+Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.
 
-  Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.
+Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.
 
-  Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan.
+Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan.
 
 ## General exception handling
 
@@ -453,7 +451,6 @@ process-test: unhandled promise rejection yields crash report (via MOCK_UNHANDLE
 process-test: unhandled exception yields crash report (via MOCK_EXCEPTION)
 ^^^ the process-level handlers (process.on('uncaughtException'/'unhandledRejection')) only exist in the real process; the integration-test covers the crash formatting for errors thrown through run()
 
-
 ## Build
 
 We need to ship JS in the skill. We need a build process that converts TS to JS so we can commit the generated
@@ -469,16 +466,16 @@ process-test: happy path — fixture repo in, reports out, SUCCESS on stderr, ex
 
 We need a matrix of supported versions and invoke them via npx e.g.
 
- import { spawnSync } from 'node:child_process';
-  const r = spawnSync('npx', ['-y', 'node@20', 'skills/ag-update/scripts/analyse-update.js', '.'],
-                      { stdio: 'inherit' });
-  process.exit(r.status ?? 1);   // non-zero = it broke on Node 20
+import { spawnSync } from 'node:child_process';
+const r = spawnSync('npx', ['-y', 'node@20', 'skills/ag-update/scripts/analyse-update.js', '.'],
+{ stdio: 'inherit' });
+process.exit(r.status ?? 1); // non-zero = it broke on Node 20
 
 # Code layout and test strategy
 
 ## Layout
 
-Source in `skills/ag-update/scripts/src/`, compiled output committed at `skills/ag-update/scripts/analyse-update.js`:
+Source in `skills/ag-update/scripts/dev/src/`, compiled output committed at `skills/ag-update/scripts/analyse-update.js`. All development tooling (source, tests, fixtures, package.json, configs) lives under `skills/ag-update/scripts/dev/`, so the shipped `scripts/` folder contains only the compiled script:
 
     src/
       version-check.ts   # node version guard; MUST stay the first import of main.ts
@@ -510,17 +507,18 @@ Each test in this plan is tagged with one of three tiers:
       await expect(runCli('--root', fixtureRepo)).rejects.toThrow(ExitWithError)
 
   `fetch` is mocked as a whole (the harness intercepts by URL), so even the hardcoded VERSION.md URL is controllable without any test-only argument. Git and the filesystem are NOT mocked — integration tests run against committed fixture folders.
+
 - **process-test** (few, slow): spawns the compiled `analyse-update.js` as a separate process and asserts on exit code and stderr text. Only for behaviour that doesn't exist in-process: exit codes, the `process.on('uncaughtException'/'unhandledRejection')` handlers, the node-version floor (via `npx node@18`/`node@20`), real http fetching, and one end-to-end happy path. The stderr-writing/exit glue in main.ts is deliberately thin because it is only covered here.
 - **Filesystem fixtures**: real filesystem, no fs mocking — the script's core operations are `git ls-files`/`git grep`, which can't be meaningfully mocked. Fixtures are committed to this repo, and this repo itself is the Git repo the script sees when tests run with `--root={fixture path}`. This means fixtures can be edited and run like real projects. There are no temp repos and no `git init` in tests. Consequences:
   - Fixture files must be committed (or at least staged) or `git ls-files`/`git grep` won't see them — an uncommitted new fixture silently fails its test.
   - The test suite only works in a real Git checkout of this repo, not in an exported copy without `.git`.
   - Tests treat fixtures as read-only: never modify tracked fixture files, and write report output to temp folders, never into the fixture.
-  - The few tests needing filesystem state that can't be committed use small setup helpers with cleanup: a plain temp *directory* (no repo) for the not-in-a-Git-repo test; a runtime-written ignored file (its `.gitignore` is committed in the fixture) for ignore-behaviour tests; a permissions-restricted temp dir for unwritable-output tests. A fixture folder with no package.json needs a committed dummy file, since Git cannot track an empty folder.
+  - The few tests needing filesystem state that can't be committed use small setup helpers with cleanup: a plain temp _directory_ (no repo) for the not-in-a-Git-repo test; a runtime-written ignored file (its `.gitignore` is committed in the fixture) for ignore-behaviour tests; a permissions-restricted temp dir for unwritable-output tests. A fixture folder with no package.json needs a committed dummy file, since Git cannot track an empty folder.
 - **Network**: integration tests mock `fetch` by URL as above; change-record fixtures can also be served via `file://` URLs. Real http is exercised once at each of the unit tier (`downloadChangeRecords` against a local `http.createServer`) and the process tier.
 - **Test runner**: vitest.
 - **Snapshots**: use inline snapshot testing (`toMatchInlineSnapshot`) wherever a test asserts on message output. Structure these tests so there is one good snapshot test for each key message variation; other tests of the same message assert on the specific detail they cover rather than re-snapshotting the whole message. Report files contain no machine-varying content by design (paths are repo-root- or project-relative — see Report generation). Console output (and summary.md, its verbatim copy) does, so a shared helper patches snapshotted text to make it portable — the end result must contain no paths only valid on one machine:
   - common Mac/Linux temp folder path prefixes -> a `$TMPDIR$` token via regex replacement, preserving the rest of the path so the important part (e.g. report file names) stays asserted
-  - the known absolute root path -> `$ABSOLUTE_ROOT_PATH$`, verifying it appears where expected
+  - the known absolute root path -> `$REPO_ROOT$`, verifying it appears where expected
   - the local skill version from VERSION.md and the node version in the minimum-Node message -> tokens, same deal
   - (crash stack traces are handled in production code — see the Crash section)
 - **Test state resets**: shared mutable state (the fetch mock, the module-level notice collector in output.ts, ...) is reset by a single `globalTestStateReset()` helper, called from an `afterEach` in every test file.
@@ -531,7 +529,6 @@ Each test in this plan is tagged with one of three tiers:
       ... content ...
       stdout:
       ... content ...
-
 
 With this architecture every ERROR path is a value-returning branch (or a typed throw), so most testing is a function call plus an object assertion.
 
@@ -553,9 +550,8 @@ There is a standard output format
 - ERROR messages have an instruction on how to resolve the issue and, where relevant, re-invoke the command with appropriate arguments
 - Code can add NOTICE: messages to the current output that appears at the bottom of the response
 
-
 ```ts
-type Status = 'SUCCESS' | 'ERROR';
+type Status = "SUCCESS" | "ERROR";
 
 interface ScriptOutput {
   status: Status;
@@ -576,7 +572,12 @@ interface ScriptOutput {
 }
 
 /** Construct the single success outcome. */
-function succeed(statusLine: string, body: string[], outputFolder: string, reportFiles: Record<string, string>): ScriptOutput;
+function succeed(
+  statusLine: string,
+  body: string[],
+  outputFolder: string,
+  reportFiles: Record<string, string>,
+): ScriptOutput;
 
 /** Thrown from any stage to terminate with an ERROR output; caught once in main.ts. */
 class ExitWithError extends Error {
@@ -606,14 +607,13 @@ Build with esbuild, use --format=cjs to use require() over import;
 
 Create a file version-check.ts for checking the node version and import it first in the entry point before any other imports. --format=cjs ensures that this runs before any require() calls and checks the version before potentially failing on importing undefined modules.
 
-
 # Development process
 
 Once this plan is complete and I have agreed it, we will operate a development process to turn it into a matching implementation
 
 While planning: think through details carefully and write something that you think will work
 
-While developing: DO NOT CHANGE THE PLAN. If you discover that the plan can't be implemented as specified because the BEHAVIOUR doesn't work, stop and ask for guidance. It's OK to make trivial changes e.g. if the names or paths specified in the plan aren't right. Changes of behaviour ALWAYS need human confirmation.
+While developing: DO NOT CHANGE THE PLAN. If you discover that the plan can't be implemented as specified because the BEHAVIOUR doesn't work, stop and ask for guidance. It's OK to make trivial changes e.g. if the names or paths specified in the plan aren't right. Changes of behaviour ALWAYS need human confirmation. However it's acceptable to continue on with unrelated items and build up a list of things that need confirmation, rather than bailing immediately on first encountering a thing requiring confirmation.
 
 ## Phasing
 
@@ -636,7 +636,7 @@ Items to check after implementation, not to be acted on during it. These are tes
 
 1. **`integration-test: script exits with the not-in-a-Git-repo error outside a repo`** — how did the test control cwd? `runCli` using `process.cwd()` means the test either calls `process.chdir()` (global state, hostile to parallel tests in the same worker) or `runCli` grew cwd injection. Also check the temp dir used is genuinely outside any git repo (a defensive assertion in the helper is cheap).
 
-2. **Git not installed — untested gap.** The error message claims to cover "not a repo *or* Git is not installed", but those fail differently: a non-zero exit vs `execFileSync` throwing ENOENT. The code must handle both shapes; only one is tested. Testable as a process-test spawning the script with a PATH containing no `git`. Decide: add the test or explicitly accept the gap.
+2. **Git not installed — untested gap.** The error message claims to cover "not a repo _or_ Git is not installed", but those fail differently: a non-zero exit vs `execFileSync` throwing ENOENT. The code must handle both shapes; only one is tested. Testable as a process-test spawning the script with a PATH containing no `git`. Decide: add the test or explicitly accept the gap.
 
 3. **Default-root behaviour is only testable at unit level.** Every integration and process test must pass `--root={fixture}` — without it the script scans the entire ag-skills repo (every fixture plus the repo's own package.json). So the unit test of `determineRoot` is the only coverage the default path can get, and the happy-path process test exercises `--root`, not the no-args invocation SKILL.md calls the normal case. Confirm this held and nothing "fixed" it.
 

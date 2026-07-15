@@ -1,0 +1,12 @@
+{
+    "name": "app",
+    "private": true,
+    "dependencies": {
+        "ag-grid-community": "^32.1.0",
+        "ag-grid-react": "~32.1.0",
+        "react": "^18.2.0"
+    },
+    "devDependencies": {
+        "typescript": "~5.4.0"
+    }
+}
