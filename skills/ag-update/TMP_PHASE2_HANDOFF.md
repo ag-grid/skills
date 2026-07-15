@@ -106,6 +106,127 @@ Walk the five "Phase-1 interpretations awaiting human ruling" above and the six 
 "Post-implementation review" section (TMP_V2_PLAN.md) — several (cwd control for the not-in-repo test,
 default-root only unit-tested, ignored-package.json cleanup) are things to eyeball during this review.
 
+## Phase 1 architectural review — the one-way doors
+
+A separate, higher-stakes pass from the "results/output" review above. Phase 1's job (per the plan)
+is to fix every architectural and technical decision; Phase 2 is fill-in that slots into these
+patterns. So review the things that are *expensive to change once committed* — they'll be load-bearing
+under ~3× more code and tests. Wording, message text, and individual rules are NOT here (cheap to
+change in Phase 2). Ranked roughly by blast radius. Paths are repo-relative; the source tree lives
+under `skills/ag-update/scripts/dev/`.
+
+### A. Core seams (changing these touches every stage and/or every test)
+
+1. **The `runCli` boundary.** `runCli(...argv) -> ScriptOutput | throw ExitWithError`, with a thin
+   `runAsBin` wrapper as the *only* code that writes files/stderr and calls `process.exit`. Every
+   integration test depends on this line being drawn correctly. Confirm nothing side-effectful leaks
+   into the testable core (writes, exit, stderr all live in the wrapper — check this holds) and that
+   returning-output-vs-throwing is the right split.
+   — `skills/ag-update/scripts/dev/src/main.ts`
+2. **The error model.** One thrown type (`ExitWithError`, carrying a full `ScriptOutput`) for every
+   terminating error, caught once in `runCli`; unexpected throws become the crash output. Decide now
+   whether a single error class is enough or whether error codes / differentiated exit codes will be
+   wanted later — retrofitting a taxonomy across every `throw` site is costly.
+   — `skills/ag-update/scripts/dev/src/output.ts` (`ExitWithError`),
+   `skills/ag-update/scripts/dev/src/main.ts` (`runCli` catch, `crashError`)
+3. **The module-level notice collector**: `ScriptOutput.notices` holds a shared mutable module array
+   by reference, requiring `globalTestStateReset` between tests. This is the one piece of global
+   mutable state. Bless it or reject it now — every test file and any future concurrency depends on
+   the choice.
+   — `skills/ag-update/scripts/dev/src/output.ts` (`notices`, `addNotice`, `resetNotices`)
+4. **`ScriptOutput` shape**: `reportFiles` as a name→content map (stages never touch the filesystem;
+   the wrapper writes), `outputFolder` resolved in the core. This is what makes report content
+   snapshot-testable. Confirm the shape carries everything Phase 2 needs (no report will want to write
+   outside this map).
+   — `skills/ag-update/scripts/dev/src/output.ts`
+
+### B. Data contracts & the type pipeline
+
+5. **Dependence on `CompiledChangelog`/`CompiledChange` from `external/ag-website-shared`.** The entire
+   detect + report layer keys off this discriminated union (transition / simple / dependency). It is
+   the contract with the changes-authoring side. Two decisions: (a) is the union the right shape to
+   build against, and (b) the vendoring/symlink question (currently an untracked symlink — see Env
+   facts) needs resolving before commit.
+   — `external/ag-website-shared/src/changes/compiled-change-types.ts` (and `change-types.ts`
+   alongside), re-exported via `skills/ag-update/scripts/dev/src/types.ts`
+6. **The internal type flow**: `ProjectInfo -> ProjectDetectionResult (extends ProjectInfo) -> report`,
+   plus `DetectedChange`/`Occurrence`. These interfaces are threaded through every stage and every test
+   builder; reshaping them later is a wide ripple. Review the field set now.
+   — `skills/ag-update/scripts/dev/src/types.ts`
+7. **Product/framework modelling**: `Product = grid|charts|studio`, per-product `frameworks[]`, charts
+   inferred from grid by the constant offset. This shapes detection and reporting throughout.
+   — `skills/ag-update/scripts/dev/src/types.ts`,
+   `skills/ag-update/scripts/dev/src/project-info.ts`
+
+### C. Build & shipping (hard to change; couples to the process tests)
+
+8. **esbuild → single committed CJS bundle**, `version-check` as the mandatory first import,
+   `--format=cjs`, `--target=node18`, and the dual CJS/ESM entry guard. Plus the committed-bundle +
+   staleness gate. This is the shipping contract and underpins the node-floor and happy-path process
+   tests.
+   — `skills/ag-update/scripts/dev/build.mjs`,
+   `skills/ag-update/scripts/dev/src/version-check.ts`,
+   `skills/ag-update/scripts/dev/src/main.ts` (entry guard),
+   `skills/ag-update/scripts/analyse-update.js` (committed bundle),
+   `skills/ag-update/scripts/dev/test/build.test.ts` (staleness gate)
+9. **`.ts`-extension relative imports + `npm run cli` native-run convention.** Now a source-wide rule
+   every new file must follow. Cheap to keep, tedious to reverse once Phase 2 adds files.
+   — `skills/ag-update/scripts/dev/package.json` (`cli` script, `"type": "module"`),
+   `skills/ag-update/scripts/dev/tsconfig.json` (`allowImportingTsExtensions`),
+   `skills/ag-update/scripts/dev/src/*.ts`
+10. **git as the discovery/search engine** (`git ls-files` / `git grep`), never fs walking. Everything
+    downstream assumes git-tracked files; the whole test suite runs against *this* repo's real git.
+    Fundamental — confirm it's the right foundation.
+    — `skills/ag-update/scripts/dev/src/git.ts`,
+    `skills/ag-update/scripts/dev/src/projects.ts`,
+    `skills/ag-update/scripts/dev/src/detect.ts`
+11. **Argument surface**: the `--name=value` / `--name value` parser and the four args. Adding args
+    later is easy; changing the parsing model or validation contract is not.
+    — `skills/ag-update/scripts/dev/src/args.ts`
+
+### D. Test tiers & fixture strategy (the explicit phase-1 gate)
+
+12. **The three-tier split** (unit → `runCli` integration → compiled-bundle process) and where the
+    boundaries sit. Once Phase 2 writes ~2/3 more tests to these tiers, re-tiering is expensive. Judge
+    the boundaries are drawn so each behaviour lands in the cheapest tier that can cover it.
+    — `skills/ag-update/scripts/dev/test/` (unit + process),
+    `skills/ag-update/scripts/dev/test/fixture-tests/` (integration),
+    `skills/ag-update/scripts/dev/vitest.config.ts`
+13. **Fixtures = committed folders in this repo, driven by `--root`, no `git init` / temp repos.** The
+    whole consequence chain (fixtures must be committed to be seen; suite only works in a real checkout;
+    fixtures are read-only; empty dirs need a dummy file). This is baked into every Phase 2 fixture —
+    review the ergonomics and the escape hatches (runtime-written ignored file, permissions temp dir,
+    non-repo temp dir) now.
+    — `skills/ag-update/scripts/dev/test/fixture-tests/*/files/`,
+    `skills/ag-update/scripts/dev/test/utils/fs-helpers.ts`
+14. **Service-boundary mocking of `fetch` by URL**, git and fs left real. Confirm the seam is right
+    (vs injecting a fetcher) — every download test is built on it.
+    — `skills/ag-update/scripts/dev/test/utils/fetch-mock.ts` (`mockHttpResponse`),
+    `skills/ag-update/scripts/dev/test/utils/changelog-builders.ts` (`serveChangelogs`,
+    `writeChangelogsToDisk`)
+
+### E. Test helpers (most-used surface; ergonomics lock in early)
+
+15. **The changelog builder library** (`changelog`, `transition`, `requirement`, `behaviourChange`,
+    `styleChange`, `dependencyChange`, `mitigation`) with `Partial` overrides + defaults. This is the
+    single most-called test surface in Phase 2. Scrutinise: sensible defaults, overrides compose,
+    the builder set matches every `CompiledChange` variant.
+    — `skills/ag-update/scripts/dev/test/utils/changelog-builders.ts`
+16. **`globalTestStateReset`** — the reset surface must cover *all* shared mutable state (fetch mock,
+    notices, temp dirs). A missed reset = cross-test flake. Confirm it's complete and that every file's
+    `afterEach` calls it.
+    — `skills/ag-update/scripts/dev/test/utils/index.ts`
+17. **Snapshot strategy**: inline snapshots + `portable()` tokenisation (`$REPO_ROOT$`, `$TMPDIR$`,
+    version/node tokens) for machine-independence, and the "one canonical whole-message snapshot per
+    variation, detail-asserts elsewhere" rule. The tokeniser is load-bearing for portability — check
+    it's robust and the rule is actually followed.
+    — `skills/ag-update/scripts/dev/test/utils/snapshot.ts` (`portable`, `REPO_ROOT`)
+18. **`runCompiled` + the process-result snapshot format**, and `fixtureFiles(import.meta.url)` /
+    `expectExitWithError`. Small but every process/fixture test uses them.
+    — `skills/ag-update/scripts/dev/test/utils/run-compiled.ts` (`runCompiled`),
+    `skills/ag-update/scripts/dev/test/utils/fs-helpers.ts` (`fixtureFiles`),
+    `skills/ag-update/scripts/dev/test/utils/index.ts` (`expectExitWithError`)
+
 ## Not for this repo
 
 Four rules for the changes-database authoring side (ag-website-shared), captured during planning:

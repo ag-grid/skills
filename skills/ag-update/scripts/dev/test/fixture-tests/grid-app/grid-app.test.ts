@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "vitest";
-import { runCli } from "../../../src/main";
+import { run } from "../../../src/run";
 import { render } from "../../../src/output";
 import { RELEASED_VERSION_URL } from "../../../src/skill-version";
 import {
@@ -17,7 +17,7 @@ afterEach(globalTestStateReset);
 
 test("happy path — fixture repo in, reports out, SUCCESS message rendered", async () => {
   serveChangelogs({ grid: gridChangelog() });
-  const output = await runCli("--root", FIXTURE, "--allow-old-version");
+  const output = await run("--root", FIXTURE, "--allow-old-version");
   expect(portable(render(output))).toMatchInlineSnapshot(`
     "SUCCESS: report files produced
 
@@ -88,26 +88,41 @@ test("happy path — fixture repo in, reports out, SUCCESS message rendered", as
 
 test("report written per project with expected filename (asserted via reportFiles)", async () => {
   serveChangelogs({ grid: gridChangelog() });
-  const output = await runCli("--root", FIXTURE, "--allow-old-version");
+  const output = await run("--root", FIXTURE, "--allow-old-version");
   // one report for "app"; "lib" has no AG dependencies so gets no report
   expect(Object.keys(output.reportFiles).sort()).toEqual(["app-report.md", "summary.md"]);
 });
 
 test("on SUCCESS, reportFiles contains summary.md holding the rendered SUCCESS output", async () => {
   serveChangelogs({ grid: gridChangelog() });
-  const output = await runCli("--root", FIXTURE, "--allow-old-version");
+  const output = await run("--root", FIXTURE, "--allow-old-version");
   expect(output.reportFiles["summary.md"]).toBe(render(output));
 });
 
 test("on ERROR there is no summary.md (reportFiles is empty)", async () => {
   mockHttpResponse(RELEASED_VERSION_URL, "99.0.0"); // force the newer-skill-version ERROR
-  const output = await expectExitWithError(runCli("--root", FIXTURE));
+  const output = await expectExitWithError(run("--root", FIXTURE));
   expect(output.reportFiles).toEqual({});
+});
+
+test("exits with an error when projects are found but none are updatable", async () => {
+  // Root scoped to "lib", which has a package.json but no AG dependencies.
+  const output = await expectExitWithError(run("--root", `${FIXTURE}/lib`, "--allow-old-version"));
+  expect(portable(render(output))).toMatchInlineSnapshot(`
+    "ERROR: no updatable projects found under $REPO_ROOT$/skills/ag-update/scripts/dev/test/fixture-tests/grid-app/files/lib
+
+    The following projects contain no AG dependencies and were not analysed:
+
+    - $REPO_ROOT$/skills/ag-update/scripts/dev/test/fixture-tests/grid-app/files/lib
+
+    Check that --root points at the intended folder and that the projects depend on AG Grid, AG Charts or AG Studio (their package.json files must be committed or staged so Git can see them). To scan a different folder, invoke the command again passing --root="path".
+    "
+  `);
 });
 
 test("changelogs are fetched only for products in use across the projects", async () => {
   serveChangelogs({ grid: gridChangelog(), charts: changelog(), studio: changelog() });
-  await runCli("--root", FIXTURE, "--allow-old-version");
+  await run("--root", FIXTURE, "--allow-old-version");
   const changelogRequests = requestedUrls().filter((url) => url.includes("version-change-records"));
   expect(changelogRequests).toEqual(["https://ag-grid.com/version-change-records.json"]);
 });

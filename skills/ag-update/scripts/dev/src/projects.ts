@@ -2,7 +2,7 @@
  *  package.json file under the root. */
 import * as path from 'node:path';
 import { lsPackageJsonFiles } from './git.ts';
-import { ExitWithError } from './output.ts';
+import { ExitWithError, stringifyError } from './output.ts';
 
 /** Returns the absolute root folder to scan for projects. */
 export function determineRoot(cwd: string, rootArg: string | undefined, gitRepoRoot: string): string {
@@ -15,7 +15,7 @@ export function locateProjects(rootPath: string): string[] {
     try {
         packageJsonPaths = lsPackageJsonFiles(rootPath);
     } catch (e) {
-        throw couldNotLocateProjects((e as Error).message);
+        throw couldNotLocateProjects(stringifyError(e));
     }
     if (packageJsonPaths.length === 0) {
         throw couldNotLocateProjects(`no package.json files found under ${rootPath}`);
@@ -25,9 +25,7 @@ export function locateProjects(rootPath: string): string[] {
 
 function couldNotLocateProjects(detail: string): ExitWithError {
     return new ExitWithError(`could not find projects using \`git ls-files\` (${detail})`, [
-        'A project is a folder containing a package.json file tracked by Git. Check that the root folder is ' +
-            "inside the source code Git repo and that the projects' package.json files are committed (or at " +
-            'least staged).',
+        "A project is a folder containing a package.json file tracked by Git. Check that the root folder is inside the source code Git repo and that the projects' package.json files are committed (or at least staged).",
         'To scan a different folder, invoke the command again passing --root="path".',
     ]);
 }

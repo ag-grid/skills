@@ -19,12 +19,10 @@ running the build, typechecking, tests, and starting the dev server and accessin
 browser.`;
 
 const OPTIONAL_INTRO =
-    'The changes in this section are optional: the project will still work if they are accepted as-is. ' +
-    'Resolve each decision below with the user while planning the update.';
+    'The changes in this section are optional: the project will still work if they are accepted as-is. Resolve each decision below with the user while planning the update.';
 
 const CANNOT_RULE_OUT =
-    'Detected in: this change cannot be ruled out by searching the source code; check whether it applies ' +
-    'to this project during planning.';
+    'Detected in: this change cannot be ruled out by searching the source code; check whether it applies to this project during planning.';
 
 export const PRODUCT_LABELS: Record<Product, string> = { grid: 'Grid', charts: 'Charts', studio: 'Studio' };
 

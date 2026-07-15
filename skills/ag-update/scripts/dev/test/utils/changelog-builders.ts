@@ -37,21 +37,20 @@ export function transition(overrides: Partial<CompiledTransition> = {}): Compile
     };
 }
 
-export const requirement = simpleChangeBuilder('requirement', 'sizeColumnsToFit now requires a params object');
-export const behaviourChange = simpleChangeBuilder('behaviour', 'rows are now sorted stably by default');
-export const styleChange = simpleChangeBuilder('style', 'default row height reduced from 28px to 26px');
-
-function simpleChangeBuilder(type: CompiledSimpleChange['type'], defaultTitle: string) {
-    return (overrides: Partial<CompiledSimpleChange> = {}): CompiledSimpleChange => ({
+export function simpleChange(
+    type: CompiledSimpleChange['type'],
+    overrides: Partial<CompiledSimpleChange> = {}
+): CompiledSimpleChange {
+    return {
         type,
         framework: null,
         detectWords: null,
         mitigation: [],
         version: '33.0.0',
-        title: defaultTitle,
+        title: `example ${type} change`,
         description: null,
         ...overrides,
-    });
+    };
 }
 
 export function dependencyChange(overrides: Partial<CompiledDependencyChange> = {}): CompiledDependencyChange {

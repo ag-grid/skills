@@ -5,10 +5,6 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -25,29 +21,19 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-
-// src/main.ts
-var main_exports = {};
-__export(main_exports, {
-  formatCrashDetails: () => formatCrashDetails,
-  runCli: () => runCli
-});
-module.exports = __toCommonJS(main_exports);
 
 // src/version-check.ts
 var nodeMajor = parseInt(process.versions.node.split(".")[0], 10);
 if (nodeMajor < 20) {
-  process.stderr.write(`ERROR: minimum Node.js 20 version required (current version = ${process.version})
+  const displayed = process.env.MOCK_NODE_VERSION ?? process.version;
+  process.stderr.write(`ERROR: minimum Node.js 20 version required (current version = ${displayed})
 `);
   process.exit(1);
 }
 
 // src/main.ts
-var fs4 = __toESM(require("node:fs"), 1);
-var os = __toESM(require("node:os"), 1);
-var path4 = __toESM(require("node:path"), 1);
-var import_node_url = require("node:url");
+var fs5 = __toESM(require("node:fs"), 1);
+var path5 = __toESM(require("node:path"), 1);
 
 // src/output.ts
 var notices = [];
@@ -65,6 +51,18 @@ var ExitWithError = class extends Error {
     this.output = { status: "ERROR", statusLine, body, notices, outputFolder: "", reportFiles: {} };
   }
 };
+function stringifyError(error) {
+  const parts = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (let current = error; current != null && !seen.has(current); current = causeOf(current)) {
+    seen.add(current);
+    parts.push(current instanceof Error ? `${current.name}: ${current.message}` : String(current));
+  }
+  return parts.join(" caused by ");
+}
+function causeOf(error) {
+  return error instanceof Error ? error.cause : void 0;
+}
 function render(output) {
   const parts = [
     `${output.status}: ${output.statusLine}`,
@@ -73,6 +71,11 @@ function render(output) {
   ];
   return parts.join("\n\n") + "\n";
 }
+
+// src/run.ts
+var fs4 = __toESM(require("node:fs"), 1);
+var os = __toESM(require("node:os"), 1);
+var path4 = __toESM(require("node:path"), 1);
 
 // src/args.ts
 var DEFAULT_CHANGES_URL_PREFIX = "https://ag-grid.com/";
@@ -310,7 +313,7 @@ function locateProjects(rootPath) {
   try {
     packageJsonPaths = lsPackageJsonFiles(rootPath);
   } catch (e) {
-    throw couldNotLocateProjects(e.message);
+    throw couldNotLocateProjects(stringifyError(e));
   }
   if (packageJsonPaths.length === 0) {
     throw couldNotLocateProjects(`no package.json files found under ${rootPath}`);
@@ -326,13 +329,16 @@ function couldNotLocateProjects(detail) {
 
 // src/records.ts
 var fs3 = __toESM(require("node:fs/promises"), 1);
+var https = __toESM(require("node:https"), 1);
 
 // src/skill-version.ts
 var fs2 = __toESM(require("node:fs"), 1);
 var path3 = __toESM(require("node:path"), 1);
 var import_meta = {};
 var RELEASED_VERSION_URL = "https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md";
+var mockedSkillVersion;
 function localSkillVersion() {
+  if (mockedSkillVersion !== void 0) return mockedSkillVersion;
   let dir = typeof __dirname !== "undefined" ? __dirname : new URL(".", import_meta.url).pathname;
   for (let i = 0; i < 4; i++) {
     const candidate = path3.join(dir, "VERSION.md");
@@ -387,8 +393,14 @@ async function downloadChangeRecords(prefix, products) {
     let changelog;
     try {
       changelog = JSON.parse(await downloadText(url));
-    } catch {
-      throw downloadFailure(url);
+    } catch (e) {
+      throw new ExitWithError(
+        `could not download ${url} (${stringifyError(e)}). Check if the Internet is enabled by loading a known-good URL, then try again.`,
+        [
+          "If the Internet is not available, ask the operator to fix the issue.",
+          "If downloading fails persistently even though the Internet is available, there may be a bug in the ag-update skill, ask the user to report it as an issue on GitHub: https://github.com/ag-grid/skills/issues"
+        ]
+      );
     }
     const local = localSkillVersion();
     if (compareVersions(local, changelog.minimumSkillVersion) < 0) {
@@ -402,18 +414,33 @@ async function downloadText(url) {
   if (url.startsWith("file://")) {
     return fs3.readFile(url.slice("file://".length), "utf8");
   }
+  if (isLocalhostHttps(url)) {
+    return getInsecure(url);
+  }
   const response = await fetch(url);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.text();
 }
-function downloadFailure(url) {
-  return new ExitWithError(
-    `could not download ${url}. Check if the Internet is enabled by loading a known-good URL, then try again.`,
-    [
-      "If the Internet is not available, ask the operator to fix the issue.",
-      "If downloading fails persistently even though the Internet is available, there may be a bug in the ag-update skill, ask the user to report it as an issue on GitHub: https://github.com/ag-grid/skills/issues"
-    ]
-  );
+function isLocalhostHttps(url) {
+  const { protocol, hostname } = new URL(url);
+  return protocol === "https:" && (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1");
+}
+function getInsecure(url) {
+  return new Promise((resolve3, reject) => {
+    const request = https.get(url, { rejectUnauthorized: false }, (response) => {
+      const status = response.statusCode ?? 0;
+      if (status < 200 || status >= 300) {
+        response.resume();
+        reject(new Error(`HTTP ${status}`));
+        return;
+      }
+      response.setEncoding("utf8");
+      let body = "";
+      response.on("data", (chunk) => body += chunk);
+      response.on("end", () => resolve3(body));
+    });
+    request.on("error", reject);
+  });
 }
 
 // src/report.ts
@@ -535,77 +562,76 @@ function majorOf(version) {
   return parseInt(version.split(".")[0], 10);
 }
 
-// src/main.ts
-var import_meta2 = {};
+// src/run.ts
 var PRODUCT_ORDER2 = ["grid", "charts", "studio"];
-async function runCli(...argv) {
+async function run(...argv) {
   try {
-    return await run(argv);
+    const args = parseArgs(argv);
+    await checkSkillVersion(args.allowOldVersion);
+    const cwd = process.cwd();
+    const repoRoot = gitRepoRoot(cwd);
+    const root = determineRoot(cwd, args.root, repoRoot);
+    const projects = locateProjects(root).map((projectPath) => getProjectInfo(projectPath, repoRoot));
+    const updatable = projects.filter((p) => p.dependencies.length > 0 && p.blockers.length === 0);
+    const blocked = projects.filter((p) => p.blockers.length > 0);
+    const noAgDependencies = projects.filter((p) => p.dependencies.length === 0 && p.blockers.length === 0);
+    if (updatable.length === 0) throw noUpdateableProjects(root, blocked, noAgDependencies);
+    const productsInUse = PRODUCT_ORDER2.filter(
+      (product) => updatable.some((p) => p.dependencies.some((d) => d.product === product))
+    );
+    const changelogs = productsInUse.length > 0 ? await downloadChangeRecords(args.changesUrlPrefix, productsInUse) : /* @__PURE__ */ new Map();
+    const outputFolder = args.outputFolder ? path4.resolve(cwd, args.outputFolder) : fs4.mkdtempSync(path4.join(os.tmpdir(), "ag-update-"));
+    const reportFiles = {};
+    for (const project of updatable) {
+      reportFiles[reportFileName(project.projectPath)] = renderReport(detectChanges(project, changelogs), changelogs);
+    }
+    const body = [];
+    if (productsInUse.length > 0) {
+      const latest = productsInUse.map(
+        (product) => `${PRODUCT_LABELS[product]} v${changelogs.get(product).mostRecentVersion}`
+      );
+      body.push(`The latest versions are: ${latest.join(", ")}.`);
+    }
+    body.push(
+      "Discovered the following projects and created update reports:",
+      updatable.map((project) => {
+        const using = project.dependencies.map((d) => `${PRODUCT_LABELS[d.product]} v${d.currentVersion}`).join(", ");
+        return `- ${project.projectPath}: using ${using} -> ${path4.join(outputFolder, reportFileName(project.projectPath))}`;
+      }).join("\n"),
+      ...blockedSection(blocked),
+      ...noAgDependenciesSection(noAgDependencies),
+      "Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.",
+      "Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.",
+      "Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan."
+    );
+    const output = succeed("report files produced", body, outputFolder, reportFiles);
+    output.reportFiles["summary.md"] = render(output);
+    return output;
   } catch (e) {
     throw e instanceof ExitWithError ? e : crashError(e);
   }
 }
-async function run(argv) {
-  const args = parseArgs(argv);
-  await checkSkillVersion(args.allowOldVersion);
-  const cwd = process.cwd();
-  const repoRoot = gitRepoRoot(cwd);
-  const root = determineRoot(cwd, args.root, repoRoot);
-  const projects = locateProjects(root).map((projectPath) => getProjectInfo(projectPath, repoRoot));
-  const updatable = projects.filter((p) => p.dependencies.length > 0 && p.blockers.length === 0);
-  const blocked = projects.filter((p) => p.blockers.length > 0);
-  const noAgDependencies = projects.filter((p) => p.dependencies.length === 0 && p.blockers.length === 0);
-  const productsInUse = PRODUCT_ORDER2.filter(
-    (product) => updatable.some((p) => p.dependencies.some((d) => d.product === product))
-  );
-  const changelogs = productsInUse.length > 0 ? await downloadChangeRecords(args.changesUrlPrefix, productsInUse) : /* @__PURE__ */ new Map();
-  const outputFolder = args.outputFolder ? path4.resolve(cwd, args.outputFolder) : fs4.mkdtempSync(path4.join(os.tmpdir(), "ag-update-"));
-  const reportFiles = {};
-  for (const project of updatable) {
-    reportFiles[reportFileName(project.projectPath)] = renderReport(detectChanges(project, changelogs), changelogs);
-  }
-  const output = succeed(
-    "report files produced",
-    successBody(productsInUse, changelogs, updatable, blocked, noAgDependencies, outputFolder),
-    outputFolder,
-    reportFiles
-  );
-  output.reportFiles["summary.md"] = render(output);
-  return output;
+function blockedSection(blocked) {
+  if (blocked.length === 0) return [];
+  return [
+    "The following projects use an AG product but cannot be updated by this skill:",
+    blocked.map((project) => `- ${project.projectPath}: ${project.blockers.map((b) => b.reason).join("; ")}`).join("\n")
+  ];
 }
-function successBody(productsInUse, changelogs, updatable, blocked, noAgDependencies, outputFolder) {
-  const body = [];
-  if (productsInUse.length > 0) {
-    const latest = productsInUse.map(
-      (product) => `${PRODUCT_LABELS[product]} v${changelogs.get(product).mostRecentVersion}`
-    );
-    body.push(`The latest versions are: ${latest.join(", ")}.`);
-  }
-  body.push(
-    "Discovered the following projects and created update reports:",
-    updatable.map((project) => {
-      const using = project.dependencies.map((d) => `${PRODUCT_LABELS[d.product]} v${d.currentVersion}`).join(", ");
-      return `- ${project.projectPath}: using ${using} -> ${path4.join(outputFolder, reportFileName(project.projectPath))}`;
-    }).join("\n")
-  );
-  if (blocked.length > 0) {
-    body.push(
-      "The following projects cannot be updated by this skill and have no report. Tell the user about them and continue:",
-      blocked.map((project) => `- ${project.projectPath}: ${project.blockers.map((b) => b.reason).join("; ")}`).join("\n")
-    );
-  }
-  if (noAgDependencies.length > 0) {
-    body.push(
-      "The following projects contain no AG dependencies and were not analysed:",
-      noAgDependencies.map((project) => `- ${project.projectPath}`).join("\n")
-    );
-  }
-  body.push(
-    "Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.",
-    "Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.",
-    "Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan."
-  );
-  return body;
+function noAgDependenciesSection(noAgDependencies) {
+  if (noAgDependencies.length === 0) return [];
+  return [
+    "The following projects contain no AG dependencies and were not analysed:",
+    noAgDependencies.map((project) => `- ${project.projectPath}`).join("\n")
+  ];
+}
+function noUpdateableProjects(root, blocked, noAgDependencies) {
+  const body = [
+    ...blockedSection(blocked),
+    ...noAgDependenciesSection(noAgDependencies),
+    'Check that --root points at the intended folder and that the projects depend on AG Grid, AG Charts or AG Studio (their package.json files must be committed or staged so Git can see them). To scan a different folder, invoke the command again passing --root="path".'
+  ];
+  return new ExitWithError(`no updatable projects found under ${root}`, body);
 }
 function crashError(e) {
   return new ExitWithError(
@@ -614,8 +640,8 @@ function crashError(e) {
   );
 }
 function formatCrashDetails(e) {
-  if (!(e instanceof Error)) return String(e);
-  const lines = [`${e.name}: ${e.message}`];
+  const lines = [stringifyError(e)];
+  if (!(e instanceof Error)) return lines[0];
   for (const frame of (e.stack ?? "").split("\n").slice(1)) {
     const parsed = frame.match(/^\s*at\s+(?:(.+?)\s+\()?([^()]*?)(?::\d+:\d+)?\)?$/);
     if (!parsed) continue;
@@ -627,28 +653,28 @@ function formatCrashDetails(e) {
   }
   return lines.join("\n");
 }
-function runAsBin() {
-  process.on("uncaughtException", (e) => exitWith(crashError(e).output));
-  process.on("unhandledRejection", (e) => exitWith(crashError(e).output));
-  if (process.env.MOCK_EXCEPTION) throw new Error("MOCK_EXCEPTION");
-  if (process.env.MOCK_UNHANDLED_REJECTION) void Promise.reject(new Error("MOCK_UNHANDLED_REJECTION"));
-  void runCli(...process.argv.slice(2)).then(
-    (output) => {
-      writeReportFiles(output);
-      exitWith(output);
-    },
-    (e) => exitWith(e instanceof ExitWithError ? e.output : crashError(e).output)
-  );
-}
+
+// src/main.ts
+process.on("uncaughtException", (e) => exitWith(crashError(e).output));
+process.on("unhandledRejection", (e) => exitWith(crashError(e).output));
+if (process.env.MOCK_EXCEPTION) throw new Error("MOCK_EXCEPTION");
+if (process.env.MOCK_UNHANDLED_REJECTION) void Promise.reject(new Error("MOCK_UNHANDLED_REJECTION"));
+void run(...process.argv.slice(2)).then(
+  (output) => {
+    writeReportFiles(output);
+    exitWith(output);
+  },
+  (e) => exitWith(e instanceof ExitWithError ? e.output : crashError(e).output)
+);
 function exitWith(output) {
   process.stderr.write(render(output));
   process.exit(output.status === "SUCCESS" ? 0 : 1);
 }
 function writeReportFiles(output) {
   try {
-    fs4.mkdirSync(output.outputFolder, { recursive: true });
+    fs5.mkdirSync(output.outputFolder, { recursive: true });
     for (const [name, content] of Object.entries(output.reportFiles)) {
-      fs4.writeFileSync(path4.join(output.outputFolder, name), content);
+      fs5.writeFileSync(path5.join(output.outputFolder, name), content);
     }
   } catch {
     exitWith(
@@ -658,13 +684,3 @@ function writeReportFiles(output) {
     );
   }
 }
-var isCjsEntry = typeof require !== "undefined" && typeof module !== "undefined" && require.main === module;
-var isEsmEntry = typeof import_meta2 !== "undefined" && !!process.argv[1] && import_meta2.url === (0, import_node_url.pathToFileURL)(process.argv[1]).href;
-if (isCjsEntry || isEsmEntry) {
-  runAsBin();
-}
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  formatCrashDetails,
-  runCli
-});

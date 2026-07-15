@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from 'vitest';
 import { detectChanges } from '../../../src/detect';
 import type { CompiledChange, ProjectInfo } from '../../../src/types';
-import { changelog, fixtureFiles, globalTestStateReset, requirement, transition } from '../../utils';
+import { changelog, fixtureFiles, globalTestStateReset, simpleChange, transition } from '../../utils';
 
 afterEach(globalTestStateReset);
 
@@ -28,7 +28,7 @@ test('change whose detectWords match nothing is omitted', () => {
 });
 
 test('change with detectWords null is included with empty occurrences', () => {
-    const detected = detect(requirement({ detectWords: null }));
+    const detected = detect(simpleChange('requirement', { detectWords: null }));
     expect(detected).toHaveLength(1);
     expect(detected[0].occurrences).toEqual([]);
 });

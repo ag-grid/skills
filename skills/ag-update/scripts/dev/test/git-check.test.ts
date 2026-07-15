@@ -1,22 +1,22 @@
-import { afterEach, expect, test } from 'vitest';
-import { runCli } from '../src/main';
-import { render } from '../src/output';
+import { afterEach, expect, test } from "vitest";
+import { run } from "../src/run";
+import { render } from "../src/output";
 import {
-    assertOutsideGitRepo,
-    expectExitWithError,
-    globalTestStateReset,
-    inDirectory,
-    portable,
-    tempDir,
-} from './utils';
+  assertOutsideGitRepo,
+  expectExitWithError,
+  globalTestStateReset,
+  inDirectory,
+  portable,
+  tempDir,
+} from "./utils";
 
 afterEach(globalTestStateReset);
 
-test('script exits with the not-in-a-Git-repo error outside a repo', async () => {
-    const dir = tempDir();
-    assertOutsideGitRepo(dir);
-    const output = await inDirectory(dir, () => expectExitWithError(runCli('--allow-old-version')));
-    expect(portable(render(output))).toMatchInlineSnapshot(`
+test("script exits with the not-in-a-Git-repo error outside a repo", async () => {
+  const dir = tempDir();
+  assertOutsideGitRepo(dir);
+  const output = await inDirectory(dir, () => expectExitWithError(run("--allow-old-version")));
+  expect(portable(render(output))).toMatchInlineSnapshot(`
       "ERROR: not in a Git repo or Git is not installed
 
       This script uses Git to search project files and determine which files to ignore.

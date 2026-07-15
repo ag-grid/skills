@@ -55,6 +55,23 @@ export class ExitWithError extends Error {
     }
 }
 
+/** Renders an error and its `cause` chain as "error caused by cause caused by ...", so the root
+ *  cause (e.g. a TLS failure behind a generic "fetch failed") is surfaced. Errors render as
+ *  "Name: message"; non-Error values via String(). Cycle-safe. */
+export function stringifyError(error: unknown): string {
+    const parts: string[] = [];
+    const seen = new Set<unknown>();
+    for (let current = error; current != null && !seen.has(current); current = causeOf(current)) {
+        seen.add(current);
+        parts.push(current instanceof Error ? `${current.name}: ${current.message}` : String(current));
+    }
+    return parts.join(' caused by ');
+}
+
+function causeOf(error: unknown): unknown {
+    return error instanceof Error ? error.cause : undefined;
+}
+
 /** Render to the standard format. Called exactly once, in main.ts, which writes the
  *  result to stderr and exits (SUCCESS -> 0, ERROR -> 1). */
 export function render(output: ScriptOutput): string {

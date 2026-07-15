@@ -1,18 +1,23 @@
 import { afterEach, expect, test } from 'vitest';
 import { renderReport } from '../src/report';
-import type { CompiledChangelog, DetectedChange, Product, ProjectDetectionResult } from '../src/types';
-import {
-    behaviourChange,
-    changelog,
-    dependencyChange,
-    globalTestStateReset,
-    mitigation,
-    requirement,
-    styleChange,
-    transition,
-} from './utils';
+import type {
+    CompiledChangelog,
+    CompiledSimpleChange,
+    DetectedChange,
+    Product,
+    ProjectDetectionResult,
+} from '../src/types';
+import { changelog, dependencyChange, globalTestStateReset, mitigation, simpleChange, transition } from './utils';
 
 afterEach(globalTestStateReset);
+
+// Named simple-change builders with example titles, local to the one test file that asserts on them.
+const requirement = (o: Partial<CompiledSimpleChange> = {}) =>
+    simpleChange('requirement', { title: 'sizeColumnsToFit now requires a params object', ...o });
+const behaviourChange = (o: Partial<CompiledSimpleChange> = {}) =>
+    simpleChange('behaviour', { title: 'rows are now sorted stably by default', ...o });
+const styleChange = (o: Partial<CompiledSimpleChange> = {}) =>
+    simpleChange('style', { title: 'default row height reduced from 28px to 26px', ...o });
 
 function gridAndChartsProject(changes: DetectedChange[]): ProjectDetectionResult {
     return {

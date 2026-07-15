@@ -3,12 +3,14 @@
 import { ExitWithError, resetNotices, type ScriptOutput } from '../../src/output';
 import { resetFetchMock } from './fetch-mock';
 import { cleanupTempDirs } from './fs-helpers';
+import { resetVersionMocks } from './version-mocks';
 
 export * from './changelog-builders';
 export * from './fetch-mock';
 export * from './fs-helpers';
 export * from './run-compiled';
 export * from './snapshot';
+export * from './version-mocks';
 
 /** Resets all shared mutable test state (fetch mock, notice collector, temp folders).
  *  Call from an afterEach in every test file. */
@@ -16,6 +18,7 @@ export function globalTestStateReset(): void {
     resetFetchMock();
     resetNotices();
     cleanupTempDirs();
+    resetVersionMocks();
 }
 
 /** Awaits a runCli call that is expected to fail, returning the ERROR output it threw. */

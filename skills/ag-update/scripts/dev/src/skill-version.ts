@@ -7,9 +7,18 @@ import { compareVersions } from './types.ts';
 export const RELEASED_VERSION_URL =
     'https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md';
 
+let mockedSkillVersion: string | undefined;
+
+/** Test hook: forces localSkillVersion() to return `version`, or restores the real VERSION.md
+ *  lookup when undefined. Keeps version-dependent snapshots stable across VERSION.md bumps. */
+export function mockCurrentSkillVersion(version: string | undefined): void {
+    mockedSkillVersion = version;
+}
+
 /** Reads the local skill version from VERSION.md in the skill folder, found by walking up from
  *  this file (which lives at scripts/dev/src/ in source form and scripts/ once compiled). */
 export function localSkillVersion(): string {
+    if (mockedSkillVersion !== undefined) return mockedSkillVersion;
     // __dirname in the compiled CJS bundle; the import.meta fallback is for vitest's ESM
     // transform and is unreachable in the bundle (build.mjs silences the resulting warning).
     let dir = typeof __dirname !== 'undefined' ? __dirname : new URL('.', import.meta.url).pathname;
@@ -28,10 +37,8 @@ export function newerSkillVersionError(current: string, newVersion: string): Exi
     return new ExitWithError(
         `a new version of this skill is available. Current version ${current}; new version ${newVersion}.`,
         [
-            'Tell the user that they are recommended to update the skill by running `npx skills update ' +
-                'ag-grid/skills`, but alternatively may choose to continue running this outdated version.',
-            'Stop and wait for the user to respond. If they ask to continue using this version, invoke the ' +
-                'script again adding the --allow-old-version argument.',
+            'Tell the user that they are recommended to update the skill by running `npx skills update ag-grid/skills`, but alternatively may choose to continue running this outdated version.',
+            'Stop and wait for the user to respond. If they ask to continue using this version, invoke the script again adding the --allow-old-version argument.',
         ]
     );
 }
