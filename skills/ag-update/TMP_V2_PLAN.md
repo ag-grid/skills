@@ -196,8 +196,6 @@ Depending on any of these means the project uses `charts`:
 | `ag-charts-types` | transitive dependency, not normally installed directly; still counts as charts usage if present |
 | `ag-charts-server-side` | server-side rendering |
 
-// REVIEW: packages.md carried the caveat "ag-charts-server-side — confirm whether user-facing before acting on it". Treating it as plain charts-usage evidence here; confirm that is right.
-
 #### Studio packages
 
 Depending on any of these means the project uses `studio`:
@@ -269,16 +267,15 @@ unit-test: http:// url supported (real fetch against a local http.createServer, 
 integration-test: grid records fetched from prefix root, charts/studio from product subpath
 integration-test: bails with error if the files can't be downloaded or parsed as JSON
 integration-test: bails with newer-skill-version error if local version is below minimumSkillVersion, even with --allow-old-version
-// REVIEW: proposed test: only the changelogs for products actually in use should be fetched — guards against downloading all three unconditionally
 integration-test: changelogs are fetched only for products in use across the projects
 
 #### Exception: downloading version change record files fails
 
 We should try to download the files 3 times with a 500m then 2s delay.
 
-// REVIEW: proposed tests for the retry behaviour specified above, currently untested
 integration-test: a download that fails twice then succeeds produces a normal run
 integration-test: a download that fails three times exits with the download-failure error
+^^^ use vitest mock timers to avoid actually waiting
 
 If the download fails, exit with a message like:
 
@@ -286,7 +283,7 @@ If the download fails, exit with a message like:
 
     If the Internet is not available, ask the operator to fix the issue.
 
-    If downloading fails persistently even though the Internet is available, there may be a bug in the ag-update skill, ask the user to rport it as an issue on GitHub: https://github.com/ag-grid/skills/issues
+    If downloading fails persistently even though the Internet is available, there may be a bug in the ag-update skill, ask the user to report it as an issue on GitHub: https://github.com/ag-grid/skills/issues
 
 ### Change detection
 
@@ -305,7 +302,6 @@ function detectChanges(
 For each project:
 
 1. **Collect candidate changes**: for each product the project uses, take the changes from that product's changelog that fall in the version range (currentVersion, mostRecentVersion], filtered by framework: include changes whose `framework` is null ("potentially anything") or is in that product's `frameworks`. The version a change belongs to is `removedFrom` for transitions, `version` for simple and dependency changes.
-   // REVIEW: transitions that are only deprecated in the range but not removed by the target (`removedFrom` null or beyond it) are excluded, following the old skill's rule to ignore deprecations. Confirm.
 2. **Dependency changes** (`type: 'dependency'`) have no detectWords and there is no version check: include the change unconditionally when its `dependency` is `'typescript'` or is in that product's `frameworks` (dependency minimums are constraints of the framework wrappers, so a product used via the vanilla API is unaffected). Like detectWords-null changes, they carry empty occurrences and are verified during planning.
 3. **Changes with `detectWords: null`** cannot be ruled out by searching (per the interface contract): include them unconditionally, with empty occurrences. This also covers always-applicable changes such as "module registration required from v33".
 4. **Remaining changes**: run one `git grep -n --fixed-strings` per project (not per change record) over the combined set of detectWords from all the project's candidate changes, scoped to the project's folder. Post-process each matched `file:line:content` result to determine which detectWords actually match the line, applying the whole-word rule from the interface contract: a word matches only when not embedded in a larger identifier (`Bar` matches `Foo-Bar` but not `FooBar`), case-sensitively. Map words back to their changes: a change is included iff at least one of its detectWords has at least one occurrence.
@@ -347,7 +343,6 @@ unit-test: framework-scoped change excluded when the framework is not in the pro
 unit-test: framework-scoped change included when the product is used through multiple frameworks including it
 unit-test: transition deprecated but not removed by the target version is excluded
 unit-test: matches outside a project's folder do not count toward that project
-// REVIEW: proposed test: detectWords can contain regex/grep metacharacters (e.g. "$scope", "foo()"); --fixed-strings handles the grep side but the line post-processing must not treat words as patterns
 unit-test: detectWords containing special characters are matched literally
 
 ### Report generation
@@ -357,14 +352,14 @@ unit-test: detectWords containing special characters are matched literally
 function renderReport(result: ProjectDetectionResult, changelogs: Map<Product, CompiledChangelog>): string
 ```
 
-One report file is written per project to the output folder.
+One report file is written per project to the output folder. Like the stderr message, files are not written by the stages: `runCli` returns them in `ScriptOutput.reportFiles` (see Output format), a map of file *name* -> content, and the outer bin wrapper joins each name to `ScriptOutput.outputFolder` and writes — so integration tests assert file names and content on the return value, never the filesystem.
+
+On SUCCESS the output folder also gets a `summary.md` containing the verbatim rendered LLM output (starting "SUCCESS:"), saved for inspection. It is included in `reportFiles` like any other file, and never written on ERROR.
 
 Requirements known so far:
 
 - Each change must be attributed to the version that introduced it, so that if the user chooses to update to an earlier version than the latest, the agent can disregard the items introduced after the chosen version.
 - Optional changes must be presented as decision items (summary, mitigation, detected occurrences) so the agent can resolve them with the user while planning the update.
-
-// REVIEW: format below reworked against the real CompiledChange types. The required/optional mapping is now: required = `requirement` changes, transitions removed by the target version, and `dependency` minimum bumps; decision items = `behaviour` and `style` changes (old code runs but looks/behaves differently — accept or mitigate). Confirm. Note `behaviour`/`style` changes have no stable id (SimpleChange has only a title), so decision items are identified by title.
 
 The report is markdown, named `{projectFolderName}-report.md`. Structure:
 
@@ -379,6 +374,7 @@ The report is markdown, named `{projectFolderName}-report.md`. Structure:
       running the build, typechecking, tests, and starting the dev server and accessing it with a
       browser.
 - `# Scope` — project path, and per product: current version, target (most recent) version, and the frameworks it is used through
+- Paths in report files are never absolute: the Scope project path is relative to the repo root, occurrence paths are relative to the project folder. Better DX, and report content is machine-independent (snapshot-friendly).
 - `# Required changes` — grouped by product (`## Grid` / `## Charts` / `## Studio`) then by major version transition (`### Grid v{FROM}.x -> v{TO}.x`), so items after a user-chosen earlier version can be disregarded wholesale by skipping later transition sections. Contains, rendered per type:
   - transitions removed by the target version: `#### REMOVED: {oldApi}` — a paragraph generated from the record ("As of v{removedFrom}, {oldApi} has been removed." plus oldDescription; "Use {newApi} instead." plus newDescription, or "It has no replacement." when newApi is null)
   - `requirement` changes: `#### REQUIRED: {title}` with the description paragraph
@@ -390,15 +386,15 @@ unit-test: report groups changes by product and version transition
 unit-test: requirement/removal/dependency changes appear under Required changes; behaviour/style under Optional changes
 unit-test: mitigation entries are filtered to the product's frameworks plus javascript
 unit-test: occurrences are listed with file and line; detectWords-null changes get the cannot-rule-out sentence
-integration-test: report written per project with expected filename
-// REVIEW: proposed test: a project whose version range contains no applicable changes should still get a well-formed (near-empty) report rather than crashing or being silently skipped — decide and test which
+integration-test: report written per project with expected filename (asserted via reportFiles)
 integration-test: project with no detected changes still gets a report stating no changes were detected
+integration-test: on SUCCESS, reportFiles contains summary.md holding the rendered SUCCESS output; on ERROR there is no summary.md
 
 ### Successful report message
 
-// REVIEW: the per-project lines below only mention "Grid v..." — projects may use charts only, or both products. The message should render whichever products each project uses.
+The per-project lines below only mention "Grid v..." — There are 3 products and projects may use any combination of them. The message should render whichever products each project uses.
 
-// REVIEW: the default for --output-folder when not passed is unspecified (SKILL.md documents the arg as optional). Proposal: create a temp folder via fs.mkdtemp and report its path in this message. Confirm.
+Reports are written to the output folder: the --output-folder argument if passed, otherwise a new temporary folder created via fs.mkdtemp under os.tmpdir(). Either way its path is reported in this message.
 
 Exit 0 with a message like:
 
@@ -439,7 +435,6 @@ If writing any file fails, exit with an error message:
 
     Invoke the command again passing --output-folder=path and selecting a path that the script will be able to write to
 
-// REVIEW: proposed tests for this section and for the --output-folder contract in SKILL.md ("if provided, must be an empty directory"), both currently untested
 integration-test: unwritable output folder exits with the could-not-write error
 integration-test: --output-folder pointing at a non-empty directory exits with an error
 
@@ -449,11 +444,13 @@ If there's an uncaught exception or unhandled promise rejection, exit with a sta
 
     ERROR: the script terminated because of an internal error, details below. This is a bug in the skill. Please report it as an issue on GitHub: https://github.com/ag-grid/skills/issues
 
-    {Details, includiong stack trace if available}
+    {Details, including stack trace if available, Custom stack trace formatting to include function names but not line and column numbers, and strip path before /ag-update/scripts so that snapshot tests work}
+
+To let the process tests trigger these handlers in the real compiled script, main.ts checks two undocumented environment variables at startup: `MOCK_EXCEPTION` throws an uncaught exception and `MOCK_UNHANDLED_REJECTION` creates an unhandled promise rejection.
 
 integration-test: an unexpected (non-ExitWithError) exception thrown from a stage yields the crash report output
-process-test: unhandled promise rejection yields crash report
-process-test: unhandled exception yields crash report
+process-test: unhandled promise rejection yields crash report (via MOCK_UNHANDLED_REJECTION)
+process-test: unhandled exception yields crash report (via MOCK_EXCEPTION)
 ^^^ the process-level handlers (process.on('uncaughtException'/'unhandledRejection')) only exist in the real process; the integration-test covers the crash formatting for errors thrown through run()
 
 
@@ -468,21 +465,16 @@ unit-test: compiled js is up to date
 
 At least one test should invoke the real compiled script as a separate process and verify output as expected
 
-// REVIEW: proposed test making the "at least one" concrete: a full happy path against a fixture repo with file:// change records, asserting exit code 0 and the SUCCESS message
 process-test: happy path — fixture repo in, reports out, SUCCESS on stderr, exit code 0
 
 We need a matrix of supported versions and invoke them via npx e.g.
 
-// REVIEW: the example below references `skills/ag-update/updater/bin.mjs` but the Build section and SKILL.md say the compiled script is `skills/ag-update/scripts/analyse-update.js` — reconcile the path.
-
  import { spawnSync } from 'node:child_process';
-  const r = spawnSync('npx', ['-y', 'node@20', 'skills/ag-update/updater/bin.mjs', '.'],
+  const r = spawnSync('npx', ['-y', 'node@20', 'skills/ag-update/scripts/analyse-update.js', '.'],
                       { stdio: 'inherit' });
   process.exit(r.status ?? 1);   // non-zero = it broke on Node 20
 
 # Code layout and test strategy
-
-// REVIEW: this whole section filled in per "Note to plan agent"
 
 ## Layout
 
@@ -517,20 +509,37 @@ Each test in this plan is tagged with one of three tiers:
       mockHttpFailure('https://ag-grid.com/version-change-records.json')  // for retry/error tests
       await expect(runCli('--root', fixtureRepo)).rejects.toThrow(ExitWithError)
 
-  `fetch` is mocked as a whole (the harness intercepts by URL), so even the hardcoded VERSION.md URL is controllable without any test-only argument. Git and the filesystem are NOT mocked — integration tests run against real fixture repos.
+  `fetch` is mocked as a whole (the harness intercepts by URL), so even the hardcoded VERSION.md URL is controllable without any test-only argument. Git and the filesystem are NOT mocked — integration tests run against committed fixture folders.
 - **process-test** (few, slow): spawns the compiled `analyse-update.js` as a separate process and asserts on exit code and stderr text. Only for behaviour that doesn't exist in-process: exit codes, the `process.on('uncaughtException'/'unhandledRejection')` handlers, the node-version floor (via `npx node@18`/`node@20`), real http fetching, and one end-to-end happy path. The stderr-writing/exit glue in main.ts is deliberately thin because it is only covered here.
-- **Filesystem fixtures**: real filesystem, no fs mocking — the script's core operations are `git ls-files`/`git grep`, which can't be meaningfully mocked. A test helper creates a fixture repo in a temp folder (write files, `git init`, `git add`) from a declarative spec: `makeFixtureRepo({ 'app/package.json': '...', 'app/src/main.ts': '...' })`. Fixtures are therefore defined inline in each test file next to the assertions that use them, not checked into the repo (committed `.git` folders don't survive cloning).
-  // REVIEW: there is an existing checked-in fixture convention at tests/harness/cases/*/fixture/ in this repo (see tests/harness/cases/skill-already-latest/). Decide whether script tests should reuse that harness or use the inline temp-repo helper proposed here.
+- **Filesystem fixtures**: real filesystem, no fs mocking — the script's core operations are `git ls-files`/`git grep`, which can't be meaningfully mocked. Fixtures are committed to this repo, and this repo itself is the Git repo the script sees when tests run with `--root={fixture path}`. This means fixtures can be edited and run like real projects. There are no temp repos and no `git init` in tests. Consequences:
+  - Fixture files must be committed (or at least staged) or `git ls-files`/`git grep` won't see them — an uncommitted new fixture silently fails its test.
+  - The test suite only works in a real Git checkout of this repo, not in an exported copy without `.git`.
+  - Tests treat fixtures as read-only: never modify tracked fixture files, and write report output to temp folders, never into the fixture.
+  - The few tests needing filesystem state that can't be committed use small setup helpers with cleanup: a plain temp *directory* (no repo) for the not-in-a-Git-repo test; a runtime-written ignored file (its `.gitignore` is committed in the fixture) for ignore-behaviour tests; a permissions-restricted temp dir for unwritable-output tests. A fixture folder with no package.json needs a committed dummy file, since Git cannot track an empty folder.
 - **Network**: integration tests mock `fetch` by URL as above; change-record fixtures can also be served via `file://` URLs. Real http is exercised once at each of the unit tier (`downloadChangeRecords` against a local `http.createServer`) and the process tier.
+- **Test runner**: vitest.
+- **Snapshots**: use inline snapshot testing (`toMatchInlineSnapshot`) wherever a test asserts on message output. Structure these tests so there is one good snapshot test for each key message variation; other tests of the same message assert on the specific detail they cover rather than re-snapshotting the whole message. Report files contain no machine-varying content by design (paths are repo-root- or project-relative — see Report generation). Console output (and summary.md, its verbatim copy) does, so a shared helper patches snapshotted text to make it portable — the end result must contain no paths only valid on one machine:
+  - common Mac/Linux temp folder path prefixes -> a `$TMPDIR$` token via regex replacement, preserving the rest of the path so the important part (e.g. report file names) stays asserted
+  - the known absolute root path -> `$ABSOLUTE_ROOT_PATH$`, verifying it appears where expected
+  - the local skill version from VERSION.md and the node version in the minimum-Node message -> tokens, same deal
+  - (crash stack traces are handled in production code — see the Crash section)
+- **Test state resets**: shared mutable state (the fetch mock, the module-level notice collector in output.ts, ...) is reset by a single `globalTestStateReset()` helper, called from an `afterEach` in every test file.
+- **Process tests are all snapshot tests**, snapshotting the whole process result in this format (omit the stderr/stdout section when its content is empty):
+
+      exitCode: 0
+      stderr:
+      ... content ...
+      stdout:
+      ... content ...
 
 
 With this architecture every ERROR path is a value-returning branch (or a typed throw), so most testing is a function call plus an object assertion.
 
 ## Linking test fixtures and tests
 
-Avoid having a file full of tests, each loading a fixture folder with a path. It makes it hard to find the test for a fixture. Instead, have
+For tests that use a filesystem fixture, colocate each committed fixture with the test(s) that use it:
 
-fixture-tests/test-name/test-name.test.ts
+fixture-tests/test-name/test-name.test.ts # can have one or more tests
 fixture-tests/test-name/files/...fixture-files
 
 Then inside test-name.test.ts have the tests that use the fixture, and use import.meta.dirname or __dirname or whatever the API is to build the path to the files.
@@ -544,7 +553,6 @@ There is a standard output format
 - ERROR messages have an instruction on how to resolve the issue and, where relevant, re-invoke the command with appropriate arguments
 - Code can add NOTICE: messages to the current output that appears at the bottom of the response
 
-// REVIEW: interfaces below filled in per "Note to agent"
 
 ```ts
 type Status = 'SUCCESS' | 'ERROR';
@@ -557,10 +565,18 @@ interface ScriptOutput {
   body: string[];
   /** Collected NOTICE messages, rendered last, each prefixed "NOTICE: " */
   notices: string[];
+  /** Resolved output folder (--output-folder or the mkdtemp default); the wrapper joins
+   *  reportFiles names to this when writing. */
+  outputFolder: string;
+  /** Files to write, file name -> content (names, not paths, so tests can assert them
+   *  directly): the per-project reports plus, on SUCCESS, summary.md (the verbatim rendered
+   *  output). Like stderr, the stages don't write — the outer bin wrapper joins each name to
+   *  outputFolder and writes; integration tests assert on this value. Empty on ERROR. */
+  reportFiles: Record<string, string>;
 }
 
 /** Construct the single success outcome. */
-function succeed(statusLine: string, body: string[]): ScriptOutput;
+function succeed(statusLine: string, body: string[], outputFolder: string, reportFiles: Record<string, string>): ScriptOutput;
 
 /** Thrown from any stage to terminate with an ERROR output; caught once in main.ts. */
 class ExitWithError extends Error {
@@ -590,7 +606,6 @@ Build with esbuild, use --format=cjs to use require() over import;
 
 Create a file version-check.ts for checking the node version and import it first in the entry point before any other imports. --format=cjs ensures that this runs before any require() calls and checks the version before potentially failing on importing undefined modules.
 
-// REVIEW: minor typos left unfixed per instructions: "Dependcencies" (fixed in the filled-in code block only), "rport" (download error message), "includiong" (crash message), "relavent"/"apporpriate" (not-in-a-Git-repo message), "one of more" — none survive into implemented behaviour except the ones inside quoted output messages, which will otherwise ship verbatim.
 
 # Development process
 
@@ -599,3 +614,32 @@ Once this plan is complete and I have agreed it, we will operate a development p
 While planning: think through details carefully and write something that you think will work
 
 While developing: DO NOT CHANGE THE PLAN. If you discover that the plan can't be implemented as specified because the BEHAVIOUR doesn't work, stop and ask for guidance. It's OK to make trivial changes e.g. if the names or paths specified in the plan aren't right. Changes of behaviour ALWAYS need human confirmation.
+
+## Phasing
+
+Implementation happens in two phases, with a human review between them. The split is approximate — the guiding principles matter, not the exact contents of each phase.
+
+**Phase 1 — a reviewable slice that fixes every architectural and technical decision.** A thin-but-complete vertical slice rather than a full implementation of the first few stages:
+
+- All structural code final: build setup, entry point / `runCli` orchestration, output handling, argument parsing.
+- Every stage implemented to happy-path depth, so a real fixture repo goes in and a real report comes out end to end.
+- The complete test utility library (fetch mocking, filesystem setup helpers, change-record builders, process-test runner).
+- A representative subset of the plan's tests (roughly a third), chosen so that every test utility and every test tier is exercised at least two or three times — an abstraction with one usage can't be judged. Include some error-path and process tests, not just happy paths.
+
+The review focuses on code layout and especially on the test abstractions: tests should be minimal, elegant and easy to read.
+
+**Phase 2 — fill-in.** Everything repetitive or edge-case: remaining recognition rules and blockers, detection/report refinements, retries, remaining error paths, and the rest of the tests. No new files, helpers or test styles — everything slots into patterns approved in phase 1. Deviations from that expectation are a signal to stop and ask.
+
+# Post-implementation review
+
+Items to check after implementation, not to be acted on during it. These are tests flagged as needing special attention in a git-repo-hosted test suite; review how each turned out.
+
+1. **`integration-test: script exits with the not-in-a-Git-repo error outside a repo`** — how did the test control cwd? `runCli` using `process.cwd()` means the test either calls `process.chdir()` (global state, hostile to parallel tests in the same worker) or `runCli` grew cwd injection. Also check the temp dir used is genuinely outside any git repo (a defensive assertion in the helper is cheap).
+
+2. **Git not installed — untested gap.** The error message claims to cover "not a repo *or* Git is not installed", but those fail differently: a non-zero exit vs `execFileSync` throwing ENOENT. The code must handle both shapes; only one is tested. Testable as a process-test spawning the script with a PATH containing no `git`. Decide: add the test or explicitly accept the gap.
+
+3. **Default-root behaviour is only testable at unit level.** Every integration and process test must pass `--root={fixture}` — without it the script scans the entire ag-skills repo (every fixture plus the repo's own package.json). So the unit test of `determineRoot` is the only coverage the default path can get, and the happy-path process test exercises `--root`, not the no-args invocation SKILL.md calls the normal case. Confirm this held and nothing "fixed" it.
+
+4. **Ignored-package.json test** — confirm the runtime-written ignored file is cleaned up even when the test fails (its `.gitignore` is committed, the file itself is written at runtime).
+
+5. **No-package.json-under-root fixture** — confirm the fixture uses a committed dummy file (git can't track an empty folder) and the test still expresses its intent clearly.
