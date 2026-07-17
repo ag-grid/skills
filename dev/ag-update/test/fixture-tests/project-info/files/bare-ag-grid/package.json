@@ -1,0 +1,6 @@
+{
+  "name": "bare-ag-grid",
+  "dependencies": {
+    "ag-grid": "18.0.0"
+  }
+}

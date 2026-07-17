@@ -1,0 +1,6 @@
+{
+  "name": "non-concrete",
+  "dependencies": {
+    "ag-grid-community": "latest"
+  }
+}

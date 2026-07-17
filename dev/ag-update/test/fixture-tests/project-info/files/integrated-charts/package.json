@@ -1,0 +1,6 @@
+{
+  "name": "integrated-charts",
+  "dependencies": {
+    "ag-grid-enterprise": "32.0.0"
+  }
+}

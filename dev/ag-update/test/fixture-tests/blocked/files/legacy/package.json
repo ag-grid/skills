@@ -1,0 +1,1 @@
+{ "name": "legacy", "dependencies": { "ag-grid-vue": "^31.0.0" } }

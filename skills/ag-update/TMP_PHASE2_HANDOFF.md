@@ -2,6 +2,54 @@
 
 Context that lived only in the phase-1 planning session. The spec is TMP_V2_PLAN.md; phase 1 (complete, 22 tests green) is at `scripts/analyse-update.js` + `scripts/dev/`.
 
+## Phase 2 — completed (60 tests green, typecheck clean, bundle rebuilt)
+
+Run the suite with `npm test` **from `scripts/dev/`** (running vitest from the repo root sweeps the
+`external/` symlink and stale harness fixture copies — ignore that, it is a cwd artefact).
+
+Implemented in this pass:
+- **project-info.ts**: legacy scoped `@ag-grid-community/*` / `@ag-grid-enterprise/*` recognition
+  (prefix match, scoped wrappers -> frameworks); legacy top-level `ag-grid-charts-enterprise`;
+  blockers for bare `ag-grid`, the Vue 2 wrappers, grid major < 25, and non-concrete version specs;
+  integrated-charts version inference (grid major − 22) via a source grep.
+- **records.ts**: 3-attempt download retry (500ms, 2s) for network URLs; file:// and JSON-parse
+  failures are not retried.
+- **run.ts / main.ts**: up-front output-folder validation (non-empty dir, unwritable) as
+  ExitWithError, shared with the wrapper's write-time catch via `couldNotWriteError`.
+- Remaining tests across all tiers: getProjectInfo, detection, report, locate, download, output
+  folder, and crash (integration + process). New fixtures under `test/fixture-tests/` are staged.
+
+### Phase 2 — items awaiting human ruling (behaviour authored/interpreted during fill-in)
+
+1. **Integrated-charts detection markers**: source is grepped for `enableCharts` and
+   `IntegratedChartsModule` (`INTEGRATED_CHARTS_MARKERS` in project-info.ts). The plan says "enableCharts /
+   integrated-charts module usage" without an exact list — confirm the marker set.
+2. **Inferred charts frameworks = []** (vanilla): integrated charts has no wrapper of its own, so the
+   inferred dependency lists no frameworks. Confirm.
+3. **Retry policy scope**: only non-`file://` downloads retry; JSON-parse failures fail fast. Confirm.
+4. **Output-folder validation moved into `run()`** (before the download, fails fast). Stages still
+   never write — this is validation, not writing — but it is the one filesystem *check* in the core,
+   done so the unwritable / non-empty cases are integration-testable. Confirm the seam.
+5. **New test helpers**: `mockHttpSequence` (fetch-mock, for the fail-then-succeed retry test) and an
+   exported `realFetch` (for the one real-http test). Phase 2 expected "no new helpers"; these two were
+   required to test retries and real http. Confirm they're acceptable.
+6. **`MOCK_UNHANDLED_REJECTION` hook** now skips `run()` (else-branch in main.ts) so the crash under
+   test is the mocked rejection, not whatever a real repo scan produces. Confirm.
+7. **Authored blocker-reason wording**: non-concrete spec, bare `ag-grid` (expanded with the v18.1.2
+   rename note), below-floor. Confirm the phrasing that surfaces in the SUCCESS message.
+
+### Phase 2 — known gaps (accepted unless you want them closed)
+
+- **Git-not-installed path untested** (post-impl review item 2): `gitRepoRoot`'s catch handles both
+  ENOENT and non-zero exit, but only the not-a-repo shape is tested. Closing it needs a process test
+  with a `git`-less PATH.
+- **No Node@20 matrix process test**: the happy-path process test runs the compiled bundle under the
+  current Node, and the Node floor is covered by the node@18 test. The plan sketched a node@20 npx
+  invocation; not added.
+- **Build reproducibility**: `build.test.ts` passes from `scripts/dev/` but a build invoked from a
+  different cwd produced a differing bundle in one observation — pre-existing Phase 1 build behaviour,
+  not touched here. Worth a look if the bundle is ever built from elsewhere.
+
 ## Process
 
 - Phase 2 per the plan's "Phasing" section: fill-in only, no new files/helpers/test styles; the approved phase-1 code is the style reference. Sequential, fresh context.

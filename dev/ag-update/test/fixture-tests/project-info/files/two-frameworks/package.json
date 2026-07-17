@@ -1,0 +1,8 @@
+{
+  "name": "two-frameworks",
+  "dependencies": {
+    "ag-grid-community": "33.0.0",
+    "ag-grid-react": "33.0.0",
+    "ag-grid-angular": "33.0.0"
+  }
+}

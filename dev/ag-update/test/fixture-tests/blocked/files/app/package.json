@@ -1,0 +1,1 @@
+{ "name": "app", "dependencies": { "ag-grid-community": "^32.1.0", "ag-grid-react": "^32.1.0" } }

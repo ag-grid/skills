@@ -1,0 +1,8 @@
+{
+  "name": "legacy-scoped",
+  "dependencies": {
+    "@ag-grid-community/core": "31.0.0",
+    "@ag-grid-enterprise/range-selection": "31.0.0",
+    "@ag-grid-community/react": "31.0.0"
+  }
+}

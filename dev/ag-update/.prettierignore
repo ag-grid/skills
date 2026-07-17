@@ -1,0 +1,6 @@
+# Dependency lockfile
+package-lock.json
+
+# Test fixtures are byte-for-byte significant: source line numbers are asserted in snapshots and
+# one package.json is intentionally malformed. Never reformat them.
+test/fixture-tests/**/files/

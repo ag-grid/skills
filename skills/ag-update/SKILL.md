@@ -29,7 +29,8 @@ On success, the script's output summarises the projects found and the reports wr
 
 Invoking with no arguments is the normal case. If an error message tells you to add arguments, it will tell you which. For documentation, the supported arguments are:
 
-    --root=path # folder to scan for projects (optional; default=root of the current Git repo)
+    --root=path # folder to scan for projects (optional; default=root of the current Git repo, or the current directory if not inside a Git repo)
     --output-folder=path # (optional; folder to write output files to; default is to pick a new temporary folder under os.tmpdir())
     --allow-old-version (skip the version check, allowing an old version of the skill to be used)
     --changes-url-prefix=url (optional; default "https://ag-grid.com/", file urls supported; used for testing do not add this argument unless explicitly instructed to)
+    --source-glob=pattern # (optional; glob selecting which source files are searched for change indicators; default covers common source extensions. The effective glob is reported in the success output.)

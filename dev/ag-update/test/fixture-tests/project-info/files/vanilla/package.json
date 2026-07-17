@@ -1,0 +1,6 @@
+{
+  "name": "vanilla",
+  "dependencies": {
+    "ag-grid-community": "32.0.0"
+  }
+}

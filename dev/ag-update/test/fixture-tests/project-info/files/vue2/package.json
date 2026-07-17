@@ -1,0 +1,7 @@
+{
+  "name": "vue2",
+  "dependencies": {
+    "ag-grid-community": "31.0.0",
+    "ag-grid-vue": "31.0.0"
+  }
+}

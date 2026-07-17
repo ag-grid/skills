@@ -1,0 +1,6 @@
+{
+  "name": "below-floor",
+  "dependencies": {
+    "ag-grid-community": "24.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "standard",
+  "dependencies": {
+    "ag-grid-community": "^32.1.0",
+    "ag-grid-enterprise": "32.1.0",
+    "ag-grid-react": "32.1.0"
+  }
+}
