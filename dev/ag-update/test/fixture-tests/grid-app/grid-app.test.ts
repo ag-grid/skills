@@ -21,71 +21,68 @@ test("happy path — fixture repo in, reports out, SUCCESS message rendered", as
   expect(portable(render(output))).toMatchInlineSnapshot(`
     "SUCCESS: report files produced
 
-    The latest versions are: Grid v34.0.0.
+    ## What was scanned
 
-    Discovered the following projects and created update reports:
+    - Scan root: $REPO_ROOT$/dev/ag-update/test/fixture-tests/grid-app/files
+    - Source files were searched with the glob: **/*.{js,jsx,mjs,cjs,ts,tsx,vue,svelte,astro,html} (default)
+    - Discovered 2 package.json files:
+      - app/package.json
+      - lib/package.json
 
-    - app: using Grid v32.1.0 -> $TMPDIR$/app-report.md
+    ## Projects to update
+
+    - app: Grid v32.1.0 -> v34.0.0 (report: $TMPDIR$/report--app.md)
+
+    Latest available versions: Grid v34.0.0.
+
+    These reports were generated for target version: Grid v34.0.0.
 
     The following projects contain no AG dependencies and were not analysed:
 
     - lib
 
-    Source files were searched with the glob: **/*.{js,jsx,mjs,cjs,ts,tsx,vue,svelte,astro,html} (override with --source-glob).
+    ## Before applying: verify the reports are correct
 
-    Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.
+    1. Verify the scan. The default source glob was used — check the scan root and the discovered package.json files listed above are the ones you expected, and that the glob covers the file types this codebase uses for source. If not, re-run with an appropriate --root and/or --source-glob.
 
-    Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.
+    2. Verify the target version. These reports were generated for the target version shown above (the latest of each product unless overridden). To target an earlier version, re-run setting the per-product flag(s) — --grid-target-version, --charts-target-version, --studio-target-version — as major.minor (e.g. --grid-target-version=34.2). Note: if a project uses several products and you set a target for one, you must set one for all of them, using versions you have confirmed are compatible.
 
-    Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan.
+    Once you have verified the above and the reports are correct, follow the update guide to apply them:
+      $REPO_ROOT$/skills/ag-update/applying-updates.md
     "
   `);
-  expect(portable(output.reportFiles["app-report.md"])).toMatchInlineSnapshot(`
-    "# AG dependency update report
+  expect(portable(output.reportFiles["report--app.md"])).toMatchInlineSnapshot(`
+    "# Update report for $REPO_ROOT$/dev/ag-update/test/fixture-tests/grid-app/files/app/package.json
 
-    This file contains a list of changes to apply to the project described in the Scope section
-    below. Combine it with your knowledge of the coding conventions and verification tools
-    available for this project to plan and execute an update. After applying these changes use
-    the appropriate tools at your disposal to validate that the changes were successful, such as
-    running the build, typechecking, tests, and starting the dev server and accessing it with a
-    browser.
+    See [summary.md](summary.md) for how to apply these changes.
 
-    # Scope
+    # Project Dependencies
 
-    - Project path: app
     - Grid: current version 32.1.0, target version 34.0.0, used via react
 
-    # Required changes
+    # Changes
 
-    ## Grid
+    ## Grid v32.x -> v33.x
 
-    ### Grid v32.x -> v33.x
+    ### oldGridApi
 
-    #### REMOVED: oldGridApi
+    - **Type:** TRANSITION
+    - **Optionality:** MANDATORY — old API removed
 
-    As of v33.0.0, oldGridApi has been removed. Use api.newGridApi instead.
+    Use api.newGridApi instead.
 
-    Mitigation: Replace calls to \`oldGridApi()\` with \`api.newGridApi()\`.
+    Mitigation (apply these steps to complete this update): Replace calls to \`oldGridApi()\` with \`api.newGridApi()\`.
 
     Detected in:
 
-    - src/main.js:4 (oldGridApi)
+    - src/main.js ("oldGridApi")
 
-    # Optional changes
+    ## Grid v33.x -> v34.x
 
-    The changes in this section are optional: the project will still work if they are accepted as-is. Resolve each decision below with the user while planning the update.
+    ### rows are now sorted stably by default
 
-    ## Grid
-
-    ### Grid v33.x -> v34.x
-
-    #### DECISION: rows are now sorted stably by default
-
-    Mitigation: none — this change can only be accepted.
-
-    Detected in: this change cannot be ruled out by searching the source code; check whether it applies to this project during planning.
-
-    TODO add style changes and advice on QA based on style and behaviour changes
+    - **Type:** BEHAVIOUR
+    - **Optionality:** MANDATORY — there is no documented flag to restore the old behaviour
     "
   `);
 });
@@ -95,7 +92,7 @@ test("report written per project with expected filename (asserted via reportFile
   const output = await run("--root", FIXTURE, "--allow-old-version");
   // one report for "app"; "lib" has no AG dependencies so gets no report
   expect(Object.keys(output.reportFiles).sort()).toEqual([
-    "app-report.md",
+    "report--app.md",
     "summary.md",
   ]);
 });
@@ -132,9 +129,10 @@ test("exits with an error when projects are found but none are updatable", async
 test("--root limits located projects to those under the root folder", async () => {
   serveChangelogs({ grid: gridChangelog() });
   const output = await run("--root", `${FIXTURE}/app`, "--allow-old-version");
-  // scoped to "app" only; "lib" sits outside the root and is not located
+  // scoped to "app" only; "lib" sits outside the root and is not located. The root IS the
+  // project here, so its relative path is "." and the report file is the bare report.md.
   expect(Object.keys(output.reportFiles).sort()).toEqual([
-    "app-report.md",
+    "report.md",
     "summary.md",
   ]);
   expect(render(output)).not.toContain("/lib");
@@ -145,9 +143,9 @@ test("project with no detected changes still gets a report stating none were det
     grid: changelog({ mostRecentVersion: "34.0.0", changes: [] }),
   });
   const output = await run("--root", `${FIXTURE}/app`, "--allow-old-version");
-  const report = output.reportFiles["app-report.md"];
-  expect(report).toContain("No required changes were detected.");
-  expect(report).toContain("No optional changes were detected.");
+  // root IS the project, so the report file is the bare report.md (relative path ".").
+  const report = output.reportFiles["report.md"];
+  expect(report).toContain("No relevant changes were detected.");
 });
 
 test("changelogs are fetched only for products in use across the projects", async () => {

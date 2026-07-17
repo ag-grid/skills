@@ -10,7 +10,7 @@ test("ERROR output exits with code 1", () => {
     stderr:
     ERROR: unknown argument --nope
 
-    Supported arguments: --root=path, --output-folder=path, --allow-old-version, --changes-url-prefix=url, --source-glob=pattern.
+    Supported arguments: --root=path, --output-folder=path, --allow-old-version, --changes-url-prefix=url, --source-glob=pattern, --grid-target-version=major.minor, --charts-target-version=major.minor, --studio-target-version=major.minor.
 
     Invoke the command again using only supported arguments.
     "

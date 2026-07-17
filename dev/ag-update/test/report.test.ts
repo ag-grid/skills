@@ -56,7 +56,7 @@ const changelogs = new Map<Product, CompiledChangelog>([
 ]);
 
 test("report groups changes by product and version transition", () => {
-  const report = renderReport(
+  const { content: report } = renderReport(
     gridAndChartsProject([
       {
         product: "grid",
@@ -91,73 +91,60 @@ test("report groups changes by product and version transition", () => {
     changelogs,
   );
   expect(report).toMatchInlineSnapshot(`
-    "# AG dependency update report
+    "# Update report for /repo/app/package.json
 
-    This file contains a list of changes to apply to the project described in the Scope section
-    below. Combine it with your knowledge of the coding conventions and verification tools
-    available for this project to plan and execute an update. After applying these changes use
-    the appropriate tools at your disposal to validate that the changes were successful, such as
-    running the build, typechecking, tests, and starting the dev server and accessing it with a
-    browser.
+    See [summary.md](summary.md) for how to apply these changes.
 
-    # Scope
+    # Project Dependencies
 
-    - Project path: app
     - Grid: current version 32.1.0, target version 34.0.0, used via react
     - Charts: current version 10.1.0, target version 12.0.0, used via the vanilla javascript API
 
-    # Required changes
+    # Changes
 
-    ## Grid
+    ## Grid v32.x -> v33.x
 
-    ### Grid v32.x -> v33.x
+    ### oldGridApi
 
-    #### REMOVED: oldGridApi
+    - **Type:** TRANSITION
+    - **Optionality:** MANDATORY — old API removed
 
-    As of v33.0.0, oldGridApi has been removed. Use api.newGridApi instead.
+    Use api.newGridApi instead.
 
-    Mitigation: Replace calls to \`oldGridApi()\` with \`api.newGridApi()\`.
+    Mitigation (apply these steps to complete this update): Replace calls to \`oldGridApi()\` with \`api.newGridApi()\`.
 
     Detected in:
 
-    - src/main.js:4 (oldGridApi)
+    - src/main.js ("oldGridApi")
 
-    ### Grid v33.x -> v34.x
+    ## Grid v33.x -> v34.x
 
-    #### REQUIRED: sizeColumnsToFit now requires a params object
+    ### sizeColumnsToFit now requires a params object
+
+    - **Type:** REQUIREMENT
+    - **Optionality:** MANDATORY — new requirement; no option to restore old behaviour
 
     Pass a params object instead.
 
-    Detected in: this change cannot be ruled out by searching the source code; check whether it applies to this project during planning.
+    ## Charts v10.x -> v11.x
 
-    # Optional changes
+    ### legends now paginate by default
 
-    The changes in this section are optional: the project will still work if they are accepted as-is. Resolve each decision below with the user while planning the update.
-
-    ## Charts
-
-    ### Charts v10.x -> v11.x
-
-    #### DECISION: legends now paginate by default
-
-    Mitigation: none — this change can only be accepted.
-
-    Detected in: this change cannot be ruled out by searching the source code; check whether it applies to this project during planning.
-
-    TODO add style changes and advice on QA based on style and behaviour changes
+    - **Type:** BEHAVIOUR
+    - **Optionality:** MANDATORY — there is no documented flag to restore the old behaviour
     "
   `);
 });
 
-test("requirement/removal/dependency changes appear under Required changes; behaviour/style under Optional changes", () => {
-  const report = renderReport(
+test("each change renders its type and optionality inline (mandatory vs decision-required)", () => {
+  const { content: report } = renderReport(
     gridAndChartsProject(
       [
-        transition({ oldApi: "oldGridApi" }),
+        transition({ oldApi: "oldGridApi", removedFrom: "33.0.0" }),
         requirement(),
         dependencyChange({ dependency: "react", minVersion: "18.0.0" }),
-        behaviourChange(),
-        styleChange(),
+        behaviourChange({ mitigation: [mitigation("set the flag")] }),
+        styleChange({ mitigation: [mitigation("override the CSS")] }),
       ].map((change) => ({
         product: "grid" as const,
         change,
@@ -166,23 +153,29 @@ test("requirement/removal/dependency changes appear under Required changes; beha
     ),
     changelogs,
   );
-  const requiredSection = report.slice(
-    report.indexOf("# Required changes"),
-    report.indexOf("# Optional changes"),
+  // Mandatory changes carry the type and a MANDATORY optionality line, no DECISION_REQUIRED flag.
+  expect(report).toContain("### oldGridApi");
+  expect(report).toContain("- **Type:** TRANSITION");
+  expect(report).toContain("- **Optionality:** MANDATORY — old API removed");
+  expect(report).toContain(`### ${requirement().title}`);
+  expect(report).toContain("- **Type:** REQUIREMENT");
+  expect(report).toContain("### react >= 18.0.0");
+  expect(report).toContain("- **Type:** DEPENDENCY");
+  // Optional (mitigatable) behaviour/style changes are DECISION_REQUIRED DISCARD_TO_ACCEPT.
+  expect(report).toContain(`### ${behaviourChange().title}`);
+  expect(report).toContain(
+    "- **Optionality:** DECISION_REQUIRED DISCARD_TO_ACCEPT — follow mitigation advice to restore old behaviour",
   );
-  const optionalSection = report.slice(report.indexOf("# Optional changes"));
-  expect(requiredSection).toContain("#### REMOVED: oldGridApi");
-  expect(requiredSection).toContain(`#### REQUIRED: ${requirement().title}`);
-  expect(requiredSection).toContain("#### DEPENDENCY: react >= 18.0.0");
-  expect(optionalSection).toContain(
-    `#### DECISION: ${behaviourChange().title}`,
+  expect(report).toContain(`### ${styleChange().title}`);
+  expect(report).toContain(
+    "- **Optionality:** DECISION_REQUIRED DISCARD_TO_ACCEPT — follow mitigation advice to restore the previous appearance",
   );
-  expect(optionalSection).toContain(`#### DECISION: ${styleChange().title}`);
 });
 
 test("mitigation entries are filtered to the product's frameworks plus javascript", () => {
   // gridAndChartsProject uses grid via react, so only the react and javascript entries apply.
-  const report = renderReport(
+  // Two applicable entries combine into a multi-line body, so the mitigation is split to a file.
+  const { content, files } = renderReport(
     gridAndChartsProject([
       {
         product: "grid",
@@ -198,13 +191,40 @@ test("mitigation entries are filtered to the product's frameworks plus javascrip
     ]),
     changelogs,
   );
-  expect(report).toContain("use the react codemod");
-  expect(report).toContain("call the new API directly");
-  expect(report).not.toContain("adjust the angular module");
+  const [fileContent] = Object.values(files);
+  expect(content).toContain("word guide in");
+  expect(fileContent).toContain("use the react codemod");
+  expect(fileContent).toContain("call the new API directly");
+  expect(fileContent).not.toContain("adjust the angular module");
 });
 
-test("occurrences are listed with file and line; detectWords-null changes get the cannot-rule-out sentence", () => {
-  const report = renderReport(
+test("a single-line mitigation is inlined; a multi-line one is split into a numbered file", () => {
+  const { content, files } = renderReport(
+    gridAndChartsProject([
+      {
+        product: "grid",
+        change: transition({
+          oldApi: "oldGridApi",
+          removedFrom: "33.0.0",
+          mitigation: [mitigation("First line.\n\nSecond paragraph here.")],
+        }),
+        occurrences: [],
+      },
+    ]),
+    changelogs,
+  );
+  expect(Object.keys(files)).toEqual(["1-oldgridapi.md"]);
+  expect(files["1-oldgridapi.md"]).toBe(
+    "# Mitigation: oldGridApi\n\nFirst line.\n\nSecond paragraph here.\n",
+  );
+  // Five whitespace-separated words: "First", "line.", "Second", "paragraph", "here."
+  expect(content).toContain(
+    "Mitigation (apply these steps to complete this update): 5 word guide in [1-oldgridapi.md](1-oldgridapi.md)",
+  );
+});
+
+test("occurrences collapse to one line per file with quoted matches; a change with no occurrences gets no Detected in block", () => {
+  const { content: report } = renderReport(
     gridAndChartsProject([
       {
         product: "grid",
@@ -219,8 +239,45 @@ test("occurrences are listed with file and line; detectWords-null changes get th
     ]),
     changelogs,
   );
-  expect(report).toContain("- src/a.js:10 (gridApiA)");
+  expect(report).toContain('- src/a.js ("gridApiA")');
+  // The detectWords-null requirement is still reported, but with no occurrence block.
+  expect(report).toContain(`### ${requirement().title}`);
+  expect(report).not.toContain("cannot be ruled out");
+  expect(report).not.toContain("Detected in: this change");
+});
+
+test("occurrences dedupe matched strings per file, and cap at 5 files with a search hint", () => {
+  const occurrences = [
+    { file: "src/a.tsx", line: 2, word: "ag-grid-community" },
+    { file: "src/a.tsx", line: 3, word: "ag-grid-community" },
+    { file: "src/a.tsx", line: 4, word: "ag-grid-react" },
+    ...Array.from({ length: 5 }, (_, i) => ({
+      file: `src/f${i}.tsx`,
+      line: 1,
+      word: "ag-grid-community",
+    })),
+  ];
+  const { content: report } = renderReport(
+    gridAndChartsProject([
+      {
+        product: "grid",
+        change: transition({
+          oldApi: "oldGridApi",
+          removedFrom: "33.0.0",
+          detectWords: ["ag-grid-community", "ag-grid-react"],
+        }),
+        occurrences,
+      },
+    ]),
+    changelogs,
+  );
+  // One line per file; matches within a file are deduped and quoted, in first-seen order.
   expect(report).toContain(
-    "this change cannot be ruled out by searching the source code",
+    '- src/a.tsx ("ag-grid-community", "ag-grid-react")',
+  );
+  // Six distinct files, so the first five are listed and the last is summarised with a hint.
+  expect(report).not.toContain("src/f4.tsx");
+  expect(report).toContain(
+    "- ... and 1 more file, search for `ag-grid-community`, `ag-grid-react` to find them all",
   );
 });

@@ -28,8 +28,9 @@ test("with no --root and no Git repo, the scan falls back to cwd and succeeds", 
   const output = await inDirectory(dir, () => run("--allow-old-version"));
 
   expect(output.status).toBe("SUCCESS");
+  // The scanned project is cwd itself, so its relative path is "." → the bare report.md.
   expect(Object.keys(output.reportFiles).sort()).toEqual([
-    `${path.basename(dir)}-report.md`,
+    "report.md",
     "summary.md",
   ]);
 });

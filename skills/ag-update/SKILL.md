@@ -34,3 +34,8 @@ Invoking with no arguments is the normal case. If an error message tells you to 
     --allow-old-version (skip the version check, allowing an old version of the skill to be used)
     --changes-url-prefix=url (optional; default "https://ag-grid.com/", file urls supported; used for testing do not add this argument unless explicitly instructed to)
     --source-glob=pattern # (optional; glob selecting which source files are searched for change indicators; default covers common source extensions. The effective glob is reported in the success output.)
+    --grid-target-version=major.minor # (optional; the AG Grid version to generate the report for, e.g. 34.2. Default is the latest available.)
+    --charts-target-version=major.minor # (optional; the AG Charts version to generate the report for. Default is the latest available.)
+    --studio-target-version=major.minor # (optional; the AG Studio version to generate the report for. Default is the latest available.)
+
+Target versions are per product and given as major.minor (a minor is required; no patch). Each defaults to that product's latest. Only the latest versions of the AG products are guaranteed to be compatible with each other: if a project uses more than one AG product and you set a target version for any of them, you must set a target version for all of them, choosing versions you have confirmed are compatible.

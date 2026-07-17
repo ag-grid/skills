@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Build and test tooling for the ag-update analysis script. The shipped artifact is the committed analyse-update.js bundle; end users never npm-install this package.",
   "scripts": {
-    "build": "node build.mjs",
+    "build": "prettier --write . && node build.mjs",
     "cli": "node --experimental-strip-types src/main.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

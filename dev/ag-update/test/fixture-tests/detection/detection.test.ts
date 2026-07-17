@@ -53,6 +53,17 @@ function detectFor(
   ).changes;
 }
 
+/** Detect against the fixture with an explicit grid target version (default changelog latest is
+ *  34.0.0, project current is 32.0.0). */
+function detectWithTarget(target: string, ...changes: CompiledChange[]) {
+  return detectChanges(
+    project,
+    new Map([["grid", changelog({ changes })]]),
+    DEFAULT_SOURCE_GLOB,
+    new Map([["grid", target]]),
+  ).changes;
+}
+
 test("change with matching detectWords is included with file/line occurrences", () => {
   const detected = detect(transition({ detectWords: ["oldGridApi"] }));
   expect(detected).toHaveLength(1);
@@ -96,16 +107,65 @@ test("changes outside the project's version range are not included", () => {
   ).toEqual([]);
 });
 
-test("transition deprecated but not removed by the target version is excluded", () => {
+test("transition deprecated but not removed is included (optional migration), ranged on deprecatedFrom", () => {
+  // Deprecations are surfaced now (they were previously excluded): the old API still works, so
+  // migration is optional. Ranged on deprecatedFrom since there is no removedFrom.
+  const detected = detect(
+    transition({
+      removedFrom: null,
+      deprecatedFrom: "33.0.0",
+      detectWords: null,
+    }),
+  );
+  expect(detected).toHaveLength(1);
+  expect(detected[0].change.type).toBe("transition");
+});
+
+test("transition deprecated before the project's current version is not included", () => {
+  // deprecatedFrom 31.0.0 is at or below the project's current 32.0.0, so it predates this upgrade.
   expect(
     detect(
       transition({
         removedFrom: null,
-        deprecatedFrom: "33.0.0",
+        deprecatedFrom: "31.0.0",
         detectWords: null,
       }),
     ),
   ).toEqual([]);
+});
+
+test("a target below the latest excludes changes introduced after the target", () => {
+  const detected = detectWithTarget(
+    "33.0",
+    transition({
+      oldApi: "removedAt33",
+      removedFrom: "33.0.0",
+      detectWords: null,
+    }),
+    transition({
+      oldApi: "removedAt34",
+      removedFrom: "34.0.0",
+      detectWords: null,
+    }),
+  );
+  expect(detected).toHaveLength(1);
+  const change = detected[0].change;
+  if (change.type !== "transition") throw new Error("expected a transition");
+  expect(change.oldApi).toBe("removedAt33");
+});
+
+test("a transition removed after the target is included via its deprecation version", () => {
+  // removedFrom 34.0.0 is after the 33.0 target, so it ranges on deprecatedFrom (33.0.0) and is
+  // surfaced (as an optional migration) rather than excluded.
+  const detected = detectWithTarget(
+    "33.0",
+    transition({
+      removedFrom: "34.0.0",
+      deprecatedFrom: "33.0.0",
+      detectWords: null,
+    }),
+  );
+  expect(detected).toHaveLength(1);
 });
 
 test("framework-scoped change excluded when the framework is not in the product's frameworks", () => {

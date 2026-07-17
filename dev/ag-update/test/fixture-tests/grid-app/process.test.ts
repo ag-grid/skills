@@ -26,28 +26,39 @@ test("happy path — fixture repo in, reports out, SUCCESS on stderr, exit code 
     stderr:
     SUCCESS: report files produced
 
-    The latest versions are: Grid v34.0.0.
+    ## What was scanned
 
-    Discovered the following projects and created update reports:
+    - Scan root: $REPO_ROOT$/dev/ag-update/test/fixture-tests/grid-app/files
+    - Source files were searched with the glob: **/*.{js,jsx,mjs,cjs,ts,tsx,vue,svelte,astro,html} (default)
+    - Discovered 2 package.json files:
+      - app/package.json
+      - lib/package.json
 
-    - app: using Grid v32.1.0 -> $TMPDIR$/out/app-report.md
+    ## Projects to update
+
+    - app: Grid v32.1.0 -> v34.0.0 (report: $TMPDIR$/out/report--app.md)
+
+    Latest available versions: Grid v34.0.0.
+
+    These reports were generated for target version: Grid v34.0.0.
 
     The following projects contain no AG dependencies and were not analysed:
 
     - lib
 
-    Source files were searched with the glob: **/*.{js,jsx,mjs,cjs,ts,tsx,vue,svelte,astro,html} (override with --source-glob).
+    ## Before applying: verify the reports are correct
 
-    Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.
+    1. Verify the scan. The default source glob was used — check the scan root and the discovered package.json files listed above are the ones you expected, and that the glob covers the file types this codebase uses for source. If not, re-run with an appropriate --root and/or --source-glob.
 
-    Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.
+    2. Verify the target version. These reports were generated for the target version shown above (the latest of each product unless overridden). To target an earlier version, re-run setting the per-product flag(s) — --grid-target-version, --charts-target-version, --studio-target-version — as major.minor (e.g. --grid-target-version=34.2). Note: if a project uses several products and you set a target for one, you must set one for all of them, using versions you have confirmed are compatible.
 
-    Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan.
+    Once you have verified the above and the reports are correct, follow the update guide to apply them:
+      $REPO_ROOT$/skills/ag-update/applying-updates.md
     "
   `);
   // the wrapper joined reportFiles to the output folder and wrote them
   expect(fs.readdirSync(outputFolder).sort()).toEqual([
-    "app-report.md",
+    "report--app.md",
     "summary.md",
   ]);
 });

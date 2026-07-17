@@ -1,0 +1,8 @@
+{
+  "name": "multi",
+  "private": true,
+  "dependencies": {
+    "ag-grid-community": "32.1.0",
+    "ag-charts-community": "10.1.0"
+  }
+}

@@ -3,6 +3,7 @@
  *  comment — means the change is included with its occurrences; interpreting matches is the
  *  planning agent's job. */
 import { searchFixedStrings } from "./files.ts";
+import { relevantVersion } from "./optionality.ts";
 import {
   compareVersions,
   type CompiledChange,
@@ -14,11 +15,13 @@ import {
   type ProjectInfo,
 } from "./types.ts";
 
-/** Runs detection for one project against the downloaded changelogs. */
+/** Runs detection for one project against the downloaded changelogs. `targets` gives the effective
+ *  target version per product; a product absent from the map defaults to its changelog's latest. */
 export function detectChanges(
   project: ProjectInfo,
   changelogs: Map<Product, CompiledChangelog>,
   sourceGlob: string[],
+  targets: Map<Product, string> = new Map(),
 ): ProjectDetectionResult {
   const changes: DetectedChange[] = [];
   /** Changes with detectWords, pending the single per-project source search. */
@@ -27,12 +30,10 @@ export function detectChanges(
   for (const dependency of project.dependencies) {
     const changelog = changelogs.get(dependency.product);
     if (!changelog) continue;
+    const target =
+      targets.get(dependency.product) ?? changelog.mostRecentVersion;
     for (const change of changelog.changes) {
-      const candidate = classifyCandidate(
-        change,
-        dependency,
-        changelog.mostRecentVersion,
-      );
+      const candidate = classifyCandidate(change, dependency, target);
       if (candidate === "excluded") continue;
       const detected: DetectedChange = {
         product: dependency.product,
@@ -54,7 +55,7 @@ type Candidate = "excluded" | "included" | "search";
 function classifyCandidate(
   change: CompiledChange,
   dependency: Dependency,
-  mostRecentVersion: string,
+  target: string,
 ): Candidate {
   if (change.type === "dependency") {
     // No detectWords and no version check: dependency minimums are constraints of the framework
@@ -71,12 +72,14 @@ function classifyCandidate(
     !dependency.frameworks.includes(change.framework)
   )
     return "excluded";
-  const version =
-    change.type === "transition" ? change.removedFrom : change.version;
-  if (version === null) return "excluded"; // transition deprecated but not removed by the target version
+  // The version at which the change becomes relevant, given the target: a removal at removedFrom
+  // (if removed by the target), else the deprecation at deprecatedFrom, else the change's own
+  // version. Null = a removal-without-deprecation scheduled after the target: not yet relevant.
+  const version = relevantVersion(change, target);
+  if (version === null) return "excluded";
   const inRange =
     compareVersions(version, dependency.currentVersion) > 0 &&
-    compareVersions(version, mostRecentVersion) <= 0;
+    compareVersions(version, target) <= 0;
   if (!inRange) return "excluded";
   // detectWords null = cannot be ruled out by searching (per the interface contract).
   return change.detectWords === null ? "included" : "search";

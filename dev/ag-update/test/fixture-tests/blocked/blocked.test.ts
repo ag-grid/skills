@@ -17,11 +17,11 @@ test("blocked project gets no report and is listed with its reason in the SUCCES
   serveChangelogs({ grid: changelog({ mostRecentVersion: "34.0.0" }) });
   const output = await run("--root", FILES, "--allow-old-version");
   expect(Object.keys(output.reportFiles).sort()).toEqual([
-    "app-report.md",
+    "report--app.md",
     "summary.md",
   ]);
   const message = render(output);
   expect(message).toContain("cannot be updated by this skill");
   expect(message).toContain("migrate their application to Vue 3");
-  expect(message).not.toContain("legacy-report.md");
+  expect(message).not.toContain("report--legacy.md");
 });

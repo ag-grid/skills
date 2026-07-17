@@ -5,6 +5,7 @@ import { parseArgs } from "./args.ts";
 import { detectChanges } from "./detect.ts";
 import { findGitRoot } from "./files.ts";
 import {
+  addNotice,
   ExitWithError,
   render,
   stringifyError,
@@ -14,9 +15,19 @@ import {
 import { getProjectInfo } from "./project-info.ts";
 import { determineRoot, locateProjects } from "./projects.ts";
 import { downloadChangeRecords } from "./records.ts";
-import { renderReport, reportFileName, PRODUCT_LABELS } from "./report.ts";
-import { checkSkillVersion } from "./skill-version.ts";
+import {
+  createIndexCounter,
+  renderReport,
+  reportFileName,
+  PRODUCT_LABELS,
+} from "./report.ts";
+import { checkSkillVersion, skillFolder } from "./skill-version.ts";
+import { compareVersions } from "./types.ts";
+import type { Args } from "./args.ts";
 import type { CompiledChangelog, Product, ProjectInfo } from "./types.ts";
+
+/** File name of the static "how to apply an update" guide, shipped in the skill folder. */
+const GUIDE_FILE = "applying-updates.md";
 
 const PRODUCT_ORDER: Product[] = ["grid", "charts", "studio"];
 
@@ -30,9 +41,12 @@ export async function run(...argv: string[]): Promise<ScriptOutput> {
 
     const cwd = process.cwd();
     const root = determineRoot(cwd, args.root, findGitRoot(cwd));
-    const projects = locateProjects(root).map((projectPath) =>
-      getProjectInfo(projectPath, root, args.sourceGlob),
-    );
+    const projects = locateProjects(root)
+      .map((projectPath) => getProjectInfo(projectPath, root, args.sourceGlob))
+      // Sort for deterministic output regardless of filesystem-walk order.
+      .sort((a, b) =>
+        a.relativeProjectPath.localeCompare(b.relativeProjectPath),
+      );
 
     const updatable = projects.filter(
       (p) => p.dependencies.length > 0 && p.blockers.length === 0,
@@ -48,51 +62,57 @@ export async function run(...argv: string[]): Promise<ScriptOutput> {
     if (updatable.length === 0)
       throw noUpdateableProjects(root, blocked, noAgDependencies);
 
-    // Validate the output folder before the network round-trip, so a bad --output-folder fails fast.
-    const outputFolder = resolveOutputFolder(cwd, args.outputFolder);
-
     const productsInUse = PRODUCT_ORDER.filter((product) =>
       updatable.some((p) => p.dependencies.some((d) => d.product === product)),
     );
+    // Validate the target selection before the network round-trip, so bad targets fail fast.
+    validateTargetSelection(args.targetVersions, productsInUse, updatable);
+
+    // Validate the output folder before the network round-trip, so a bad --output-folder fails fast.
+    const outputFolder = resolveOutputFolder(cwd, args.outputFolder);
+
     const changelogs =
       productsInUse.length > 0
         ? await downloadChangeRecords(args.changesUrlPrefix, productsInUse)
         : new Map<Product, CompiledChangelog>();
 
+    // The effective target per product: an explicit --<product>-target-version, else the latest.
+    const targets = resolveTargets(
+      args.targetVersions,
+      productsInUse,
+      changelogs,
+    );
+
     const reportFiles: Record<string, string> = {};
+    // One counter shared across every project's report so split-out mitigation file names are
+    // unique across the whole run, not just within a single report.
+    const nextMitigationFileIndex = createIndexCounter();
     for (const project of updatable) {
-      reportFiles[reportFileName(project.projectPath)] = renderReport(
-        detectChanges(project, changelogs, args.sourceGlob),
+      const { content, files } = renderReport(
+        detectChanges(project, changelogs, args.sourceGlob, targets),
         changelogs,
+        targets,
+        nextMitigationFileIndex,
       );
+      reportFiles[reportFileName(project.relativeProjectPath)] = content;
+      Object.assign(reportFiles, files);
     }
 
-    const body: string[] = [];
-    if (productsInUse.length > 0) {
-      const latest = productsInUse.map(
-        (product) =>
-          `${PRODUCT_LABELS[product]} v${changelogs.get(product)!.mostRecentVersion}`,
-      );
-      body.push(`The latest versions are: ${latest.join(", ")}.`);
-    }
-    body.push(
-      "Discovered the following projects and created update reports:",
-      updatable
-        .map((project) => {
-          const using = project.dependencies
-            .map((d) => `${PRODUCT_LABELS[d.product]} v${d.currentVersion}`)
-            .join(", ");
-          return `- ${project.relativeProjectPath}: using ${using} -> ${path.join(outputFolder, reportFileName(project.projectPath))}`;
-        })
-        .join("\n"),
+    const productVersions = (versionOf: (product: Product) => string): string =>
+      productsInUse
+        .map((product) => `${PRODUCT_LABELS[product]} v${versionOf(product)}`)
+        .join(", ");
+
+    const body: string[] = [
+      scannedSection(root, args, projects),
+      updatableSection(updatable, targets, outputFolder),
+      `Latest available versions: ${productVersions((p) => changelogs.get(p)!.mostRecentVersion)}.`,
+      `These reports were generated for target version: ${productVersions((p) => targets.get(p)!)}.`,
       ...blockedSection(blocked),
       ...noAgDependenciesSection(noAgDependencies),
-      `Source files were searched with the glob: ${args.sourceGlob.join(", ")} (override with --source-glob).`,
-      "## How to apply these changes",
-      "Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.",
-      "Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.",
-      "Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan.",
-    );
+      ...verifySection(args),
+      `Once you have verified the above and the reports are correct, follow the update guide to apply them:\n  ${path.join(skillFolder(), GUIDE_FILE)}`,
+    ];
 
     const output = succeed(
       "report files produced",
@@ -106,6 +126,153 @@ export async function run(...argv: string[]): Promise<ScriptOutput> {
   } catch (e) {
     throw e instanceof ExitWithError ? e : crashError(e);
   }
+}
+
+/** Validates the per-product target selection using only local data (no network), so it fails
+ *  fast. Enforces: (1) targets set for products no project uses are noted and ignored; (2) an
+ *  all-or-nothing rule across products in use — you cannot mix an explicit target with a defaulted
+ *  (latest) one, because only the latest versions are guaranteed compatible; (3) no downgrades. */
+function validateTargetSelection(
+  targetVersions: Partial<Record<Product, string>>,
+  productsInUse: Product[],
+  updatable: ProjectInfo[],
+): void {
+  for (const product of PRODUCT_ORDER) {
+    if (
+      targetVersions[product] !== undefined &&
+      !productsInUse.includes(product)
+    ) {
+      addNotice(
+        `--${product}-target-version was given but no scanned project uses ${PRODUCT_LABELS[product]}, so it was ignored`,
+      );
+    }
+  }
+
+  const targeted = productsInUse.filter((p) => targetVersions[p] !== undefined);
+  if (targeted.length > 0 && targeted.length < productsInUse.length) {
+    const missing = productsInUse.filter(
+      (p) => targetVersions[p] === undefined,
+    );
+    throw new ExitWithError(
+      "a target version was set for some but not all of the products in use",
+      [
+        `Products in use: ${productsInUse.map((p) => PRODUCT_LABELS[p]).join(", ")}. Missing a target version: ${missing.map((p) => PRODUCT_LABELS[p]).join(", ")}.`,
+        "Specific product versions only work together in tested combinations; only the latest versions of each product are guaranteed to be compatible. If you set a target version for one product in use, you must set one for every product in use, choosing versions you have confirmed work together.",
+        `Invoke the command again setting a target for every product in use (e.g. ${productsInUse.map((p) => `--${p}-target-version=major.minor`).join(" ")}), or set none to target the latest of each.`,
+      ],
+    );
+  }
+
+  for (const project of updatable) {
+    for (const dependency of project.dependencies) {
+      const target = targetVersions[dependency.product];
+      if (
+        target !== undefined &&
+        compareVersions(target, dependency.currentVersion) < 0
+      ) {
+        throw new ExitWithError(
+          `target version ${target} for ${PRODUCT_LABELS[dependency.product]} is below the current version ${dependency.currentVersion} in ${project.relativeProjectPath}`,
+          [
+            "This skill only updates forwards. Choose a target version at or above the current version of every project.",
+            `Invoke the command again with --${dependency.product}-target-version set to ${dependency.currentVersion} or later.`,
+          ],
+        );
+      }
+    }
+  }
+}
+
+/** Resolves the effective target version per product in use: an explicit target overrides the
+ *  changelog's latest (the default). Errors when an explicit target is newer than the latest. */
+function resolveTargets(
+  targetVersions: Partial<Record<Product, string>>,
+  productsInUse: Product[],
+  changelogs: Map<Product, CompiledChangelog>,
+): Map<Product, string> {
+  const targets = new Map<Product, string>();
+  for (const product of productsInUse) {
+    const latest = changelogs.get(product)!.mostRecentVersion;
+    const specified = targetVersions[product];
+    if (specified !== undefined && compareVersions(specified, latest) > 0) {
+      throw new ExitWithError(
+        `target version ${specified} for ${PRODUCT_LABELS[product]} is newer than the latest available version ${latest}`,
+        [
+          `Choose a target version no newer than the latest available (${PRODUCT_LABELS[product]} v${latest}).`,
+          `Invoke the command again with --${product}-target-version set to ${latest} or earlier, or omit it to target the latest.`,
+        ],
+      );
+    }
+    targets.set(product, specified ?? latest);
+  }
+  return targets;
+}
+
+/** The "what was scanned" section: the resolved scan root, the source glob (flagged default vs
+ *  supplied), and every discovered package.json — so the agent can judge whether the scan was
+ *  appropriate before trusting the reports (see the verify step / the update guide). */
+function scannedSection(
+  root: string,
+  args: Args,
+  projects: ProjectInfo[],
+): string {
+  const globNote = args.sourceGlobIsDefault
+    ? "(default)"
+    : "(supplied via --source-glob)";
+  const discovered = projects.map((p) =>
+    p.relativeProjectPath === "."
+      ? "package.json"
+      : `${p.relativeProjectPath}/package.json`,
+  );
+  return [
+    "## What was scanned",
+    [
+      `- Scan root: ${root}`,
+      `- Source files were searched with the glob: ${args.sourceGlob.join(", ")} ${globNote}`,
+      `- Discovered ${discovered.length} package.json file${discovered.length === 1 ? "" : "s"}:`,
+      ...discovered.map((d) => `  - ${d}`),
+    ].join("\n"),
+  ].join("\n\n");
+}
+
+/** The updatable-projects section: one line per project showing the current and target version
+ *  of each product in use and the path to its generated report. */
+function updatableSection(
+  updatable: ProjectInfo[],
+  targets: Map<Product, string>,
+  outputFolder: string,
+): string {
+  const lines = updatable.map((project) => {
+    const versions = project.dependencies
+      .map(
+        (d) =>
+          `${PRODUCT_LABELS[d.product]} v${d.currentVersion} -> v${targets.get(d.product)}`,
+      )
+      .join(", ");
+    const reportPath = path.join(
+      outputFolder,
+      reportFileName(project.relativeProjectPath),
+    );
+    return `- ${project.relativeProjectPath}: ${versions} (report: ${reportPath})`;
+  });
+  return ["## Projects to update", lines.join("\n")].join("\n\n");
+}
+
+/** The "verify before applying" section: the re-run gates the agent must clear before trusting
+ *  the reports. The source-glob gate is only relevant when the glob was defaulted. */
+function verifySection(args: Args): string[] {
+  const gates: string[] = [];
+  if (args.sourceGlobIsDefault) {
+    gates.push(
+      "Verify the scan. The default source glob was used — check the scan root and the discovered package.json files listed above are the ones you expected, and that the glob covers the file types this codebase uses for source. If not, re-run with an appropriate --root and/or --source-glob.",
+    );
+  }
+  gates.push(
+    "Verify the target version. These reports were generated for the target version shown above (the latest of each product unless overridden). To target an earlier version, re-run setting the per-product flag(s) — --grid-target-version, --charts-target-version, --studio-target-version — as major.minor (e.g. --grid-target-version=34.2). Note: if a project uses several products and you set a target for one, you must set one for all of them, using versions you have confirmed are compatible.",
+  );
+  return [
+    "## Before applying: verify the reports are correct",
+    gates.map((gate, i) => `${i + 1}. ${gate}`).join("\n\n"),
+  ];
 }
 
 /** The blocked-projects section (heading + list), shared by the SUCCESS summary and the

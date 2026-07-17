@@ -15,12 +15,11 @@ export function mockCurrentSkillVersion(version: string | undefined): void {
   mockedSkillVersion = version;
 }
 
-/** Reads the local skill version from VERSION.md in the skill folder. The compiled bundle lives
- *  at skills/ag-update/scripts/, so walking up finds skills/ag-update/VERSION.md. In source form
- *  the code runs from dev/ag-update/src/, which is outside the skill folder, so a source-mode
- *  fallback points back at skills/ag-update/VERSION.md relative to the source dir. */
-export function localSkillVersion(): string {
-  if (mockedSkillVersion !== undefined) return mockedSkillVersion;
+/** Absolute path of the skill folder (the folder holding VERSION.md, SKILL.md and the other
+ *  skill files). The compiled bundle lives at skills/ag-update/scripts/, so walking up finds
+ *  skills/ag-update/; in source form the code runs from dev/ag-update/src/, which is outside the
+ *  skill folder, so a source-mode fallback points back at skills/ag-update/. */
+export function skillFolder(): string {
   // __dirname in the compiled CJS bundle; the import.meta fallback is for vitest's ESM
   // transform and is unreachable in the bundle (build.mjs silences the resulting warning).
   const dir =
@@ -29,19 +28,24 @@ export function localSkillVersion(): string {
       : new URL(".", import.meta.url).pathname;
   let walk = dir;
   for (let i = 0; i < 4; i++) {
-    const candidate = path.join(walk, "VERSION.md");
-    if (fs.existsSync(candidate)) {
-      return fs.readFileSync(candidate, "utf8").trim();
-    }
+    if (fs.existsSync(path.join(walk, "VERSION.md"))) return walk;
     walk = path.dirname(walk);
   }
   // Source-mode (npm run cli / non-mocked vitest): dir is dev/ag-update/src, from which the
-  // walk-up above cannot reach the skill folder. Point directly at the skill's VERSION.md.
-  const sourceFallback = path.join(dir, "../../../skills/ag-update/VERSION.md");
-  if (fs.existsSync(sourceFallback)) {
-    return fs.readFileSync(sourceFallback, "utf8").trim();
+  // walk-up above cannot reach the skill folder. Point directly at it.
+  const sourceFallback = path.resolve(dir, "../../../skills/ag-update");
+  if (fs.existsSync(path.join(sourceFallback, "VERSION.md"))) {
+    return sourceFallback;
   }
-  throw new Error(`VERSION.md not found in any folder above ${dir}`);
+  throw new Error(
+    `skill folder (containing VERSION.md) not found above ${dir}`,
+  );
+}
+
+/** Reads the local skill version from VERSION.md in the skill folder. */
+export function localSkillVersion(): string {
+  if (mockedSkillVersion !== undefined) return mockedSkillVersion;
+  return fs.readFileSync(path.join(skillFolder(), "VERSION.md"), "utf8").trim();
 }
 
 /** The "newer skill version available" ERROR, shared with the minimumSkillVersion check in records.ts. */

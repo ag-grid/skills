@@ -97,7 +97,7 @@ var require_path = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
     var os2 = require("os");
-    var path8 = require("path");
+    var path9 = require("path");
     var IS_WINDOWS_PLATFORM = os2.platform() === "win32";
     var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
     var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
@@ -109,7 +109,7 @@ var require_path = __commonJS({
     }
     exports2.unixify = unixify;
     function makeAbsolute(cwd, filepath) {
-      return path8.resolve(cwd, filepath);
+      return path9.resolve(cwd, filepath);
     }
     exports2.makeAbsolute = makeAbsolute;
     function removeLeadingDotSegment(entry) {
@@ -1406,7 +1406,7 @@ var require_braces = __commonJS({
 var require_constants2 = __commonJS({
   "node_modules/micromatch/node_modules/picomatch/lib/constants.js"(exports2, module2) {
     "use strict";
-    var path8 = require("path");
+    var path9 = require("path");
     var WIN_SLASH = "\\\\/";
     var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
     var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
@@ -1580,7 +1580,7 @@ var require_constants2 = __commonJS({
       /* | */
       CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
       /* \uFEFF */
-      SEP: path8.sep,
+      SEP: path9.sep,
       /**
        * Create EXTGLOB_CHARS
        */
@@ -1607,7 +1607,7 @@ var require_constants2 = __commonJS({
 var require_utils2 = __commonJS({
   "node_modules/micromatch/node_modules/picomatch/lib/utils.js"(exports2) {
     "use strict";
-    var path8 = require("path");
+    var path9 = require("path");
     var win32 = process.platform === "win32";
     var {
       REGEX_BACKSLASH,
@@ -1636,7 +1636,7 @@ var require_utils2 = __commonJS({
       if (options && typeof options.windows === "boolean") {
         return options.windows;
       }
-      return win32 === true || path8.sep === "\\";
+      return win32 === true || path9.sep === "\\";
     };
     exports2.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
@@ -3000,7 +3000,7 @@ var require_parse2 = __commonJS({
 var require_picomatch = __commonJS({
   "node_modules/micromatch/node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
     "use strict";
-    var path8 = require("path");
+    var path9 = require("path");
     var scan = require_scan();
     var parse = require_parse2();
     var utils = require_utils2();
@@ -3085,7 +3085,7 @@ var require_picomatch = __commonJS({
     };
     picomatch.matchBase = (input, glob, options, posix = utils.isWindows(options)) => {
       const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
-      return regex.test(path8.basename(input));
+      return regex.test(path9.basename(input));
     };
     picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
     picomatch.parse = (pattern, options) => {
@@ -3312,7 +3312,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
-    var path8 = require("path");
+    var path9 = require("path");
     var globParent = require_glob_parent();
     var micromatch = require_micromatch();
     var GLOBSTAR = "**";
@@ -3407,7 +3407,7 @@ var require_pattern = __commonJS({
     }
     exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
     function isAffectDepthOfReadingPattern(pattern) {
-      const basename = path8.basename(pattern);
+      const basename = path9.basename(pattern);
       return endsWithSlashGlobStar(pattern) || isStaticPattern(basename);
     }
     exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
@@ -3465,7 +3465,7 @@ var require_pattern = __commonJS({
     }
     exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
     function isAbsolute(pattern) {
-      return path8.isAbsolute(pattern);
+      return path9.isAbsolute(pattern);
     }
     exports2.isAbsolute = isAbsolute;
   }
@@ -3642,8 +3642,8 @@ var require_utils3 = __commonJS({
     exports2.errno = errno;
     var fs9 = require_fs();
     exports2.fs = fs9;
-    var path8 = require_path();
-    exports2.path = path8;
+    var path9 = require_path();
+    exports2.path = path9;
     var pattern = require_pattern();
     exports2.pattern = pattern;
     var stream = require_stream();
@@ -3755,8 +3755,8 @@ var require_async = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path8, settings, callback) {
-      settings.fs.lstat(path8, (lstatError, lstat) => {
+    function read(path9, settings, callback) {
+      settings.fs.lstat(path9, (lstatError, lstat) => {
         if (lstatError !== null) {
           callFailureCallback(callback, lstatError);
           return;
@@ -3765,7 +3765,7 @@ var require_async = __commonJS({
           callSuccessCallback(callback, lstat);
           return;
         }
-        settings.fs.stat(path8, (statError, stat) => {
+        settings.fs.stat(path9, (statError, stat) => {
           if (statError !== null) {
             if (settings.throwErrorOnBrokenSymbolicLink) {
               callFailureCallback(callback, statError);
@@ -3797,13 +3797,13 @@ var require_sync = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.read = void 0;
-    function read(path8, settings) {
-      const lstat = settings.fs.lstatSync(path8);
+    function read(path9, settings) {
+      const lstat = settings.fs.lstatSync(path9);
       if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
         return lstat;
       }
       try {
-        const stat = settings.fs.statSync(path8);
+        const stat = settings.fs.statSync(path9);
         if (settings.markSymbolicLink) {
           stat.isSymbolicLink = () => true;
         }
@@ -3874,17 +3874,17 @@ var require_out = __commonJS({
     var sync = require_sync();
     var settings_1 = require_settings();
     exports2.Settings = settings_1.default;
-    function stat(path8, optionsOrSettingsOrCallback, callback) {
+    function stat(path9, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path8, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path9, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path8, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path9, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.stat = stat;
-    function statSync2(path8, optionsOrSettings) {
+    function statSync2(path9, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path8, settings);
+      return sync.read(path9, settings);
     }
     exports2.statSync = statSync2;
     function getSettings(settingsOrOptions = {}) {
@@ -4100,16 +4100,16 @@ var require_async2 = __commonJS({
           return;
         }
         const tasks = names.map((name) => {
-          const path8 = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          const path9 = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
           return (done) => {
-            fsStat.stat(path8, settings.fsStatSettings, (error, stats) => {
+            fsStat.stat(path9, settings.fsStatSettings, (error, stats) => {
               if (error !== null) {
                 done(error);
                 return;
               }
               const entry = {
                 name,
-                path: path8,
+                path: path9,
                 dirent: utils.fs.createDirentFromStats(name, stats)
               };
               if (settings.stats) {
@@ -4227,7 +4227,7 @@ var require_settings2 = __commonJS({
   "node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path8 = require("path");
+    var path9 = require("path");
     var fsStat = require_out();
     var fs9 = require_fs4();
     var Settings = class {
@@ -4235,7 +4235,7 @@ var require_settings2 = __commonJS({
         this._options = _options;
         this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
         this.fs = fs9.createFileSystemAdapter(this._options.fs);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path8.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path9.sep);
         this.stats = this._getValue(this._options.stats, false);
         this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
         this.fsStatSettings = new fsStat.Settings({
@@ -4262,17 +4262,17 @@ var require_out2 = __commonJS({
     var sync = require_sync2();
     var settings_1 = require_settings2();
     exports2.Settings = settings_1.default;
-    function scandir(path8, optionsOrSettingsOrCallback, callback) {
+    function scandir(path9, optionsOrSettingsOrCallback, callback) {
       if (typeof optionsOrSettingsOrCallback === "function") {
-        async.read(path8, getSettings(), optionsOrSettingsOrCallback);
+        async.read(path9, getSettings(), optionsOrSettingsOrCallback);
         return;
       }
-      async.read(path8, getSettings(optionsOrSettingsOrCallback), callback);
+      async.read(path9, getSettings(optionsOrSettingsOrCallback), callback);
     }
     exports2.scandir = scandir;
-    function scandirSync(path8, optionsOrSettings) {
+    function scandirSync(path9, optionsOrSettings) {
       const settings = getSettings(optionsOrSettings);
-      return sync.read(path8, settings);
+      return sync.read(path9, settings);
     }
     exports2.scandirSync = scandirSync;
     function getSettings(settingsOrOptions = {}) {
@@ -4551,41 +4551,41 @@ var require_queue = __commonJS({
       queue.drained = drained;
       return queue;
       function push(value) {
-        var p = new Promise(function(resolve4, reject) {
+        var p = new Promise(function(resolve5, reject) {
           pushCb(value, function(err, result) {
             if (err) {
               reject(err);
               return;
             }
-            resolve4(result);
+            resolve5(result);
           });
         });
         p.catch(noop2);
         return p;
       }
       function unshift(value) {
-        var p = new Promise(function(resolve4, reject) {
+        var p = new Promise(function(resolve5, reject) {
           unshiftCb(value, function(err, result) {
             if (err) {
               reject(err);
               return;
             }
-            resolve4(result);
+            resolve5(result);
           });
         });
         p.catch(noop2);
         return p;
       }
       function drained() {
-        var p = new Promise(function(resolve4) {
+        var p = new Promise(function(resolve5) {
           process.nextTick(function() {
             if (queue.idle()) {
-              resolve4();
+              resolve5();
             } else {
               var previousDrain = queue.drain;
               queue.drain = function() {
                 if (typeof previousDrain === "function") previousDrain();
-                resolve4();
+                resolve5();
                 queue.drain = previousDrain;
               };
             }
@@ -4919,7 +4919,7 @@ var require_settings3 = __commonJS({
   "node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path8 = require("path");
+    var path9 = require("path");
     var fsScandir = require_out2();
     var Settings = class {
       constructor(_options = {}) {
@@ -4929,7 +4929,7 @@ var require_settings3 = __commonJS({
         this.deepFilter = this._getValue(this._options.deepFilter, null);
         this.entryFilter = this._getValue(this._options.entryFilter, null);
         this.errorFilter = this._getValue(this._options.errorFilter, null);
-        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path8.sep);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path9.sep);
         this.fsScandirSettings = new fsScandir.Settings({
           followSymbolicLinks: this._options.followSymbolicLinks,
           fs: this._options.fs,
@@ -4991,7 +4991,7 @@ var require_reader2 = __commonJS({
   "node_modules/fast-glob/out/readers/reader.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path8 = require("path");
+    var path9 = require("path");
     var fsStat = require_out();
     var utils = require_utils3();
     var Reader = class {
@@ -5004,7 +5004,7 @@ var require_reader2 = __commonJS({
         });
       }
       _getFullEntryPath(filepath) {
-        return path8.resolve(this._settings.cwd, filepath);
+        return path9.resolve(this._settings.cwd, filepath);
       }
       _makeEntry(stats, pattern) {
         const entry = {
@@ -5071,9 +5071,9 @@ var require_stream3 = __commonJS({
         });
       }
       _getStat(filepath) {
-        return new Promise((resolve4, reject) => {
+        return new Promise((resolve5, reject) => {
           this._stat(filepath, this._fsStatSettings, (error, stats) => {
-            return error === null ? resolve4(stats) : reject(error);
+            return error === null ? resolve5(stats) : reject(error);
           });
         });
       }
@@ -5097,10 +5097,10 @@ var require_async5 = __commonJS({
         this._readerStream = new stream_1.default(this._settings);
       }
       dynamic(root, options) {
-        return new Promise((resolve4, reject) => {
+        return new Promise((resolve5, reject) => {
           this._walkAsync(root, options, (error, entries) => {
             if (error === null) {
-              resolve4(entries);
+              resolve5(entries);
             } else {
               reject(error);
             }
@@ -5110,10 +5110,10 @@ var require_async5 = __commonJS({
       async static(patterns, options) {
         const entries = [];
         const stream = this._readerStream.static(patterns, options);
-        return new Promise((resolve4, reject) => {
+        return new Promise((resolve5, reject) => {
           stream.once("error", reject);
           stream.on("data", (entry) => entries.push(entry));
-          stream.once("end", () => resolve4(entries));
+          stream.once("end", () => resolve5(entries));
         });
       }
     };
@@ -5420,7 +5420,7 @@ var require_provider = __commonJS({
   "node_modules/fast-glob/out/providers/provider.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var path8 = require("path");
+    var path9 = require("path");
     var deep_1 = require_deep();
     var entry_1 = require_entry();
     var error_1 = require_error();
@@ -5434,7 +5434,7 @@ var require_provider = __commonJS({
         this.entryTransformer = new entry_2.default(this._settings);
       }
       _getRootDirectory(task) {
-        return path8.resolve(this._settings.cwd, task.base);
+        return path9.resolve(this._settings.cwd, task.base);
       }
       _getReaderOptions(task) {
         const basePath = task.base === "." ? "" : task.base;
@@ -6068,7 +6068,7 @@ var require_ignore = __commonJS({
       //   path matching.
       // - check `string` either `MODE_IGNORE` or `MODE_CHECK_IGNORE`
       // @returns {TestResult} true if a file is ignored
-      test(path8, checkUnignored, mode) {
+      test(path9, checkUnignored, mode) {
         let ignored = false;
         let unignored = false;
         let matchedRule;
@@ -6077,7 +6077,7 @@ var require_ignore = __commonJS({
           if (unignored === negative && ignored !== unignored || negative && !ignored && !unignored && !checkUnignored) {
             return;
           }
-          const matched = rule[mode].test(path8);
+          const matched = rule[mode].test(path9);
           if (!matched) {
             return;
           }
@@ -6098,17 +6098,17 @@ var require_ignore = __commonJS({
     var throwError = (message, Ctor) => {
       throw new Ctor(message);
     };
-    var checkPath = (path8, originalPath, doThrow) => {
-      if (!isString(path8)) {
+    var checkPath = (path9, originalPath, doThrow) => {
+      if (!isString(path9)) {
         return doThrow(
           `path must be a string, but got \`${originalPath}\``,
           TypeError
         );
       }
-      if (!path8) {
+      if (!path9) {
         return doThrow(`path must not be empty`, TypeError);
       }
-      if (checkPath.isNotRelative(path8)) {
+      if (checkPath.isNotRelative(path9)) {
         const r = "`path.relative()`d";
         return doThrow(
           `path should be a ${r} string, but got "${originalPath}"`,
@@ -6117,7 +6117,7 @@ var require_ignore = __commonJS({
       }
       return true;
     };
-    var isNotRelative = (path8) => REGEX_TEST_INVALID_PATH.test(path8);
+    var isNotRelative = (path9) => REGEX_TEST_INVALID_PATH.test(path9);
     checkPath.isNotRelative = isNotRelative;
     checkPath.convert = (p) => p;
     var Ignore = class {
@@ -6147,19 +6147,19 @@ var require_ignore = __commonJS({
       }
       // @returns {TestResult}
       _test(originalPath, cache, checkUnignored, slices) {
-        const path8 = originalPath && checkPath.convert(originalPath);
+        const path9 = originalPath && checkPath.convert(originalPath);
         checkPath(
-          path8,
+          path9,
           originalPath,
           this._strictPathCheck ? throwError : RETURN_FALSE
         );
-        return this._t(path8, cache, checkUnignored, slices);
+        return this._t(path9, cache, checkUnignored, slices);
       }
-      checkIgnore(path8) {
-        if (!REGEX_TEST_TRAILING_SLASH.test(path8)) {
-          return this.test(path8);
+      checkIgnore(path9) {
+        if (!REGEX_TEST_TRAILING_SLASH.test(path9)) {
+          return this.test(path9);
         }
-        const slices = path8.split(SLASH).filter(Boolean);
+        const slices = path9.split(SLASH).filter(Boolean);
         slices.pop();
         if (slices.length) {
           const parent = this._t(
@@ -6172,18 +6172,18 @@ var require_ignore = __commonJS({
             return parent;
           }
         }
-        return this._rules.test(path8, false, MODE_CHECK_IGNORE);
+        return this._rules.test(path9, false, MODE_CHECK_IGNORE);
       }
-      _t(path8, cache, checkUnignored, slices) {
-        if (path8 in cache) {
-          return cache[path8];
+      _t(path9, cache, checkUnignored, slices) {
+        if (path9 in cache) {
+          return cache[path9];
         }
         if (!slices) {
-          slices = path8.split(SLASH).filter(Boolean);
+          slices = path9.split(SLASH).filter(Boolean);
         }
         slices.pop();
         if (!slices.length) {
-          return cache[path8] = this._rules.test(path8, checkUnignored, MODE_IGNORE);
+          return cache[path9] = this._rules.test(path9, checkUnignored, MODE_IGNORE);
         }
         const parent = this._t(
           slices.join(SLASH) + SLASH,
@@ -6191,29 +6191,29 @@ var require_ignore = __commonJS({
           checkUnignored,
           slices
         );
-        return cache[path8] = parent.ignored ? parent : this._rules.test(path8, checkUnignored, MODE_IGNORE);
+        return cache[path9] = parent.ignored ? parent : this._rules.test(path9, checkUnignored, MODE_IGNORE);
       }
-      ignores(path8) {
-        return this._test(path8, this._ignoreCache, false).ignored;
+      ignores(path9) {
+        return this._test(path9, this._ignoreCache, false).ignored;
       }
       createFilter() {
-        return (path8) => !this.ignores(path8);
+        return (path9) => !this.ignores(path9);
       }
       filter(paths) {
         return makeArray(paths).filter(this.createFilter());
       }
       // @returns {TestResult}
-      test(path8) {
-        return this._test(path8, this._testCache, true);
+      test(path9) {
+        return this._test(path9, this._testCache, true);
       }
     };
     var factory = (options) => new Ignore(options);
-    var isPathValid = (path8) => checkPath(path8 && checkPath.convert(path8), path8, RETURN_FALSE);
+    var isPathValid = (path9) => checkPath(path9 && checkPath.convert(path9), path9, RETURN_FALSE);
     var setupWindows = () => {
       const makePosix = (str) => /^\\\\\?\\/.test(str) || /["<>|\u0000-\u001F]+/u.test(str) ? str : str.replace(/\\/g, "/");
       checkPath.convert = makePosix;
       const REGEX_TEST_WINDOWS_PATH_ABSOLUTE = /^[a-z]:\//i;
-      checkPath.isNotRelative = (path8) => REGEX_TEST_WINDOWS_PATH_ABSOLUTE.test(path8) || isNotRelative(path8);
+      checkPath.isNotRelative = (path9) => REGEX_TEST_WINDOWS_PATH_ABSOLUTE.test(path9) || isNotRelative(path9);
     };
     if (
       // Detect `process` so that it can run in browsers.
@@ -6241,7 +6241,7 @@ if (nodeMajor < 20) {
 
 // src/main.ts
 var fs8 = __toESM(require("node:fs"), 1);
-var path7 = __toESM(require("node:path"), 1);
+var path8 = __toESM(require("node:path"), 1);
 
 // src/output.ts
 var notices = [];
@@ -6299,7 +6299,7 @@ function render(output) {
 // src/run.ts
 var fs7 = __toESM(require("node:fs"), 1);
 var os = __toESM(require("node:os"), 1);
-var path6 = __toESM(require("node:path"), 1);
+var path7 = __toESM(require("node:path"), 1);
 
 // src/files.ts
 var import_node_fs4 = require("node:fs");
@@ -6546,12 +6546,12 @@ var import_fast_glob = __toESM(require_out4(), 1);
 var import_ignore = __toESM(require_ignore(), 1);
 
 // node_modules/slash/index.js
-function slash(path8) {
-  const isExtendedLengthPath = path8.startsWith("\\\\?\\");
+function slash(path9) {
+  const isExtendedLengthPath = path9.startsWith("\\\\?\\");
   if (isExtendedLengthPath) {
-    return path8;
+    return path9;
   }
-  return path8.replace(/\\/g, "/");
+  return path9.replace(/\\/g, "/");
 }
 
 // node_modules/globby/utilities.js
@@ -6639,8 +6639,8 @@ var assertPatternsInput = (patterns) => {
   }
 };
 var normalizePathForDirectoryGlob = (filePath, cwd) => {
-  const path8 = isNegativePattern(filePath) ? filePath.slice(1) : filePath;
-  return import_node_path2.default.isAbsolute(path8) ? path8 : import_node_path2.default.join(cwd, path8);
+  const path9 = isNegativePattern(filePath) ? filePath.slice(1) : filePath;
+  return import_node_path2.default.isAbsolute(path9) ? path9 : import_node_path2.default.join(cwd, path9);
 };
 var getDirectoryGlob = ({ directoryPath, files, extensions }) => {
   const extensionGlob = extensions?.length > 0 ? `.${extensions.length > 1 ? `{${extensions.join(",")}}` : extensions[0]}` : "";
@@ -6878,13 +6878,30 @@ function searchFixedStrings(dir, words, sourceGlob) {
 
 // src/args.ts
 var DEFAULT_CHANGES_URL_PREFIX = "https://ag-grid.com/";
+var TARGET_VERSION_PATTERN = /^\d+\.\d+$/;
+var TARGET_VERSION_FLAGS = {
+  grid: "--grid-target-version",
+  charts: "--charts-target-version",
+  studio: "--studio-target-version"
+};
+function parseTargetVersion(name, value) {
+  if (!TARGET_VERSION_PATTERN.test(value)) {
+    throw new ExitWithError(`invalid ${name} value "${value}"`, [
+      "Target versions must be given as major.minor (e.g. 34.2): a minor is required, and no patch or pre-release suffix is allowed.",
+      `Invoke the command again passing ${name}=major.minor.`
+    ]);
+  }
+  return value;
+}
 function parseArgs(argv) {
   const args = {
     root: void 0,
     outputFolder: void 0,
     allowOldVersion: false,
     changesUrlPrefix: DEFAULT_CHANGES_URL_PREFIX,
-    sourceGlob: DEFAULT_SOURCE_GLOB
+    sourceGlob: DEFAULT_SOURCE_GLOB,
+    sourceGlobIsDefault: true,
+    targetVersions: {}
   };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -6902,13 +6919,23 @@ function parseArgs(argv) {
         break;
       case "--source-glob":
         args.sourceGlob = [valueOf()];
+        args.sourceGlobIsDefault = false;
+        break;
+      case TARGET_VERSION_FLAGS.grid:
+        args.targetVersions.grid = parseTargetVersion(name, valueOf());
+        break;
+      case TARGET_VERSION_FLAGS.charts:
+        args.targetVersions.charts = parseTargetVersion(name, valueOf());
+        break;
+      case TARGET_VERSION_FLAGS.studio:
+        args.targetVersions.studio = parseTargetVersion(name, valueOf());
         break;
       case "--allow-old-version":
         args.allowOldVersion = true;
         break;
       default:
         throw new ExitWithError(`unknown argument ${arg}`, [
-          "Supported arguments: --root=path, --output-folder=path, --allow-old-version, --changes-url-prefix=url, --source-glob=pattern.",
+          "Supported arguments: --root=path, --output-folder=path, --allow-old-version, --changes-url-prefix=url, --source-glob=pattern, --grid-target-version=major.minor, --charts-target-version=major.minor, --studio-target-version=major.minor.",
           "Invoke the command again using only supported arguments."
         ]);
     }
@@ -6940,19 +6967,69 @@ function compareVersions(a, b) {
   return 0;
 }
 
+// src/optionality.ts
+function assertNever(value) {
+  throw new Error(`unhandled change type: ${JSON.stringify(value)}`);
+}
+function relevantVersion(change, target) {
+  if (change.type === "transition") {
+    return change.removedFrom !== null && compareVersions(change.removedFrom, target) <= 0 ? change.removedFrom : change.deprecatedFrom;
+  }
+  return change.version;
+}
+function optionalityOf(change, targetVersion) {
+  switch (change.type) {
+    case "transition": {
+      const removedByTarget = change.removedFrom !== null && compareVersions(change.removedFrom, targetVersion) <= 0;
+      if (removedByTarget) {
+        return { level: "MANDATORY", statement: "old API removed" };
+      }
+      return {
+        level: "MITIGATE_TO_ACCEPT",
+        statement: change.isSoft ? "old API is not deprecated and remains fully supported; applications should consider updating if it benefits them" : "old API deprecated; applications will be required to update in a future major and may choose to update now"
+      };
+    }
+    case "requirement":
+      return {
+        level: "MANDATORY",
+        statement: "new requirement; no option to restore old behaviour"
+      };
+    case "behaviour":
+      return change.mitigation.length > 0 ? {
+        level: "DISCARD_TO_ACCEPT",
+        statement: "follow mitigation advice to restore old behaviour"
+      } : {
+        level: "MANDATORY",
+        statement: "there is no documented flag to restore the old behaviour"
+      };
+    case "style":
+      return change.mitigation.length > 0 ? {
+        level: "DISCARD_TO_ACCEPT",
+        statement: "follow mitigation advice to restore the previous appearance"
+      } : {
+        level: "MANDATORY",
+        statement: "there is no single flag to revert the style changes, but the new appearance can be customised with CSS"
+      };
+    case "dependency":
+      return {
+        level: "MANDATORY",
+        statement: "minimum supported version raised; verify the installed version"
+      };
+    default:
+      return assertNever(change);
+  }
+}
+
 // src/detect.ts
-function detectChanges(project, changelogs, sourceGlob) {
+function detectChanges(project, changelogs, sourceGlob, targets = /* @__PURE__ */ new Map()) {
   const changes = [];
   const wordSearched = [];
   for (const dependency of project.dependencies) {
     const changelog = changelogs.get(dependency.product);
     if (!changelog) continue;
+    const target = targets.get(dependency.product) ?? changelog.mostRecentVersion;
     for (const change of changelog.changes) {
-      const candidate = classifyCandidate(
-        change,
-        dependency,
-        changelog.mostRecentVersion
-      );
+      const candidate = classifyCandidate(change, dependency, target);
       if (candidate === "excluded") continue;
       const detected = {
         product: dependency.product,
@@ -6967,7 +7044,7 @@ function detectChanges(project, changelogs, sourceGlob) {
   );
   return { ...project, changes };
 }
-function classifyCandidate(change, dependency, mostRecentVersion) {
+function classifyCandidate(change, dependency, target) {
   if (change.type === "dependency") {
     const applies = change.dependency === "typescript" || dependency.frameworks.includes(
       change.dependency
@@ -6976,9 +7053,9 @@ function classifyCandidate(change, dependency, mostRecentVersion) {
   }
   if (change.framework !== null && !dependency.frameworks.includes(change.framework))
     return "excluded";
-  const version = change.type === "transition" ? change.removedFrom : change.version;
+  const version = relevantVersion(change, target);
   if (version === null) return "excluded";
-  const inRange = compareVersions(version, dependency.currentVersion) > 0 && compareVersions(version, mostRecentVersion) <= 0;
+  const inRange = compareVersions(version, dependency.currentVersion) > 0 && compareVersions(version, target) <= 0;
   if (!inRange) return "excluded";
   return change.detectWords === null ? "included" : "search";
 }
@@ -7208,22 +7285,24 @@ var path5 = __toESM(require("node:path"), 1);
 var import_meta = {};
 var RELEASED_VERSION_URL = "https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md";
 var mockedSkillVersion;
-function localSkillVersion() {
-  if (mockedSkillVersion !== void 0) return mockedSkillVersion;
+function skillFolder() {
   const dir = typeof __dirname !== "undefined" ? __dirname : new URL(".", import_meta.url).pathname;
   let walk = dir;
   for (let i = 0; i < 4; i++) {
-    const candidate = path5.join(walk, "VERSION.md");
-    if (fs5.existsSync(candidate)) {
-      return fs5.readFileSync(candidate, "utf8").trim();
-    }
+    if (fs5.existsSync(path5.join(walk, "VERSION.md"))) return walk;
     walk = path5.dirname(walk);
   }
-  const sourceFallback = path5.join(dir, "../../../skills/ag-update/VERSION.md");
-  if (fs5.existsSync(sourceFallback)) {
-    return fs5.readFileSync(sourceFallback, "utf8").trim();
+  const sourceFallback = path5.resolve(dir, "../../../skills/ag-update");
+  if (fs5.existsSync(path5.join(sourceFallback, "VERSION.md"))) {
+    return sourceFallback;
   }
-  throw new Error(`VERSION.md not found in any folder above ${dir}`);
+  throw new Error(
+    `skill folder (containing VERSION.md) not found above ${dir}`
+  );
+}
+function localSkillVersion() {
+  if (mockedSkillVersion !== void 0) return mockedSkillVersion;
+  return fs5.readFileSync(path5.join(skillFolder(), "VERSION.md"), "utf8").trim();
 }
 function newerSkillVersionError(current, newVersion) {
   return new ExitWithError(
@@ -7301,7 +7380,7 @@ async function downloadWithRetries(url) {
   throw lastError;
 }
 function sleep(ms) {
-  return new Promise((resolve4) => setTimeout(resolve4, ms));
+  return new Promise((resolve5) => setTimeout(resolve5, ms));
 }
 async function downloadText(url) {
   if (url.startsWith("file://")) {
@@ -7319,7 +7398,7 @@ function isLocalhostHttps(url) {
   return protocol === "https:" && (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1");
 }
 function getInsecure(url) {
-  return new Promise((resolve4, reject) => {
+  return new Promise((resolve5, reject) => {
     const request = https.get(
       url,
       { rejectUnauthorized: false },
@@ -7333,7 +7412,7 @@ function getInsecure(url) {
         response.setEncoding("utf8");
         let body = "";
         response.on("data", (chunk) => body += chunk);
-        response.on("end", () => resolve4(body));
+        response.on("end", () => resolve5(body));
       }
     );
     request.on("error", reject);
@@ -7341,155 +7420,198 @@ function getInsecure(url) {
 }
 
 // src/report.ts
-var PREAMBLE = `# AG dependency update report
-
-This file contains a list of changes to apply to the project described in the Scope section
-below. Combine it with your knowledge of the coding conventions and verification tools
-available for this project to plan and execute an update. After applying these changes use
-the appropriate tools at your disposal to validate that the changes were successful, such as
-running the build, typechecking, tests, and starting the dev server and accessing it with a
-browser.`;
-var OPTIONAL_INTRO = "The changes in this section are optional: the project will still work if they are accepted as-is. Resolve each decision below with the user while planning the update.";
-var CANNOT_RULE_OUT = "Detected in: this change cannot be ruled out by searching the source code; check whether it applies to this project during planning.";
+var path6 = __toESM(require("node:path"), 1);
+var MAX_OCCURRENCE_FILES = 5;
 var PRODUCT_LABELS = {
   grid: "Grid",
   charts: "Charts",
   studio: "Studio"
 };
-function reportFileName(projectPath) {
-  return `${projectPath.split("/").filter(Boolean).pop()}-report.md`;
+function createIndexCounter() {
+  let n = 0;
+  return () => ++n;
 }
-function renderReport(result, changelogs) {
-  const scope = [
-    "# Scope",
-    [
-      `- Project path: ${result.relativeProjectPath}`,
-      ...result.dependencies.map(({ product, currentVersion, frameworks }) => {
-        const via = frameworks.length > 0 ? frameworks.join(", ") : "the vanilla javascript API";
-        const target = changelogs.get(product)?.mostRecentVersion;
-        return `- ${PRODUCT_LABELS[product]}: current version ${currentVersion}, target version ${target}, used via ${via}`;
-      })
-    ].join("\n")
+function reportFileName(relativeProjectPath) {
+  if (relativeProjectPath === ".") return "report.md";
+  return `report--${relativeProjectPath.split(path6.sep).join("--")}.md`;
+}
+function targetFor(product, changelogs, targets) {
+  return targets.get(product) ?? changelogs.get(product).mostRecentVersion;
+}
+function renderReport(result, changelogs, targets = /* @__PURE__ */ new Map(), nextMitigationFileIndex = createIndexCounter()) {
+  const ctx = { files: {}, nextIndex: nextMitigationFileIndex };
+  const projectDependencies = [
+    "# Project Dependencies",
+    result.dependencies.map(({ product, currentVersion, frameworks }) => {
+      const via = frameworks.length > 0 ? frameworks.join(", ") : "the vanilla javascript API";
+      const target = targetFor(product, changelogs, targets);
+      return `- ${PRODUCT_LABELS[product]}: current version ${currentVersion}, target version ${target}, used via ${via}`;
+    }).join("\n")
   ];
-  const required = result.changes.filter(
-    (c) => c.change.type !== "behaviour" && c.change.type !== "style"
-  );
-  const optional = result.changes.filter(
-    (c) => c.change.type === "behaviour" || c.change.type === "style"
-  );
   const sections = [
-    PREAMBLE,
-    ...scope,
-    "# Required changes",
-    ...required.length > 0 ? renderGroupedChanges(result, required) : ["No required changes were detected."],
-    "# Optional changes",
-    ...optional.length > 0 ? [OPTIONAL_INTRO, ...renderGroupedChanges(result, optional)] : ["No optional changes were detected."],
-    "TODO add style changes and advice on QA based on style and behaviour changes"
+    `# Update report for ${path6.join(result.projectPath, "package.json")}`,
+    "See [summary.md](summary.md) for how to apply these changes.",
+    ...projectDependencies,
+    "# Changes",
+    ...result.changes.length > 0 ? renderGroupedChanges(result, changelogs, targets, ctx) : ["No relevant changes were detected."]
   ];
-  return sections.join("\n\n") + "\n";
+  return { content: sections.join("\n\n") + "\n", files: ctx.files };
 }
-function renderGroupedChanges(result, changes) {
+function renderGroupedChanges(result, changelogs, targets, ctx) {
   const parts = [];
   for (const { product } of result.dependencies) {
-    const productChanges = changes.filter(
+    const productChanges = result.changes.filter(
       (change) => change.product === product
     );
     if (productChanges.length === 0) continue;
-    parts.push(`## ${PRODUCT_LABELS[product]}`);
+    const target = targetFor(product, changelogs, targets);
     const majors = [
       ...new Set(
-        productChanges.map((change) => majorOf2(changeVersion(change.change)))
+        productChanges.map(
+          (change) => majorOf2(relevantVersion(change.change, target))
+        )
       )
     ];
     majors.sort((a, b) => a - b);
     for (const major of majors) {
       parts.push(
-        `### ${PRODUCT_LABELS[product]} v${major - 1}.x -> v${major}.x`
+        `## ${PRODUCT_LABELS[product]} v${major - 1}.x -> v${major}.x`
       );
-      const inTransition = productChanges.filter((change) => majorOf2(changeVersion(change.change)) === major).sort(
-        (a, b) => compareVersions(changeVersion(a.change), changeVersion(b.change))
+      const inTransition = productChanges.filter(
+        (change) => majorOf2(relevantVersion(change.change, target)) === major
+      ).sort(
+        (a, b) => compareVersions(
+          relevantVersion(a.change, target),
+          relevantVersion(b.change, target)
+        )
       );
       for (const change of inTransition) {
-        parts.push(...renderChange(result, change));
+        parts.push(...renderChange(result, change, target, ctx));
       }
     }
   }
   return parts;
 }
-function renderChange(result, detected) {
+function renderChange(result, detected, target, ctx) {
   const { change } = detected;
-  const parts = [];
+  const optionality = optionalityOf(change, target);
+  const decisionPrefix = optionality.level === "MANDATORY" ? "" : "DECISION_REQUIRED ";
+  const parts = [
+    `### ${changeHeading(change)}`,
+    [
+      `- **Type:** ${change.type.toUpperCase()}`,
+      `- **Optionality:** ${decisionPrefix}${optionality.level} \u2014 ${optionality.statement}`
+    ].join("\n")
+  ];
+  const description = changeDescription(change);
+  if (description) parts.push(description);
+  parts.push(...renderMitigation(result, detected, optionality.level, ctx));
+  parts.push(...renderOccurrences(detected));
+  return parts;
+}
+function changeHeading(change) {
+  switch (change.type) {
+    case "transition":
+      return change.oldApi;
+    case "requirement":
+    case "behaviour":
+    case "style":
+      return change.title;
+    case "dependency":
+      return `${change.dependency} >= ${change.minVersion}`;
+  }
+}
+function changeDescription(change) {
   switch (change.type) {
     case "transition": {
-      parts.push(`#### REMOVED: ${change.oldApi}`);
-      const sentences = [
-        `As of v${change.removedFrom}, ${change.oldApi} has been removed.`
-      ];
+      const sentences = [];
       if (change.oldDescription) sentences.push(change.oldDescription);
       if (change.newApi !== null) {
         sentences.push(`Use ${change.newApi} instead.`);
-        if (change.newDescription) sentences.push(change.newDescription);
       } else {
         sentences.push("It has no replacement.");
       }
-      parts.push(sentences.join(" "));
-      break;
+      if (change.newDescription) sentences.push(change.newDescription);
+      return sentences.join(" ");
     }
     case "requirement":
-      parts.push(`#### REQUIRED: ${change.title}`);
-      if (change.description) parts.push(change.description);
-      break;
     case "behaviour":
     case "style":
-      parts.push(`#### DECISION: ${change.title}`);
-      if (change.description) parts.push(change.description);
-      break;
+      return change.description ?? void 0;
     case "dependency":
-      parts.push(
-        `#### DEPENDENCY: ${change.dependency} >= ${change.minVersion}`
-      );
-      if (change.reason) parts.push(change.reason);
-      break;
+      return change.reason ?? void 0;
   }
-  parts.push(
-    ...renderMitigation(result, detected),
-    renderOccurrences(detected)
-  );
-  return parts;
 }
-function renderMitigation(result, detected) {
+function mitigationLabel(level) {
+  switch (level) {
+    case "MANDATORY":
+      return "Mitigation (apply these steps to complete this update)";
+    case "MITIGATE_TO_ACCEPT":
+      return "Mitigation (apply to adopt this change)";
+    case "DISCARD_TO_ACCEPT":
+      return "Mitigation (apply these steps to restore the old behaviour)";
+  }
+}
+function renderMitigation(result, detected, level, ctx) {
   const { change } = detected;
   if (change.type === "dependency") return [];
-  const frameworks = [
+  const projectFrameworks = [
     "javascript",
     ...result.dependencies.find(({ product }) => product === detected.product)?.frameworks ?? []
   ];
   const applicable = change.mitigation.filter(
-    (entry) => entry.frameworks.some((framework) => frameworks.includes(framework))
+    (entry) => entry.frameworks === null || entry.frameworks.some(
+      (framework) => projectFrameworks.includes(framework)
+    )
   );
-  if (applicable.length === 0) {
-    const acceptOnly = change.type === "behaviour" || change.type === "style";
-    return acceptOnly ? ["Mitigation: none \u2014 this change can only be accepted."] : [];
-  }
-  return [
-    `Mitigation: ${applicable.map((entry) => entry.content).join("\n\n")}`
-  ];
+  const content = applicable.map((entry) => entry.content).join("\n\n").trim();
+  if (content === "") return [];
+  const label = mitigationLabel(level);
+  if (!content.includes("\n")) return [`${label}: ${content}`];
+  const heading = changeHeading(change);
+  const filename = `${ctx.nextIndex()}-${slugify(heading)}.md`;
+  ctx.files[filename] = `# Mitigation: ${heading}
+
+${content}
+`;
+  const words = content.split(/\s+/).filter(Boolean).length;
+  return [`${label}: ${words} word guide in [${filename}](${filename})`];
+}
+function slugify(title) {
+  const slug = title.slice(0, 50).replace(/[^\w\s]/g, "").replace(/\s+/g, "-").toLowerCase().replace(/^-+|-+$/g, "");
+  return slug || "mitigation";
 }
 function renderOccurrences(detected) {
-  if (detected.occurrences.length === 0) return CANNOT_RULE_OUT;
-  const lines = detected.occurrences.map(
-    ({ file, line, word }) => `- ${file}:${line} (${word})`
+  const occurrences = detected.occurrences;
+  if (occurrences.length === 0) return [];
+  const wordsByFile = /* @__PURE__ */ new Map();
+  for (const { file, word } of occurrences) {
+    let words = wordsByFile.get(file);
+    if (!words) {
+      words = /* @__PURE__ */ new Set();
+      wordsByFile.set(file, words);
+    }
+    words.add(word);
+  }
+  const files = [...wordsByFile];
+  const lines = files.slice(0, MAX_OCCURRENCE_FILES).map(
+    ([file, words]) => `- ${file} (${[...words].map((word) => `"${word}"`).join(", ")})`
   );
-  return ["Detected in:", "", ...lines].join("\n");
-}
-function changeVersion(change) {
-  return change.type === "transition" ? change.removedFrom : change.version;
+  if (files.length > MAX_OCCURRENCE_FILES) {
+    const more = files.length - MAX_OCCURRENCE_FILES;
+    const distinctWords = [...new Set(occurrences.map((o) => o.word))].map((word) => `\`${word}\``).join(", ");
+    lines.push(
+      `- ... and ${more} more ${more === 1 ? "file" : "files"}, search for ${distinctWords} to find them all`
+    );
+  }
+  return [["Detected in:", "", ...lines].join("\n")];
 }
 function majorOf2(version) {
   return parseInt(version.split(".")[0], 10);
 }
 
 // src/run.ts
+var GUIDE_FILE = "applying-updates.md";
 var PRODUCT_ORDER2 = ["grid", "charts", "studio"];
 async function run(...argv) {
   try {
@@ -7497,8 +7619,8 @@ async function run(...argv) {
     await checkSkillVersion(args.allowOldVersion);
     const cwd = process.cwd();
     const root = determineRoot(cwd, args.root, findGitRoot(cwd));
-    const projects = locateProjects(root).map(
-      (projectPath) => getProjectInfo(projectPath, root, args.sourceGlob)
+    const projects = locateProjects(root).map((projectPath) => getProjectInfo(projectPath, root, args.sourceGlob)).sort(
+      (a, b) => a.relativeProjectPath.localeCompare(b.relativeProjectPath)
     );
     const updatable = projects.filter(
       (p) => p.dependencies.length > 0 && p.blockers.length === 0
@@ -7509,38 +7631,41 @@ async function run(...argv) {
     );
     if (updatable.length === 0)
       throw noUpdateableProjects(root, blocked, noAgDependencies);
-    const outputFolder = resolveOutputFolder(cwd, args.outputFolder);
     const productsInUse = PRODUCT_ORDER2.filter(
       (product) => updatable.some((p) => p.dependencies.some((d) => d.product === product))
     );
+    validateTargetSelection(args.targetVersions, productsInUse, updatable);
+    const outputFolder = resolveOutputFolder(cwd, args.outputFolder);
     const changelogs = productsInUse.length > 0 ? await downloadChangeRecords(args.changesUrlPrefix, productsInUse) : /* @__PURE__ */ new Map();
+    const targets = resolveTargets(
+      args.targetVersions,
+      productsInUse,
+      changelogs
+    );
     const reportFiles = {};
+    const nextMitigationFileIndex = createIndexCounter();
     for (const project of updatable) {
-      reportFiles[reportFileName(project.projectPath)] = renderReport(
-        detectChanges(project, changelogs, args.sourceGlob),
-        changelogs
+      const { content, files } = renderReport(
+        detectChanges(project, changelogs, args.sourceGlob, targets),
+        changelogs,
+        targets,
+        nextMitigationFileIndex
       );
+      reportFiles[reportFileName(project.relativeProjectPath)] = content;
+      Object.assign(reportFiles, files);
     }
-    const body = [];
-    if (productsInUse.length > 0) {
-      const latest = productsInUse.map(
-        (product) => `${PRODUCT_LABELS[product]} v${changelogs.get(product).mostRecentVersion}`
-      );
-      body.push(`The latest versions are: ${latest.join(", ")}.`);
-    }
-    body.push(
-      "Discovered the following projects and created update reports:",
-      updatable.map((project) => {
-        const using = project.dependencies.map((d) => `${PRODUCT_LABELS[d.product]} v${d.currentVersion}`).join(", ");
-        return `- ${project.relativeProjectPath}: using ${using} -> ${path6.join(outputFolder, reportFileName(project.projectPath))}`;
-      }).join("\n"),
+    const productVersions = (versionOf) => productsInUse.map((product) => `${PRODUCT_LABELS[product]} v${versionOf(product)}`).join(", ");
+    const body = [
+      scannedSection(root, args, projects),
+      updatableSection(updatable, targets, outputFolder),
+      `Latest available versions: ${productVersions((p) => changelogs.get(p).mostRecentVersion)}.`,
+      `These reports were generated for target version: ${productVersions((p) => targets.get(p))}.`,
       ...blockedSection(blocked),
       ...noAgDependenciesSection(noAgDependencies),
-      `Source files were searched with the glob: ${args.sourceGlob.join(", ")} (override with --source-glob).`,
-      "Confirm with the user that they want to update to the latest versions. If they choose an earlier version, disregard the report items introduced after the chosen version.",
-      "Confirm with the user that this is the correct set of projects to update, and disregard the reports for any projects they do not want to update.",
-      "Use your normal planning process and knowledge of the application's structure, coding standards, and development process to plan the change. Take into account the number of changes. If there are a very large number of changes across many files it may make sense to work with the user to plan a phased approach. If there are only a few changes it may be appropriate to apply them in a single phase. Work with the user to make an appropriate plan."
-    );
+      ...verifySection(args),
+      `Once you have verified the above and the reports are correct, follow the update guide to apply them:
+  ${path7.join(skillFolder(), GUIDE_FILE)}`
+    ];
     const output = succeed(
       "report files produced",
       body,
@@ -7552,6 +7677,104 @@ async function run(...argv) {
   } catch (e) {
     throw e instanceof ExitWithError ? e : crashError(e);
   }
+}
+function validateTargetSelection(targetVersions, productsInUse, updatable) {
+  for (const product of PRODUCT_ORDER2) {
+    if (targetVersions[product] !== void 0 && !productsInUse.includes(product)) {
+      addNotice(
+        `--${product}-target-version was given but no scanned project uses ${PRODUCT_LABELS[product]}, so it was ignored`
+      );
+    }
+  }
+  const targeted = productsInUse.filter((p) => targetVersions[p] !== void 0);
+  if (targeted.length > 0 && targeted.length < productsInUse.length) {
+    const missing = productsInUse.filter(
+      (p) => targetVersions[p] === void 0
+    );
+    throw new ExitWithError(
+      "a target version was set for some but not all of the products in use",
+      [
+        `Products in use: ${productsInUse.map((p) => PRODUCT_LABELS[p]).join(", ")}. Missing a target version: ${missing.map((p) => PRODUCT_LABELS[p]).join(", ")}.`,
+        "Specific product versions only work together in tested combinations; only the latest versions of each product are guaranteed to be compatible. If you set a target version for one product in use, you must set one for every product in use, choosing versions you have confirmed work together.",
+        `Invoke the command again setting a target for every product in use (e.g. ${productsInUse.map((p) => `--${p}-target-version=major.minor`).join(" ")}), or set none to target the latest of each.`
+      ]
+    );
+  }
+  for (const project of updatable) {
+    for (const dependency of project.dependencies) {
+      const target = targetVersions[dependency.product];
+      if (target !== void 0 && compareVersions(target, dependency.currentVersion) < 0) {
+        throw new ExitWithError(
+          `target version ${target} for ${PRODUCT_LABELS[dependency.product]} is below the current version ${dependency.currentVersion} in ${project.relativeProjectPath}`,
+          [
+            "This skill only updates forwards. Choose a target version at or above the current version of every project.",
+            `Invoke the command again with --${dependency.product}-target-version set to ${dependency.currentVersion} or later.`
+          ]
+        );
+      }
+    }
+  }
+}
+function resolveTargets(targetVersions, productsInUse, changelogs) {
+  const targets = /* @__PURE__ */ new Map();
+  for (const product of productsInUse) {
+    const latest = changelogs.get(product).mostRecentVersion;
+    const specified = targetVersions[product];
+    if (specified !== void 0 && compareVersions(specified, latest) > 0) {
+      throw new ExitWithError(
+        `target version ${specified} for ${PRODUCT_LABELS[product]} is newer than the latest available version ${latest}`,
+        [
+          `Choose a target version no newer than the latest available (${PRODUCT_LABELS[product]} v${latest}).`,
+          `Invoke the command again with --${product}-target-version set to ${latest} or earlier, or omit it to target the latest.`
+        ]
+      );
+    }
+    targets.set(product, specified ?? latest);
+  }
+  return targets;
+}
+function scannedSection(root, args, projects) {
+  const globNote = args.sourceGlobIsDefault ? "(default)" : "(supplied via --source-glob)";
+  const discovered = projects.map(
+    (p) => p.relativeProjectPath === "." ? "package.json" : `${p.relativeProjectPath}/package.json`
+  );
+  return [
+    "## What was scanned",
+    [
+      `- Scan root: ${root}`,
+      `- Source files were searched with the glob: ${args.sourceGlob.join(", ")} ${globNote}`,
+      `- Discovered ${discovered.length} package.json file${discovered.length === 1 ? "" : "s"}:`,
+      ...discovered.map((d) => `  - ${d}`)
+    ].join("\n")
+  ].join("\n\n");
+}
+function updatableSection(updatable, targets, outputFolder) {
+  const lines = updatable.map((project) => {
+    const versions = project.dependencies.map(
+      (d) => `${PRODUCT_LABELS[d.product]} v${d.currentVersion} -> v${targets.get(d.product)}`
+    ).join(", ");
+    const reportPath = path7.join(
+      outputFolder,
+      reportFileName(project.relativeProjectPath)
+    );
+    return `- ${project.relativeProjectPath}: ${versions} (report: ${reportPath})`;
+  });
+  return ["## Projects to update", lines.join("\n")].join("\n\n");
+}
+function verifySection(args) {
+  const gates = [];
+  if (args.sourceGlobIsDefault) {
+    gates.push(
+      "Verify the scan. The default source glob was used \u2014 check the scan root and the discovered package.json files listed above are the ones you expected, and that the glob covers the file types this codebase uses for source. If not, re-run with an appropriate --root and/or --source-glob."
+    );
+  }
+  gates.push(
+    "Verify the target version. These reports were generated for the target version shown above (the latest of each product unless overridden). To target an earlier version, re-run setting the per-product flag(s) \u2014 --grid-target-version, --charts-target-version, --studio-target-version \u2014 as major.minor (e.g. --grid-target-version=34.2). Note: if a project uses several products and you set a target for one, you must set one for all of them, using versions you have confirmed are compatible."
+  );
+  return [
+    "## Before applying: verify the reports are correct",
+    gates.map((gate, i) => `${i + 1}. ${gate}`).join("\n\n")
+  ];
 }
 function blockedSection(blocked) {
   if (blocked.length === 0) return [];
@@ -7571,8 +7794,8 @@ function noAgDependenciesSection(noAgDependencies) {
 }
 function resolveOutputFolder(cwd, outputFolderArg) {
   if (outputFolderArg === void 0)
-    return fs7.mkdtempSync(path6.join(os.tmpdir(), "ag-update-"));
-  const outputFolder = path6.resolve(cwd, outputFolderArg);
+    return fs7.mkdtempSync(path7.join(os.tmpdir(), "ag-update-"));
+  const outputFolder = path7.resolve(cwd, outputFolderArg);
   if (fs7.existsSync(outputFolder)) {
     if (fs7.statSync(outputFolder).isDirectory() && fs7.readdirSync(outputFolder).length > 0) {
       throw new ExitWithError(`output folder ${outputFolder} is not empty`, [
@@ -7581,7 +7804,7 @@ function resolveOutputFolder(cwd, outputFolderArg) {
     }
     assertWritable(outputFolder, outputFolder);
   } else {
-    assertWritable(path6.dirname(outputFolder), outputFolder);
+    assertWritable(path7.dirname(outputFolder), outputFolder);
   }
   return outputFolder;
 }
@@ -7653,7 +7876,7 @@ function writeReportFiles(output) {
   try {
     fs8.mkdirSync(output.outputFolder, { recursive: true });
     for (const [name, content] of Object.entries(output.reportFiles)) {
-      fs8.writeFileSync(path7.join(output.outputFolder, name), content);
+      fs8.writeFileSync(path8.join(output.outputFolder, name), content);
     }
   } catch {
     exitWith(couldNotWriteError(output.outputFolder).output);
