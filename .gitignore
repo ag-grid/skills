@@ -17,3 +17,5 @@ tests/harness/cases/*/fixture/.claude/
 
 # Work files when running skill locally
 AG_UPDATE_*.md
+
+tmp_*

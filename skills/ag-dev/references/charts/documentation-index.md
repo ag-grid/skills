@@ -1,0 +1,107 @@
+# AG Charts documentation index
+
+<!-- TODO: hand-author this preamble (docs URL template + usage). Everything below the '---' is generated from ag-grid/ag-charts docs-nav by scripts/gen-capabilities.mjs; re-run to refresh. -->
+
+---
+- `quick-start`
+- `key-features`
+- `community-vs-enterprise`
+- Setup `installation`
+- Setup `module-registry`
+- Setup: Enterprise Licence Key `license-install`
+- Setup `migration`
+- Setup `server-side-rendering`
+- Tutorials: Creating a Basic Chart `create-a-basic-chart`
+- Security & Compatibility `security`
+- Security & Compatibility `supported-browsers`
+- Security & Compatibility `supported-frameworks`
+- `skills`
+- `data-configuration`
+- Large Datasets `large-dataset-interactivity`
+- High-Frequency Update `high-frequency-data`
+- Data `transactions`
+- Asynchronous Data `async-data`
+- Axis Configuration `axes-configuration`
+- Axis Types `axes-types`
+- Axis Intervals `axes-intervals`
+- Axis Domain `axes-domain`
+- Axis Position `axes-position`
+- Axis Labels `axes-labels`
+- `axes-time`
+- Grid Lines & Band Shading `axes-grid-lines`
+- `axes-secondary`
+- Data Elements `axes-cross-lines`
+- Data Elements `legend`
+- Data Elements `formatters`
+- Data Elements `stylers`
+- Data Elements: Series Bars `bars`
+- Data Elements: Series Fills `fills`
+- Data Elements: Series Markers `markers`
+- Data Elements `style-segments`
+- Data Elements `annotations`
+- Data Elements `colour-scale`
+- Data Elements `error-bars`
+- Interactivity `accessibility`
+- Interactivity `localisation`
+- Interactivity `series-highlighting`
+- Interactivity `tooltips`
+- Interactivity `touch`
+- Interactivity `animation`
+- Interactivity `context-menu`
+- Interactivity: Crosshairs & Band Highlight `axes-crosshairs`
+- Interactivity: Data Selection `selection`
+- Interactivity `flash-on-update`
+- Interactivity `navigator`
+- Interactivity `range-controls`
+- Interactivity `scrollbar`
+- Interactivity: Synchronization `sync`
+- Interactivity `zoom`
+- Layout & Styling `background`
+- Layout & Styling `colours`
+- Layout & Styling `fills-borders`
+- Layout & Styling `layout`
+- Layout & Styling `overlays`
+- Layout & Styling: RTL Text & Layout `rtl`
+- Layout & Styling `text`
+- Layout & Styling `themes`
+- Layout & Styling `background-image`
+- Overview `financial-charts`
+- `financial-charts-configuration`
+- `financial-charts-toolbar`
+- Financial Charts `range-buttons`
+- Overview `maps`
+- Geographic Areas `map-shapes`
+- Maps: Routes and Connections `map-lines`
+- Maps: Markers & Points of Interest `map-markers`
+- Maps `map-topology`
+- `org-chart`
+- Bar `bar-series`
+- `line-series`
+- `area-series`
+- `scatter-series`
+- `bubble-series`
+- Pie `pie-series`
+- `donut-series`
+- `combination-series`
+- `box-plot-series`
+- `candlestick-series`
+- `ohlc-series`
+- `heatmap-series`
+- `histogram-series`
+- `nightingale-series`
+- `radar-area-series`
+- `radar-line-series`
+- `radial-bar-series`
+- `radial-column-series`
+- `range-area-series`
+- `range-bar-series`
+- `waterfall-series`
+- `sunburst-series`
+- `treemap-series`
+- `sankey-series`
+- `chord-series`
+- `funnel-series`
+- `cone-funnel-series`
+- `pyramid-series`
+- `radial-gauge`
+- `linear-gauge`
