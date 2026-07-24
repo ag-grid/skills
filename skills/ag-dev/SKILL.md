@@ -21,9 +21,9 @@ Framework is `react`, `vue`, `angular` if using those frameworks, `javascript` f
 
 This skill ships with a sibling skill, "ag-update", for managing version updates of `ag-grid-*` and `@ag-grid-*` packages. Use it when updating grid packages.
 
-## Do not fabricate APIs
+## Don't guess
 
-Whenever writing code, you must have a clear source for the APIs you use, whether that's following existing patterns, instructions from the user or consulting our docs.
+Whenever writing code, you must have a clear source for the APIs you use, whether that's following existing patterns, instructions from the user or consulting our docs. If you're unsure, do research to ground your actions.
 
 ## By default consult the docs
 
