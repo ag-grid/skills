@@ -1,6 +1,6 @@
 ---
 name: ag-update
-description: Update AG Grid or AG Charts dependencies to a newer version
+description: Update AG Grid dependencies to a newer version
 ---
 
 ## Rules

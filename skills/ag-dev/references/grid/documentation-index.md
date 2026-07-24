@@ -7,9 +7,10 @@ Where the content of the page is not obvious from the slug, additional context a
 1. Choose the pages likely to contain the information you required by looking at the slugs and context words below
 2. Determine the correct framework: javascript, react, angular or vue
 3. Determine the appropriate version as full semver e.g. 35.2.1
-4. Build a docs URL from a slug: `https://www.ag-grid.com/archive/{version}/{framework}-data-grid/{slug}/`
+4. Build a docs URL from a slug: `https://www.ag-grid.com/archive/{major.minor.patch}/{framework}-data-grid/{slug}/`
 
 ---
+
 - Quick Start `getting-started`
 - `key-features`
 - `community-vs-enterprise`

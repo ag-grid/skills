@@ -3,32 +3,43 @@ name: ag-dev
 description: Write, edit or plan code or features relating to AG Grid, AG Charts or AG Studio
 ---
 
-## Be aware of the AG products in use, and their versions
+## Be aware of the AG products in use, and their versions and wrapper framework
 
-## Before you start: is this an UPDATE task?
+Products in use may be obvious from the context, if not it can be determined from the package that features are imported from:
 
-**If the task is a version UPDATE or MIGRATION — bumping the installed version, applying breaking-change migrations, or moving off a deprecated API as part of a version change — STOP and use the `ag-update` skill instead.** `ag-dev` builds/configures/debugs at the _current_ version. Hand it over and stop.
+- `grid` packages start @ag-grid or ag-grid
+- `charts` packages start ag-charts
+- `studio` packages start ag-studio
 
-## Never fabricate
+{product} below refers to grid, charts or studio.
 
-Do **not invent** option names, API shapes, module names, package names, version numbers, or error numbers — training data is saturated with old and hallucinated APIs. If a fact is not in the reference you opened, retrieve and verify it (official docs, the installed package's type definitions, or console output) or tell the user you are unsure. Do not guess a plausible-looking name.
+Versions can be determined from project's package.json or by reading the installed library's package.json inside node_modules
 
-## Detect the product first
+Framework is `react`, `vue`, `angular` if using those frameworks, `javascript` for Vanilla JS apps or for apps on any other framework (e.g. Svelte, Solid).
 
-Identify which product(s) the task uses — **AG Grid**, **AG Charts**, or **AG Studio** — from dependencies, imports, and the task text, then load references under `references/<product>/`. Integrated charts is a **Grid** feature → grid.
+## For package version updates on AG Grid, use the ag-update skill
 
-Only `references/grid/` exists so far. AG Charts and AG Studio references are not yet authored — for those, apply the same principles (never fabricate; verify names against docs/type defs) and retrieve specifics.
+This skill ships with a sibling skill, "ag-update", for managing version updates of `ag-grid-*` and `@ag-grid-*` packages. Use it when updating grid packages.
 
-## Errors — read the console
+## Do not fabricate APIs
 
-If a grid misbehaves, watch the console for `AG Grid: error #<n>` / `warning #<n>`. In v33+ the full message text only prints when `ValidationModule` is registered (register it in dev); production shows just a bare number + doc link. Resolve **any** number by fetching `https://www.ag-grid.com/javascript-data-grid/errors/<n>/`. The dominant new-code error is **#200 — module not registered** (see `references/grid/versions.md`).
+Whenever writing code, you must have a clear source for the APIs you use, whether that's following existing patterns, instructions from the user or consulting our docs.
 
-## Routing — AG Grid
+## By default consult the docs
 
-Read the whole file you land on. A task can span rows (e.g. "why is my Enterprise feature blank" = capabilities + recommendations) — open both from here. Framework is handled _within_ `recommendations.md` (read General + your framework subsection); the router does not branch on framework.
+When writing code you will encounter two problems:
 
-| When the task is…                                                                                                                                                                                                                | Open                                 |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| Writing or debugging grid code — how to do X, why isn't this working, a blank/broken grid, state resetting on update, a cell/feature not showing, which feature to choose (row model, renderer vs formatter vs getter vs editor) | `references/grid/recommendations.md` |
-| The model emitted a pre-v33 pattern — scoped `@ag-grid-*` packages, CSS-file themes, no module registration, a removed option name — and you need the current equivalent                                                         | `references/grid/versions.md`        |
-| Is X Community or Enterprise; will it work without a licence                                                                                                                                                                     | `references/grid/capabilities.md`    |
+1. Your training data contains many deprecated and removed APIs and package names and may not have newer APIs.
+2. APIs have non-obvious edge cases and interactions with other features.
+
+The solution to both of these is to consult the documentation.
+
+If it is clear exactly what API to use, eg you are following a detailed plan that names specific APIs, or there are other examples in the codebase to copy, you may write code directly.
+
+Otherwise if there is uncertainty, check the docs. To find the correct docs URL for the version in use, load `references/{product}/documentation-index.md` and follow the instructions in that file.
+
+Locate the feature you are working with in the docs and read surrounding paragraphs to get information on edge cases and interactions. If many docs pages seem potentially relevant, consider getting a sub-agent to read them all and extract information relevant to the task.
+
+## Load product-specific recommendations
+
+`references/{product}/recommendations.md` contains specific advice for each product including known LLM failure modes and key APIs that have changed between versions. Load it and take it into account when developing.

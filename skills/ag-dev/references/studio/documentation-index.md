@@ -1,18 +1,26 @@
-# AG Studio documentation index
+# AG Studio Documentation Index
 
-<!-- TODO: hand-author this preamble (docs URL template + usage). Everything below the '---' is generated from ag-grid/ag-studio docs-nav by scripts/gen-capabilities.mjs; re-run to refresh. -->
+This is a list of documentation page slugs in backticks, e.g. `theming`.
+
+Where the content of the page is not obvious from the slug, additional context appears before the slug.
+
+1. Choose the pages likely to contain the information you required by looking at the slugs and context words below
+2. Determine the correct framework: javascript, react, angular or vue
+3. Determine the appropriate version as full semver e.g. 2.0.0
+4. Build a docs URL from a slug: `https://www.ag-grid.com/studio/archive/{major.minor.patch}/{framework}/{slug}/`
 
 ---
+
 - `overview`
 - `quick-start`
 - Building a Dashboard `tutorial`
 - `migration`
-- Setup `installation`
-- Setup: Installing a Licence Key `licence-install`
-- Setup `react-best-practices` (react only)
-- Compatibility & Security `compatibility`
-- Compatibility & Security `security`
-- Compatibility & Security `supported-browsers`
+- `installation`
+- Installing a Licence Key `licence-install`
+- `react-best-practices` (react only)
+- `compatibility`
+- `security`
+- `supported-browsers`
 - Data Overview `data`
 - `sync-data`
 - `async-data`
@@ -37,9 +45,6 @@
 - `ai-configuration`
 - Agentic Experience `ai-ax`
 - `ai-toolkit`
-- Getting Around `user-interface`
-- Getting Around `page-settings`
-- Getting Around `keyboard-shortcuts`
 - Working with Data `data-setup`
 - Working with Data `using-data`
 - Working with Data `filters`

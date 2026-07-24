@@ -1,20 +1,27 @@
-# AG Charts documentation index
+# AG Charts Documentation Index
 
-<!-- TODO: hand-author this preamble (docs URL template + usage). Everything below the '---' is generated from ag-grid/ag-charts docs-nav by scripts/gen-capabilities.mjs; re-run to refresh. -->
+This is a list of documentation page slugs in backticks, e.g. `axes-types`.
+
+Where the content of the page is not obvious from the slug, additional context appears before the slug.
+
+1. Choose the pages likely to contain the information you required by looking at the slugs and context words below
+2. Determine the correct framework: javascript, react, angular or vue
+3. Determine the appropriate version as full semver e.g. 14.0.1
+4. Build a docs URL from a slug: `https://www.ag-grid.com/charts/archive/{major.minor.patch}/{framework}/{slug}/`
 
 ---
+
 - `quick-start`
 - `key-features`
 - `community-vs-enterprise`
-- Setup `installation`
-- Setup `module-registry`
-- Setup: Enterprise Licence Key `license-install`
-- Setup `migration`
-- Setup `server-side-rendering`
-- Tutorials: Creating a Basic Chart `create-a-basic-chart`
-- Security & Compatibility `security`
-- Security & Compatibility `supported-browsers`
-- Security & Compatibility `supported-frameworks`
+- `installation`
+- `module-registry`
+- Enterprise Licence Key `license-install`
+- `migration`
+- `server-side-rendering`
+- `security`
+- `supported-browsers`
+- `supported-frameworks`
 - `skills`
 - `data-configuration`
 - Large Datasets `large-dataset-interactivity`
@@ -30,41 +37,41 @@
 - `axes-time`
 - Grid Lines & Band Shading `axes-grid-lines`
 - `axes-secondary`
-- Data Elements `axes-cross-lines`
-- Data Elements `legend`
-- Data Elements `formatters`
-- Data Elements `stylers`
-- Data Elements: Series Bars `bars`
-- Data Elements: Series Fills `fills`
-- Data Elements: Series Markers `markers`
-- Data Elements `style-segments`
-- Data Elements `annotations`
-- Data Elements `colour-scale`
-- Data Elements `error-bars`
-- Interactivity `accessibility`
-- Interactivity `localisation`
-- Interactivity `series-highlighting`
-- Interactivity `tooltips`
-- Interactivity `touch`
-- Interactivity `animation`
-- Interactivity `context-menu`
-- Interactivity: Crosshairs & Band Highlight `axes-crosshairs`
-- Interactivity: Data Selection `selection`
-- Interactivity `flash-on-update`
-- Interactivity `navigator`
-- Interactivity `range-controls`
-- Interactivity `scrollbar`
-- Interactivity: Synchronization `sync`
-- Interactivity `zoom`
-- Layout & Styling `background`
-- Layout & Styling `colours`
-- Layout & Styling `fills-borders`
-- Layout & Styling `layout`
-- Layout & Styling `overlays`
-- Layout & Styling: RTL Text & Layout `rtl`
-- Layout & Styling `text`
-- Layout & Styling `themes`
-- Layout & Styling `background-image`
+- `axes-cross-lines`
+- `legend`
+- `formatters`
+- `stylers`
+- Series Bars `bars`
+- Series Fills `fills`
+- Series Markers `markers`
+- `style-segments`
+- `annotations`
+- `colour-scale`
+- `error-bars`
+- `accessibility`
+- `localisation`
+- `series-highlighting`
+- `tooltips`
+- `touch`
+- `animation`
+- `context-menu`
+- Crosshairs & Band Highlight `axes-crosshairs`
+- Data Selection `selection`
+- `flash-on-update`
+- `navigator`
+- `range-controls`
+- `scrollbar`
+- Synchronization `sync`
+- `zoom`
+- `background`
+- `colours`
+- `fills-borders`
+- `layout`
+- `overlays`
+- RTL Text & Layout `rtl`
+- `text`
+- `themes`
+- `background-image`
 - Overview `financial-charts`
 - `financial-charts-configuration`
 - `financial-charts-toolbar`

@@ -30,6 +30,18 @@ const GRID_TRIM = [
   'Performance', 'Import & Export', 'Server-Side Data',
 ];
 
+const CHARTS_DROP = ['Tutorials'];
+// note: charts uses "Security & Compatibility" (reversed vs grid's order)
+const CHARTS_TRIM = [
+  'Setup', 'Security & Compatibility', 'Interactivity', 'Data Elements',
+  'Layout & Styling',
+];
+
+// Studio: "Getting Around" is pure end-user UI (no value for an embedding dev).
+// The "Working with …" sections are left KEEP pending a dev/end-user boundary call.
+const STUDIO_DROP = ['Getting Around'];
+const STUDIO_TRIM = ['Setup', 'Compatibility & Security'];
+
 const PRODUCTS = {
   grid: {
     label: 'AG Grid',
@@ -44,16 +56,16 @@ const PRODUCTS = {
     repo: 'ag-grid/ag-charts',
     navPath: 'packages/ag-charts-website/src/content/docs-nav/nav.json',
     out: 'skills/ag-dev/references/charts/documentation-index.md',
-    drop: [], // TODO: populate after reviewing generated output
-    trim: [],
+    drop: CHARTS_DROP,
+    trim: CHARTS_TRIM,
   },
   studio: {
     label: 'AG Studio',
     repo: 'ag-grid/ag-studio',
     navPath: 'packages/ag-studio-docs/src/content/docs-nav/nav.json',
     out: 'skills/ag-dev/references/studio/documentation-index.md',
-    drop: [],
-    trim: [],
+    drop: STUDIO_DROP,
+    trim: STUDIO_TRIM,
   },
 };
 
@@ -142,7 +154,7 @@ function generate(key) {
   const p = PRODUCTS[key];
   const { tag, nav } = fetchNav(p.repo, p.navPath);
   const lines = buildTree(nav, new Set(p.drop), new Set(p.trim));
-  const out = preambleFor(p.out, p.label, p.repo) + '\n' + lines.join('\n') + '\n';
+  const out = preambleFor(p.out, p.label, p.repo) + '\n\n' + lines.join('\n') + '\n';
   mkdirSync(dirname(p.out), { recursive: true });
   writeFileSync(p.out, out);
   process.stderr.write(
