@@ -17,53 +17,59 @@
 // list below is regenerated. A new product file is bootstrapped with a stub
 // preamble for you to fill in.
 //
-// Usage: node scripts/ag-dev/gen-capabilities.mjs [grid|charts|studio|all]
+// Usage: node scripts/ag-dev/generate-documentation-index.mjs [grid|charts|studio|all]
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { execSync } from 'node:child_process';
-import { dirname } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
+import { dirname } from "node:path";
 
-const GRID_DROP = ['Tutorials', 'AI Features'];
+const GRID_DROP = ["Tutorials", "AI Features"];
 const GRID_TRIM = [
-  'Setup', 'Compatibility & Security', 'Rows', 'Columns', 'Selection',
-  'Filtering', 'Interactivity', 'Accessories', 'State & Lifecycle',
-  'Performance', 'Import & Export', 'Server-Side Data',
+  "Setup",
+  "Compatibility & Security",
+  "Rows",
+  "Columns",
+  "Selection",
+  "Filtering",
+  "Interactivity",
+  "Accessories",
+  "State & Lifecycle",
+  "Performance",
+  "Import & Export",
+  "Server-Side Data",
 ];
 
-const CHARTS_DROP = ['Tutorials'];
+const CHARTS_DROP = ["Tutorials"];
 // note: charts uses "Security & Compatibility" (reversed vs grid's order)
-const CHARTS_TRIM = [
-  'Setup', 'Security & Compatibility', 'Interactivity', 'Data Elements',
-  'Layout & Styling',
-];
+const CHARTS_TRIM = ["Setup", "Security & Compatibility", "Interactivity", "Data Elements", "Layout & Styling"];
 
 // Studio: "Getting Around" is pure end-user UI (no value for an embedding dev).
 // The "Working with …" sections are left KEEP pending a dev/end-user boundary call.
-const STUDIO_DROP = ['Getting Around'];
-const STUDIO_TRIM = ['Setup', 'Compatibility & Security'];
+const STUDIO_DROP = ["Getting Around"];
+const STUDIO_TRIM = ["Setup", "Compatibility & Security"];
 
 const PRODUCTS = {
   grid: {
-    label: 'AG Grid',
-    repo: 'ag-grid/ag-grid',
-    navPath: 'documentation/ag-grid-docs/src/content/docs-nav/nav.json',
-    out: 'skills/ag-dev/references/grid/documentation-index.md',
+    label: "AG Grid",
+    repo: "ag-grid/ag-grid",
+    navPath: "documentation/ag-grid-docs/src/content/docs-nav/nav.json",
+    out: "skills/ag-dev/references/grid/documentation-index.md",
     drop: GRID_DROP,
     trim: GRID_TRIM,
   },
   charts: {
-    label: 'AG Charts',
-    repo: 'ag-grid/ag-charts',
-    navPath: 'packages/ag-charts-website/src/content/docs-nav/nav.json',
-    out: 'skills/ag-dev/references/charts/documentation-index.md',
+    label: "AG Charts",
+    repo: "ag-grid/ag-charts",
+    navPath: "packages/ag-charts-website/src/content/docs-nav/nav.json",
+    out: "skills/ag-dev/references/charts/documentation-index.md",
     drop: CHARTS_DROP,
     trim: CHARTS_TRIM,
   },
   studio: {
-    label: 'AG Studio',
-    repo: 'ag-grid/ag-studio',
-    navPath: 'packages/ag-studio-docs/src/content/docs-nav/nav.json',
-    out: 'skills/ag-dev/references/studio/documentation-index.md',
+    label: "AG Studio",
+    repo: "ag-grid/ag-studio",
+    navPath: "packages/ag-studio-docs/src/content/docs-nav/nav.json",
+    out: "skills/ag-dev/references/studio/documentation-index.md",
     drop: STUDIO_DROP,
     trim: STUDIO_TRIM,
   },
@@ -73,25 +79,25 @@ const PRODUCTS = {
 
 const fw = (node) => {
   const f = node?.frameworks;
-  if (!f || !Array.isArray(f) || f.length === 0 || f.length === 4) return '';
-  return ` (${f.join(',')} only)`;
+  if (!f || !Array.isArray(f) || f.length === 0 || f.length === 4) return "";
+  return ` (${f.join(",")} only)`;
 };
 
 const sigWords = (seg) =>
   (seg.match(/[A-Za-z0-9]+/g) || []).filter(
-    (t) => t.length >= 4 || (t.length >= 2 && /[A-Z]/.test(t) && t === t.toUpperCase())
+    (t) => t.length >= 4 || (t.length >= 2 && /[A-Z]/.test(t) && t === t.toUpperCase()),
   );
 
 const recapitulated = (seg, slug) => {
   if (!slug) return false;
-  const s = slug.toLowerCase().replace(/-/g, '');
+  const s = slug.toLowerCase().replace(/-/g, "");
   const w = sigWords(seg);
   return w.length > 0 && w.every((x) => s.includes(x.toLowerCase()));
 };
 
 const exactTrim = (title, parentRaw) => {
   if (parentRaw && title.toLowerCase().startsWith(parentRaw.toLowerCase())) {
-    const t = title.slice(parentRaw.length).replace(/^[\s:–—-]+/, '');
+    const t = title.slice(parentRaw.length).replace(/^[\s:–—-]+/, "");
     if (t) return t;
   }
   return title;
@@ -100,13 +106,13 @@ const exactTrim = (title, parentRaw) => {
 function buildTree(nav, dropSet, trimSet) {
   const lines = [];
   function walk(node, ancestors) {
-    const title = node.title ?? '(untitled)';
+    const title = node.title ?? "(untitled)";
     if (dropSet.has(title)) return;
     const parentRaw = ancestors.length ? ancestors.at(-1).raw : null;
     const slug = node.path || null;
     if (slug) {
       const segs = [...ancestors.map((a) => a.seg), exactTrim(title, parentRaw)];
-      const label = segs.filter((s) => !recapitulated(s, slug)).join(': ');
+      const label = segs.filter((s) => !recapitulated(s, slug)).join(": ");
       const tail = `\`${slug}\`${fw(node)}`;
       lines.push(label ? `- ${label} ${tail}` : `- ${tail}`);
     }
@@ -127,11 +133,11 @@ function buildTree(nav, dropSet, trimSet) {
 
 function fetchNav(repo, navPath) {
   const tag = execSync(`gh api repos/${repo}/releases/latest --jq .tag_name`, {
-    encoding: 'utf8',
+    encoding: "utf8",
   }).trim();
   const raw = execSync(
     `gh api "repos/${repo}/contents/${navPath}?ref=${tag}" -H "Accept: application/vnd.github.raw"`,
-    { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }
+    { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 },
   );
   return { tag, nav: JSON.parse(raw) };
 }
@@ -139,13 +145,13 @@ function fetchNav(repo, navPath) {
 // preserve the hand-authored preamble; bootstrap a stub for a new product file
 function preambleFor(out, label, repo) {
   if (existsSync(out)) {
-    const ex = readFileSync(out, 'utf8').split('\n');
-    const sep = ex.findIndex((l) => l.trim() === '---');
-    if (sep !== -1) return ex.slice(0, sep + 1).join('\n');
+    const ex = readFileSync(out, "utf8").split("\n");
+    const sep = ex.findIndex((l) => l.trim() === "---");
+    if (sep !== -1) return ex.slice(0, sep + 1).join("\n");
   }
   return (
     `# ${label} documentation index\n\n` +
-    `<!-- TODO: hand-author this preamble (docs URL template + usage). Everything below the '---' is generated from ${repo} docs-nav by scripts/ag-dev/gen-capabilities.mjs; re-run to refresh. -->\n\n` +
+    `<!-- TODO: hand-author this preamble (docs URL template + usage). Everything below the '---' is generated -->\n\n` +
     `---`
   );
 }
@@ -154,16 +160,16 @@ function generate(key) {
   const p = PRODUCTS[key];
   const { tag, nav } = fetchNav(p.repo, p.navPath);
   const lines = buildTree(nav, new Set(p.drop), new Set(p.trim));
-  const out = preambleFor(p.out, p.label, p.repo) + '\n\n' + lines.join('\n') + '\n';
+  const out = preambleFor(p.out, p.label, p.repo) + "\n\n" + lines.join("\n") + "\n";
   mkdirSync(dirname(p.out), { recursive: true });
   writeFileSync(p.out, out);
   process.stderr.write(
-    `[${key}] ${p.repo}@${tag}\n  -> ${p.out}\n  ~${Math.round(out.length / 4)} tokens, ${lines.length} bullets\n`
+    `[${key}] ${p.repo}@${tag}\n  -> ${p.out}\n  ~${Math.round(out.length / 4)} tokens, ${lines.length} bullets\n`,
   );
 }
 
-const which = process.argv[2] ?? 'all';
-const keys = which === 'all' ? Object.keys(PRODUCTS) : [which];
+const which = process.argv[2] ?? "all";
+const keys = which === "all" ? Object.keys(PRODUCTS) : [which];
 for (const k of keys) {
   if (!PRODUCTS[k]) {
     process.stderr.write(`unknown product: ${k}\n`);
