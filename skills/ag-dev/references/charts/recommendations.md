@@ -25,6 +25,7 @@ Where docs pages are provided below they are a slug, load the page from `https:/
 
 ## Performance (high-volume / high-frequency)
 
+- Prefer a single root-level `data` array shared by all series over per-series `series[].data` — one shared dataset is much easier for AG Charts to optimise.
 - Prefer the fastest update path that fits the change: `applyTransaction()` (incremental append/prepend/remove) is faster than `updateDelta()` (partial), which is faster than `update()` (full replacement). Docs: `high-frequency-data`, `transactions`
 - Callbacks are expensive — `itemStyler` and `styler` especially. Avoid them on hot paths; when you must use one, pass a stable static function reference rather than a fresh inline closure, so results stay cached instead of invalidating on every update.
 - For a custom `theme`, use a static, immutable object reference — a stable reference lets AG Charts cache the processed theme instead of reprocessing it each update. Docs: `themes`
