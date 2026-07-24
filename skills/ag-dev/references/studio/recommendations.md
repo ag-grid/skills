@@ -29,3 +29,11 @@ AG Studio logs validation errors and warnings to the console. Where practical, i
 ## Angular
 
 - Angular wrapper events are `@Output`s **without** the `on` prefix: `(apiReady)`, `(stateUpdated)`, `(studioReady)`, `(errorRaised)` — not `(onApiReady)`. (The React wrapper uses the `on*` prop form, e.g. `onApiReady`.)
+
+## React
+
+Stabilise every non-primitive prop by reference; a new reference each render resets Studio state.
+
+- Object or array props (`data`, `panels`, `layout`, etc) use `useState` / `useMemo` to preserve reference equality when unchanged.
+- function props via `useCallback` with correct deps.
+- Event handlers (`onStateUpdated` etc.) don't require `useCallback`, new values don't trigger re-render

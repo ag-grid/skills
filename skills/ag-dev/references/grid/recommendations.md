@@ -7,7 +7,6 @@ Where docs pages are provided below they are a slug, load the page from `https:/
 - The grid's container div needs an explicit height. Under the default `domLayout:'normal'` the grid fills the parent div. If this div has no intrinsic height, the grid will have zero height. Load the `grid-size` documentation page for the appropriate framework and version for more details.
 - Always supply `getRowId` when data will be updated. It must be a **pure** function returning a **unique, stable string** per row. Docs: `row-ids`
 - By default change detection compares object/array **references**, mutating data in place will not trigger an update. Many small updates can be batched for performance using transactions. When writing code that provides and updates data use the documentation index to find the "Updating Data" pages.
-  - Avoid unnecessary recreating of object and array options, which is especially easy in React: `<AgGridReact columnDefs={[{ field: "name" }] /* new object on each render */} ... />`
 - `colDef.field` supports a dot notation nested path: `field:'address.city'` reads `data.address.city`. If a key literally contains a dot use a `valueGetter` (`p => p.data['S.No']`). Docs: `value-getters`
 - Column filters are selected by **registered component name**, not free-form strings: `filter:true` (default text), `filter:'agNumberColumnFilter'`, `filter:'agDateColumnFilter'` etc. Docs: `filtering`
 - Pick the right row model for a project. Client Side Row Model: data loaded up front and stored in browser memory. Server Side Row Model (SSRM): loads data on demand from a server. Infinite Row Model and Viewport Row Model: much less common as SSRM is the default for server-side data, consult docs before using.
@@ -40,4 +39,14 @@ if (process.env.NODE_ENV !== "production") {
 
 ## Angular
 
-- Angular `@Output` events drop the `on` prefix: bind `(cellClicked)`, `(gridReady)`, `(selectionChanged)` — not `(onCellClicked)`/`(onGridReady)`. (The React `AgGridReact` props and the `gridOptions` callbacks use the `on*` form, e.g. `onCellClicked`.)
+- Angular `@Output` events drop the `on` prefix: bind `(cellClicked)`, `(gridReady)`, `(selectionChanged)` — not `(onCellClicked)`/`(onGridReady)`.
+
+## React
+
+Stabilise every non-primitive prop by reference; a new reference each render forces a grid update.
+
+- `rowData`/`columnDefs` via `useState` or `useMemo` — a fresh array resets column state and row selection.
+- Object props (`defaultColDef`, `sideBar`, `statusBar`) via `useState`/`useMemo`; function grid options (e.g. `isRowSelectable`) via `useCallback` with correct deps.
+- Event handler props (`onCellClicked` etc.) need no `useCallback` (they don't trigger grid updates).
+- Pass custom cell components by reference (optionally `memo()`), not by registered string name.
+- To detect excessive rendering, set `debug={true}` to log "Updated property …" on each changed prop — use it to spot re-renders caused by unmemoised props.
