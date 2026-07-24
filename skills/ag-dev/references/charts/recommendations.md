@@ -23,6 +23,13 @@ Where docs pages are provided below they are a slug, load the page from `https:/
 - From v13, `axes` is a dictionary keyed `x`/`y` (cartesian) or `angle`/`radius` (polar) — `axes: { x: { type: 'category' }, y: { type: 'number' } }` — not the old array form. Bind a series to a secondary axis with `yKeyAxis`/`xKeyAxis` (there is no `axes` object on a series). Docs: `axes-configuration`, `axes-types`
 - Bar and column series merged: use `type: 'bar'` for both vertical and horizontal bars — the separate `type: 'column'` was removed. Docs: `bars`
 
+## Performance (high-volume / high-frequency)
+
+- Prefer the fastest update path that fits the change: `applyTransaction()` (incremental append/prepend/remove) is faster than `updateDelta()` (partial), which is faster than `update()` (full replacement). Docs: `high-frequency-data`, `transactions`
+- Callbacks are expensive — `itemStyler` and `styler` especially. Avoid them on hot paths; when you must use one, pass a stable static function reference rather than a fresh inline closure, so results stay cached instead of invalidating on every update.
+- For a custom `theme`, use a static, immutable object reference — a stable reference lets AG Charts cache the processed theme instead of reprocessing it each update. Docs: `themes`
+- For time series, use numeric timestamps rather than `Date` objects (avoids round-tripping and memory churn), and prefer a continuous time axis over a non-continuous or category-based axis.
+
 ## Pay attention to console messages
 
 AG Charts logs validation errors and warnings to the console. Where practical, include a real browser in the verification loop (e.g. Chrome MCP or Playwright) and watch for console messages — a misconfiguration causing an actual bug is often described there in detail.
