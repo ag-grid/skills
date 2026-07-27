@@ -10,7 +10,6 @@ Where docs pages are provided below they are a slug, load the page from `https:/
 - The chart container needs a height. With no explicit `width`/`height` option the chart fills its container element; an unsized container falls back to the `minWidth`/`minHeight` default of 300px and may mis-size. `container` must be an `HTMLElement`, not an id string. Docs: `layout`
 - Data can be set once on the chart (`options.data`, shared by all series) or per-series (`series[].data`, overrides chart-level). Each series maps columns via keys — `xKey`/`yKey` (cartesian), `angleKey`/`calloutLabelKey` (pie/donut) — and a series with no matching keys renders nothing silently. Docs: `data-configuration`
 - Updating data/options requires a NEW options object; in-place mutation does not update the chart. Use `AgChartInstance.update(options)` (full, returns a Promise), `updateDelta(partial)`, or `applyTransaction(...)` for incremental data — spread into a fresh object rather than re-passing the mutated one. Docs: `transactions`, `high-frequency-data`
-  - In React, hold the options in `useState`/`useMemo` — a fresh object literal on every render triggers a full update (flicker, wasted work).
   - `updateDelta` merges top-level properties but replaces `series`/`axes` array items wholesale by index — spread the original item before changing one field, or you drop its other options and it typically throws.
 - Tooltip renderers return a structured object — `{ heading?, title?, data?: [{ label, value }] }` — not an HTML `content` string. The `content` field was removed in v13; returning it renders a blank tooltip. Docs: `tooltips`
 - Community series are `bar`, `line`, `area`, `scatter`, `bubble`, `histogram`, `pie`, `donut`. Everything else (candlestick, heatmap, waterfall, radar/radial, sankey, treemap, sunburst, maps, gauges, org chart, …) is enterprise-only and requires `ag-charts-enterprise` plus a licence key. Docs: `community-vs-enterprise`
@@ -34,3 +33,10 @@ Where docs pages are provided below they are a slug, load the page from `https:/
 ## Pay attention to console messages
 
 AG Charts logs validation errors and warnings to the console. Where practical, include a real browser in the verification loop (e.g. Chrome MCP or Playwright) and watch for console messages — a misconfiguration causing an actual bug is often described there in detail.
+
+## React
+
+The component (`AgCharts` from `ag-charts-react`) takes a single object prop, `options`.
+
+- Hold `options` in `useState` (or `useMemo`); a freshly-constructed object each render forces a full chart update. Update by replacing the object (e.g. `setChartOptions`), not by mutating it in place.
+- When changing some keys within options, use the immutable update pattern popularised by Redux: preserve reference equality for keys that haven't changed.

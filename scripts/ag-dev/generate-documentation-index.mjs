@@ -7,7 +7,7 @@
 //
 // Output: one flat bullet list, no headings. Hierarchy is encoded in each leaf's
 // colon-delimited path; only nodes with a slug are emitted. Reduction rules:
-//   - DROP: category/section titles whose whole subtree is hidden (per product).
+//   - DROP: a category/section title (hides its whole subtree) or a leaf slug (per product).
 //   - TRIM: category titles kept but not added to the path prefix (per product).
 //   - Path segments: exact-literal parent prefix trimmed off a child title.
 //   - A segment is dropped if the slug already spells it out (every significant
@@ -23,7 +23,14 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { dirname } from "node:path";
 
-const GRID_DROP = ["Tutorials", "AI Features"];
+const GRID_DROP = [
+  "Tutorials",
+  "AI Features",
+  "server-side-operations-nodejs",
+  "server-side-operations-graphql",
+  "server-side-operations-oracle",
+  "server-side-operations-spark",
+];
 const GRID_TRIM = [
   "Setup",
   "Compatibility & Security",
@@ -41,7 +48,13 @@ const GRID_TRIM = [
 
 const CHARTS_DROP = ["Tutorials"];
 // note: charts uses "Security & Compatibility" (reversed vs grid's order)
-const CHARTS_TRIM = ["Setup", "Security & Compatibility", "Interactivity", "Data Elements", "Layout & Styling"];
+const CHARTS_TRIM = [
+  "Setup",
+  "Security & Compatibility",
+  "Interactivity",
+  "Data Elements",
+  "Layout & Styling",
+];
 
 // Studio: "Getting Around" is pure end-user UI (no value for an embedding dev).
 // The "Working with …" sections are left KEEP pending a dev/end-user boundary call.
@@ -85,7 +98,9 @@ const fw = (node) => {
 
 const sigWords = (seg) =>
   (seg.match(/[A-Za-z0-9]+/g) || []).filter(
-    (t) => t.length >= 4 || (t.length >= 2 && /[A-Z]/.test(t) && t === t.toUpperCase()),
+    (t) =>
+      t.length >= 4 ||
+      (t.length >= 2 && /[A-Z]/.test(t) && t === t.toUpperCase()),
   );
 
 const recapitulated = (seg, slug) => {
@@ -107,18 +122,23 @@ function buildTree(nav, dropSet, trimSet) {
   const lines = [];
   function walk(node, ancestors) {
     const title = node.title ?? "(untitled)";
-    if (dropSet.has(title)) return;
-    const parentRaw = ancestors.length ? ancestors.at(-1).raw : null;
     const slug = node.path || null;
+    if (dropSet.has(title) || (slug && dropSet.has(slug))) return;
+    const parentRaw = ancestors.length ? ancestors.at(-1).raw : null;
     if (slug) {
-      const segs = [...ancestors.map((a) => a.seg), exactTrim(title, parentRaw)];
+      const segs = [
+        ...ancestors.map((a) => a.seg),
+        exactTrim(title, parentRaw),
+      ];
       const label = segs.filter((s) => !recapitulated(s, slug)).join(": ");
       const tail = `\`${slug}\`${fw(node)}`;
       lines.push(label ? `- ${label} ${tail}` : `- ${tail}`);
     }
     if (Array.isArray(node.children) && node.children.length) {
       const seg = exactTrim(title, parentRaw);
-      const next = trimSet.has(title) ? ancestors : [...ancestors, { raw: title, seg }];
+      const next = trimSet.has(title)
+        ? ancestors
+        : [...ancestors, { raw: title, seg }];
       for (const c of node.children) walk(c, next);
     }
   }
@@ -160,7 +180,8 @@ function generate(key) {
   const p = PRODUCTS[key];
   const { tag, nav } = fetchNav(p.repo, p.navPath);
   const lines = buildTree(nav, new Set(p.drop), new Set(p.trim));
-  const out = preambleFor(p.out, p.label, p.repo) + "\n\n" + lines.join("\n") + "\n";
+  const out =
+    preambleFor(p.out, p.label, p.repo) + "\n\n" + lines.join("\n") + "\n";
   mkdirSync(dirname(p.out), { recursive: true });
   writeFileSync(p.out, out);
   process.stderr.write(
