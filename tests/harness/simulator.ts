@@ -55,6 +55,8 @@ function buildPrompt(opts: {
 
 Decide whether the agent's latest message asks the user a question that needs an answer. If it does, answer ONLY using the ANSWER MAP below. Never invent information that is not in the map.
 
+An answer-map entry may also describe a state rather than a question — for example "the agent reports it has finished X and has not yet done Y". If the agent's latest message matches such an entry, reply with that entry's "answer" action even though no question was asked: the user is giving the agent its next instruction. Prefer this over "done" whenever an unused entry clearly describes the agent's current state.
+
 ANSWER MAP (each entry: "when" describes a question the user might be asked, "reply" is what to say):
 ${answersJson}
 
