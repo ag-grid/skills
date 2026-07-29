@@ -5,10 +5,10 @@
 }
 
 /* Brand tweaks reaching into Studio's own DOM. */
-.dashboard-shell .ag-studio-page-header {
+.dashboard-shell .ag-studio-panel-section-group-title-bar {
   border-bottom: 2px solid #4a5568;
 }
 
-.dashboard-shell .ag-studio-widget-toolbar {
-  background: #f7fafc;
+.dashboard-shell .ag-studio-widget-selection-item-label {
+  font-weight: 600;
 }
