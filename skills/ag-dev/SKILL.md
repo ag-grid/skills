@@ -9,7 +9,7 @@ Products in use may be obvious from the context, if not it can be determined fro
 
 - `grid` packages start @ag-grid- or ag-grid-
 - `charts` packages start ag-charts-
-- `studio` packages start ag-studio-
+- `studio` package is ag-studio or starts ag-studio-
 
 {product} below refers to grid, charts or studio.
 
@@ -19,7 +19,7 @@ Framework is `react`, `vue`, `angular` if using those frameworks, `javascript` f
 
 ## For package version updates, use the ag-update skill
 
-This skill ships with a sibling skill, "ag-update", for managing version updates of `ag-grid-*`, `@ag-grid-*`, `ag-charts-*` and `ag-studio*` packages. Delegate to it when asked to update grid, charts or studio packages.
+This skill ships with a sibling skill, "ag-update". Delegate to it when asked to update grid, charts or studio packages.
 
 ## Don't guess
 

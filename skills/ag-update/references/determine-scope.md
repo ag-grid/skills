@@ -18,6 +18,6 @@ Do not include any other information in the output
 
 - Determine the projects to operate on. A "project" is a folder containing a package.json.
   - If you were provided with a list of projects, use it
-  - Otherwise, recursively find all projects in the current directory that contain dependencies starting "ag-grid-" or "ag-charts-" or "ag-studio", or the dependency named exactly "ag-studio" (note the studio core package has no trailing hyphen, unlike the grid and charts packages). Ignore projects that are not part of the software in this folder, e.g. inside node_modules and build artefacts. Show these projects to the user and ask them which they want to update.
+  - Otherwise, recursively find all projects in the current directory that contain dependencies starting "@ag-grid-", "ag-grid-", "ag-charts-" or "ag-studio". Ignore projects that are not part of the software in this folder, e.g. inside node_modules and build artefacts. Show these projects to the user and ask them which they want to update.
 - Determine the dependency versions in use for each project
   - The version can be determined from package.json if an explicit version like "31.2.0" is used, otherwise use the package manager to determine what actual version is installed.

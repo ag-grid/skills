@@ -1,0 +1,14 @@
+/* Studio fills its parent, so the shell needs an explicit height. */
+.dashboard-shell {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Brand tweaks reaching into Studio's own DOM. */
+.dashboard-shell .ag-studio-page-header {
+  border-bottom: 2px solid #4a5568;
+}
+
+.dashboard-shell .ag-studio-widget-toolbar {
+  background: #f7fafc;
+}

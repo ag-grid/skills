@@ -73,11 +73,11 @@ After generating the structured list of changes, validate it against these rules
 
 ### Module registration
 
-If the list of upgrade versions includes v33, this is the version at which module registration becomes required. Application projects (those that create grids) must have a `ModuleRegistry.registerModules` call activating the modules they require. When an application project that does not already contain `ModuleRegistry.registerModules` is migrating to v33+, ensure that the mitigation steps include both a requirement to register the correct modules, and a link to the migration guide `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/#migrating-from-packages`
+If the list of upgrade versions includes grid v33, this is the version at which module registration becomes required. Application projects (those that create grids) must have a `ModuleRegistry.registerModules` call activating the modules they require. When an application project that does not already contain `ModuleRegistry.registerModules` is migrating to v33+, ensure that the mitigation steps include both a requirement to register the correct modules, and a link to the migration guide `https://www.ag-grid.com/{framework}-data-grid/upgrading-to-ag-grid-33/#migrating-from-packages`
 
 ### Theming
 
-v33 introduced the Theming API. Legacy themes are deprecated but not removed. This skill should not attempt to migrate applications from legacy themes to the Theming API. If a project is being updated across v33, ensure that there is a BREAKING record stating that it is necessary to pass the string "legacy" to the `theme` grid option. Ensure that there are NO instructions to perform a migration to Theming API.
+grid v33 introduced the Theming API. Legacy themes are deprecated but not removed. This skill should not attempt to migrate applications from legacy themes to the Theming API. If a project is being updated across v33, ensure that there is a BREAKING record stating that it is necessary to pass the string "legacy" to the `theme` grid option. Ensure that there are NO instructions to perform a migration to Theming API.
 
 ### Studio projects that depend on grid or charts directly
 

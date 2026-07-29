@@ -19,8 +19,9 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
 
 - Read `VERSION.md` in this skill folder. Fetch the latest: `https://raw.githubusercontent.com/ag-grid/skills/main/skills/ag-update/VERSION.md`.
 - Compare as semver:
-  - If patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting the harness and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they type "continue" to do so.
-  - Major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit the harness and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
+  - If the local version is the same as, or newer than, the fetched version: continue silently.
+  - If the local version is older and only the patch or minor differs: Prominently tell the user that a new version has been released, show the new and currently installed version, suggest quitting the harness and running `npx skills update ag-grid/skills`. Ask the user if they'd like to continue with this old skill version, suggesting they type "continue" to do so.
+  - If the local version is older and the major differs: Prominently tell the user that their current skill version is incompatible and will not work, show the new and currently installed version, tell them to quit the harness and run `npx skills update ag-grid/skills` before resuming. Stop. The skill invocation is now finished. Regardless of the user response, do not follow any of the other instructions in this file.
 
 ## Check for existing plan
 
