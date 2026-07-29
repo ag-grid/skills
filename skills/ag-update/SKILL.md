@@ -1,6 +1,6 @@
 ---
 name: ag-update
-description: Update AG Grid dependencies to a newer version
+description: Update AG Grid, AG Charts and AG Studio dependencies to a newer version
 ---
 
 ## Rules
@@ -34,14 +34,14 @@ Tell the user "Welcome to the AG Update skill. Let's start by gathering some con
 This section populates the AG_UPDATE_SCOPE.md file
 
 1. Determine the full set of potential projects to update. There are instructions in the file `determine-scope.md`. If you have access to sub-agents, give that file path to a sub-agent and ask it to report the results to you. Otherwise follow the steps yourself. If this skill was invoked with instructions to upgrade specific projects, pass that to the sub agent.
-2. Determine whether this update is grid-only, charts-only, or grid & charts. In the case of grid-only or charts-only repos, **do not mention the other product**. There is no need to confuse the process by referring to a product that the user does not have installed.
-3. Determine the latest versions of the product(s) in use with `npm view ag-grid-community version` and/or `npm view ag-charts-community version`
+2. Determine which of the three products — grid, charts and studio — are in use. **Refer only to the products actually installed**, in every message from here on. There is no need to confuse the process by referring to a product that the user does not have installed.
+3. Determine the latest versions of the product(s) in use with `npm view ag-grid-community version`, `npm view ag-charts-community version` and/or `npm view ag-studio version`
 4. Tell the user which projects you found, what current versions they're on, and the latest version you propose updating to. Ask them if they'd like to continue, giving them the option to change the target version, or select a subset of projects if applicable.
 5. Record the user's decisions in AG_UPDATE_SCOPE.md before continuing. Under `## Projects to update` record the projects and dependencies in exactly the same 2-level markdown list format as it was generated in, removing any projects that the user indicated that they did not want to update. Under `## Target versions` record the target version of grid and/or charts to update to.
 
 ## Warn on unsupported versions
 
-The earliest supported major version to migrate _from_ is 25 for grid and 8 for charts. If the application uses earlier versions, **stop** the skill execution and tell the user why (it is because this skill only has change information going back to these versions).
+The earliest supported major version to migrate _from_ is 25 for grid, 8 for charts and 1 for studio. If the application uses earlier versions, **stop** the skill execution and tell the user why (it is because this skill only has change information going back to these versions).
 
 ## Determine the full set of changes
 

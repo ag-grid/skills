@@ -7,9 +7,9 @@ description: Write, edit or plan code or features relating to AG Grid, AG Charts
 
 Products in use may be obvious from the context, if not it can be determined from the package that features are imported from:
 
-- `grid` packages start @ag-grid or ag-grid
-- `charts` packages start ag-charts
-- `studio` packages start ag-studio
+- `grid` packages start @ag-grid- or ag-grid-
+- `charts` packages start ag-charts-
+- `studio` packages start ag-studio-
 
 {product} below refers to grid, charts or studio.
 
@@ -17,9 +17,9 @@ Versions can be determined from project's package.json or by reading the install
 
 Framework is `react`, `vue`, `angular` if using those frameworks, `javascript` for Vanilla JS apps or for apps on any other framework (e.g. Svelte, Solid).
 
-## For package version updates on AG Grid, use the ag-update skill
+## For package version updates, use the ag-update skill
 
-This skill ships with a sibling skill, "ag-update", for managing version updates of `ag-grid-*` and `@ag-grid-*` packages. Use it when updating grid packages.
+This skill ships with a sibling skill, "ag-update", for managing version updates of `ag-grid-*`, `@ag-grid-*`, `ag-charts-*` and `ag-studio*` packages. Delegate to it when asked to update grid, charts or studio packages.
 
 ## Don't guess
 

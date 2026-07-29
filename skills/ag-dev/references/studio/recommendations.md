@@ -6,7 +6,7 @@ AG Studio is a new product and very underrepresented in your training data, so t
 
 ## Common mistakes
 
-- **AG Studio bundles AG Grid and AG Charts as dependencies and releases in lockstep with both: Studio version = grid version − 34, and Studio version = charts version − 12** (e.g. Studio 1.1 depends grid 35.1 and charts 13.1). If you need to declare a grid or charts dependency in your package.json, ensure that it is exactly the same version as depended on by studio, to avoid runtime incompatibilities and bloated bundle size.
+- **AG Studio pulls in AG Grid and AG Charts as dependencies and releases in lockstep with both** From Studio 2.0 onwards, Studio version = grid version − 34, and Studio version = charts version − 12 (e.g. Studio 2.0 depends grid 36.0 and charts 14.0). If you need to declare a grid or charts dependency in your package.json, ensure that it is exactly the same version as depended on by studio, to avoid runtime incompatibilities and bloated bundle size.
 - The API is created imperatively via `createStudio(rootDiv, properties, params?)` imported from `ag-studio` — it returns the `AgStudioApi`. There is no `new Studio(...)`, no `Studio.create(...)`. Docs: `quick-start`, `installation`
 - The single config argument is `AgStudioProperties` (NOT "options"/"config"/"gridOptions"). Its real top-level keys include: `data`, `mode`, `initialState`, `theme`, `layout`, `panels`, `page`, `widgets`, `components`, `dataOptions`, `ai`, `localeText`/`getLocaleText`, `context`, plus `on*` event handlers (`onStateUpdated`, `onApiReady`, `onStudioReady`, `onErrorRaised`, `onStudioPreDestroyed`). Do not invent keys — verify against the `AgStudioProperties` type.
 - `mode` is `'view' | 'edit'` and **defaults to `'view'`**. To get the drag-and-drop report builder you must set `mode:'edit'`. Docs: `modes-layout`
@@ -22,7 +22,7 @@ AG Studio is a new product and very underrepresented in your training data, so t
   - Especially in React, inline object/array props (`data={{…}}`, `theme={…}`, `widgets={…}`) recreated every render read as a change each render — memoize them (`useMemo`/`useState`/module constant). StrictMode double-invocation is handled by the wrapper; do not add your own init guards.
 - The AI Assistant (`ai` property, `AgAiAssistant` / adapter) is **experimental**; behaviour varies by LLM. Don't assume a stable/default AI backend. Docs: `ai`, `ai-adapter`, `ai-configuration`
 
-## Enable development mode debugging and pay attention to console messages
+## Pay attention to console messages
 
 AG Studio logs validation errors and warnings to the console. Where practical, include a real browser in the verification loop (e.g. Chrome MCP or Playwright) and watch for console messages — a configuration issue causing an actual bug will often be described in detail by the console error messenger.
 
