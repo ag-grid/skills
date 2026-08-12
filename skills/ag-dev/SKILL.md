@@ -27,13 +27,11 @@ Whenever writing code, you must have a clear source for the APIs you use, whethe
 
 ## Prefer the purpose-built feature over a general-purpose primitive
 
-Where the product ships a dedicated feature for what you are building, use it — even when a lower-level primitive (a `valueGetter`, a custom cell renderer, hand-rolled state or your own event wiring) would produce the same visible result.
+Where the product ships a dedicated feature for what you are building, use it — not a `valueGetter`, a custom cell renderer, hand-rolled state or your own event wiring that produces the same visible result. Sorting, filtering, aggregation, export and the UI all understand the built-in feature; a primitive is opaque application code that has to re-implement that behaviour and keep it in step by hand.
 
-The dedicated feature is understood by the rest of the product: sorting, filtering, aggregation, export, the UI affordances and future versions all know what it is. A primitive is opaque application code that the product cannot reason about, so behaviour that should come for free has to be re-implemented and kept in step by hand.
+"The primitive renders the right value" is not a reason to reject the built-in feature. Neither is the feature being unfamiliar to you: your training data lags the current version, so unfamiliar is not evidence of unsupported.
 
-"The primitive renders the right value" is therefore not a reason to reject the built-in feature, and neither is the built-in feature being newer. If it is an Enterprise feature and Enterprise is available to the project, that is not a reason to avoid it either — see the module-registration guidance in the product recommendations.
-
-**Check before you implement, not after.** You cannot prefer a feature you do not know exists, and your training data lags the current version — so the fact that a capability is unfamiliar to you is not evidence that it is unsupported. Before implementing any requested capability with a primitive, scan `references/{product}/documentation-index.md` for a slug describing that capability (whatever it is — a filter type, an export format, a selection or layout behaviour, and so on). If a slug plausibly matches, read that page before writing the primitive.
+**Check before you implement, not after.** Before building a requested capability out of a primitive, scan `references/{product}/documentation-index.md` for a slug describing that capability and read the page if one plausibly matches. For Enterprise features, follow the module-registration guidance in the product recommendations.
 
 ## By default consult the docs
 
