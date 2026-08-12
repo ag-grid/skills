@@ -16,6 +16,7 @@ Where the content of the page is not obvious from the slug, additional context a
 - `community-vs-enterprise`
 - `installation`
 - Registering Modules `modules`
+- Development Validation `dev-validation`
 - Installing Enterprise Licence `license-install`
 - `migration`
 - `codemods`
@@ -288,7 +289,6 @@ Where the content of the page is not obvious from the slug, additional context a
 - `grid-state`
 - Grid Context `context`
 - `grid-lifecycle`
-- Development-time validation and richer console errors `dev-validation`
 - `change-detection`
 - `dom-virtualisation`
 - `value-cache`
