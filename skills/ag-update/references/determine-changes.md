@@ -77,7 +77,7 @@ If the list of upgrade versions includes grid v33, this is the version at which 
 
 ### Theming
 
-grid v33 introduced the Theming API. Legacy themes are deprecated but not removed. This skill should not attempt to migrate applications from legacy themes to the Theming API. If a project is being updated across v33, ensure that there is a BREAKING record stating that it is necessary to pass the string "legacy" to the `theme` grid option. Ensure that there are NO instructions to perform a migration to Theming API.
+grid v33 introduced the Theming API. Legacy themes are deprecated but not removed. This skill should not attempt to migrate applications from legacy themes to the Theming API. If a project is being updated across v33, ensure that there is a BREAKING record stating that it is necessary to pass the string "legacy" to the `theme` grid option. Ensure that there are NO instructions to perform a migration to Theming API. A user who wants that migration should be pointed at the separate `ag-theme-migration` skill, after this update completes.
 
 ### Studio projects that depend on grid or charts directly
 

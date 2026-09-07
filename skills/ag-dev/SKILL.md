@@ -21,6 +21,12 @@ Framework is `react`, `vue`, `angular` if using those frameworks, `javascript` f
 
 This skill ships with a sibling skill, "ag-update". Delegate to it when asked to update grid, charts or studio packages.
 
+## For legacy theme migration, use the ag-theme-migration skill
+
+This skill also ships with "ag-theme-migration". Delegate to it when an application still styles the
+grid with legacy themes (`--ag-*` CSS variables, `ag-theme-*` classes, `styles/*.css` imports or the
+Sass API) and should move to the Theming API.
+
 ## Don't guess
 
 Whenever writing code, you must have a clear source for the APIs you use, whether that's following existing patterns, instructions from the user or consulting our docs. If you're unsure, do research to ground your actions.

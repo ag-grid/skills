@@ -33,3 +33,17 @@ Use the ag-update skill to update all projects in this monorepo except apps/demo
 The skill will analyse your repo and our breaking change documentation and produce a markdown file containing a list of changes to apply. In the case of optional changes you'll be asked whether you want to apply them.
 
 You can then review the generated file and ask your agent to make an implementation plan based on it.
+
+## ag-theme-migration skill
+
+Converts a legacy (v32) theme customisation — `--ag-*` CSS variables, `ag-theme-*` classes, the Sass
+API — into a `themeQuartz.withParams({ ... })` call, and tells you which of your variables have no
+direct equivalent and why.
+
+```
+Use the ag-theme-migration skill
+```
+
+Legacy variables are silently ignored once the Theming API is in use, so a customisation can look
+applied and do nothing. Run this if your grid styling stopped taking effect after updating to v33 or
+later, or if you see AG Grid warning #106, #239 or #332.
