@@ -30,9 +30,27 @@ Where docs pages are provided below they are a slug, load the page from `https:/
 - For a custom `theme`, use a static, immutable object reference — a stable reference lets AG Charts cache the processed theme instead of reprocessing it each update. Docs: `themes`
 - For time series, use numeric timestamps rather than `Date` objects (avoids round-tripping and memory churn), and prefer a continuous time axis over a non-continuous or category-based axis.
 
-## Pay attention to console messages
+## Enable development mode debugging and pay attention to console messages
 
-AG Charts logs validation errors and warnings to the console. Where practical, include a real browser in the verification loop (e.g. Chrome MCP or Playwright) and watch for console messages — a misconfiguration causing an actual bug is often described there in detail.
+AG products log error information to the console when configured to do so. Enabling these validations _significantly_ improves AI agent development experience allowing the agent to diagnose and fix issues.
+
+**Do this first, before writing feature code — not after something goes wrong.** AG Charts logs validation issues to the console by default, but it then applies a fallback and keeps rendering, so a misconfigured option often just looks like a feature that does nothing. A console message is easy to scroll past or dismiss as noise, which leads to wrongly concluding the API is unsupported and rewriting working code. Making validation issues throw turns each one into a failure that can't be missed.
+
+1. Enable development time validations
+
+```ts
+const options: AgChartOptions = {
+  // ...
+  // for v14.2 and above; v14.1 and below only log to the console
+  validations: process.env.NODE_ENV !== "production"
+    ? { throwOn: ["error", "warning", "deprecation"] }
+    : undefined,
+};
+```
+
+`throwOn` errors are thrown asynchronously, after the chart has reported the issue and applied its fallback. They cannot be caught around `AgCharts.create()` or `update()`; they surface as uncaught errors in the console, `window.onerror` and test runners. Never enable `throwOn` in production. Docs: `dev-validation`
+
+2. Where practical, include a real browser in the verification loop, e.g. using Chrome MCP or Playwright, and look out for console messages.
 
 ## React
 
