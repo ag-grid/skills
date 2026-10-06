@@ -17,6 +17,7 @@ Where the content of the page is not obvious from the slug, additional context a
 - `installation`
 - `module-registry`
 - Enterprise Licence Key `license-install`
+- Development Validation `dev-validation`
 - `migration`
 - `server-side-rendering`
 - `security`
@@ -43,9 +44,11 @@ Where the content of the page is not obvious from the slug, additional context a
 - `stylers`
 - Series Bars `bars`
 - Series Fills `fills`
+- `series-labels`
 - Series Markers `markers`
 - `style-segments`
 - `annotations`
+- `background-regions`
 - `colour-scale`
 - `error-bars`
 - `accessibility`
@@ -82,6 +85,7 @@ Where the content of the page is not obvious from the slug, additional context a
 - Maps: Markers & Points of Interest `map-markers`
 - Maps `map-topology`
 - `org-chart`
+- `quadrant-chart`
 - Bar `bar-series`
 - `line-series`
 - `area-series`

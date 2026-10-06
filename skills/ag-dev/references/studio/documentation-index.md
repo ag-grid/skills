@@ -15,39 +15,62 @@ Where the content of the page is not obvious from the slug, additional context a
 - `quick-start`
 - Building a Dashboard `tutorial`
 - `migration`
+- `enterprise-licence`
 - `installation`
 - Installing a Licence Key `licence-install`
 - `react-best-practices` (react only)
 - `compatibility`
 - `security`
 - `supported-browsers`
+- AI Skills `skills`
 - Data Overview `data`
-- `sync-data`
-- `async-data`
+- `data-modelling`
+- `loading-data`
 - `sharing-caching-data`
-- Server-Side Overview `server-side-data`
-- `server-side-data-implementation`
+- Agent Framework Overview `ai`
+- Agent Quick Start `ai-quickstart`
+- Overview `ai-harness`
+- `ai-builtin-harness`
+- Harness `ai-direct-llm-runner`
+- Harness `ai-client-tool-runner`
+- Harness `ai-custom-runner`
+- `ai-custom-harness`
+- Agent Overview `ai-agents`
+- `ai-builtin-agents`
+- Agent Configuration `ai-custom-agents`
+- Agents: Agent Context `ai-context`
+- Overview `ai-tools`
+- `ai-tools-builtin`
+- `ai-custom-tools`
+- `ai-tools-external`
+- Overview `ai-chat-ui`
+- Chat UI: Panel Features `ai-chat-features`
+- Chat UI `ai-tool-components`
+- `ai-webmcp`
 - `data-types`
 - `formatting`
 - `expressions`
 - `calendars`
+- Editable Fields `creating-editing-fields`
 - `modes-layout`
-- `state`
-- `editable-fields`
-- Overview `theming`
-- Theming `theme-builder`
+- `theming`
+- `theme-builder`
 - `localisation`
-- `widget-configuration`
+- `state`
+- `undo-redo`
+- `exporting`
+- `figma-design-system`
+- Widgets Overview `widget-overview`
+- Configuring Widgets `widget-configuration`
 - `custom-widgets`
 - Form Configuration `custom-widgets-form`
-- AI Assistant Overview `ai`
-- Building an Adapter `ai-adapter`
-- `ai-configuration`
-- Agentic Experience `ai-ax`
-- `ai-toolkit`
+- Custom Engine `server-side-data`
+- Implementing Queries `server-side-data-implementation`
 - Working with Data `data-setup`
 - Working with Data `using-data`
+- Working with Data `creating-calculations`
 - Working with Data `filters`
-- Working with Widgets: Widget Overview `widgets`
+- Working with Widgets: Widget Basics `widgets`
 - Working with Widgets `building-widgets`
+- Working with Widgets `widget-catalogue`
 - `working-with-ai`
