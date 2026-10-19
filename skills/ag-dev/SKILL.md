@@ -46,7 +46,7 @@ If it is clear exactly what API to use, eg you are following a detailed plan tha
 
 Otherwise if there is uncertainty, check the docs. To find the correct docs URL for the version in use, load `references/{product}/documentation-index.md` and follow the instructions in that file.
 
-Locate the feature you are working with in the docs and read surrounding paragraphs to get information on edge cases and interactions. If many docs pages seem potentially relevant, consider getting a sub-agent to read them all and extract information relevant to the task.
+Locate the feature you are working with in the docs and read surrounding paragraphs to get information on edge cases and interactions.
 
 ## Load product-specific recommendations
 
