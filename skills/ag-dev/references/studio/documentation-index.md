@@ -9,6 +9,8 @@ Where the content of the page is not obvious from the slug, additional context a
 3. Determine the appropriate version as full semver e.g. 2.0.0
 4. Build a docs URL from a slug: `https://www.ag-grid.com/studio/archive/{major.minor.patch}/{framework}/{slug}/`
 
+The website has bot protection. To avoid it: always use your built-in web fetch tool, not e.g. curl or node scripts; if a JS challenge is served, allow it to complete and you will then be able to access the docs page; if you get a 403 response, look at the response content for potential workarounds, e.g. appending `.md` to the URL for individual docs content pages.
+
 ---
 
 - `overview`
