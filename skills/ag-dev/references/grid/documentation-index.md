@@ -9,6 +9,8 @@ Where the content of the page is not obvious from the slug, additional context a
 3. Determine the appropriate version as full semver e.g. 35.2.1
 4. Build a docs URL from a slug: `https://www.ag-grid.com/archive/{major.minor.patch}/{framework}-data-grid/{slug}/`
 
+The website has bot protection. To avoid it: always use your built-in web fetch tool, not e.g. curl or node scripts; if a JS challenge is served, allow it to complete and you will then be able to access the docs page; if you get a 403 response, look at the response content for potential workarounds, e.g. appending `.md` to the URL for individual docs content pages.
+
 If a page 404s, the slug is not wrong — this list covers the latest version, and the feature it names most likely did not exist in the version you are building the URL for. Check the same slug on the current docs (drop `/archive/{version}` from the URL) to see what the feature is and which version introduced it, then work with the APIs the project's version actually has.
 
 ---
